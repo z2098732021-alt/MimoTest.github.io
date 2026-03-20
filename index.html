@@ -120,29 +120,32 @@
         }
         header h1 { font-size: 17px; font-weight: 600; letter-spacing: 0.05em; color: var(--text-primary); margin: 0; user-select: none;}
         
-        /* 核心修复：更严格的图标形状重置 */
+        /* 核心修复：终极解决 iOS Safari 按钮坍塌导致的“线条乱飘”问题 */
         .btn-icon { 
-            -webkit-appearance: none; appearance: none;
+            -webkit-appearance: none !important; appearance: none !important;
             box-sizing: border-box !important;
-            background: transparent; 
-            border: 1px solid transparent; 
+            background: transparent !important; 
+            border: none !important; 
             width: 36px !important; height: 36px !important; 
             min-width: 36px !important; min-height: 36px !important; 
             max-width: 36px !important; max-height: 36px !important;
-            flex: 0 0 36px !important; /* 强制flex下的宽度 */
-            aspect-ratio: 1 / 1 !important; /* 强制保持1:1比例 */
+            flex: 0 0 36px !important; 
             border-radius: 50% !important; 
-            color: var(--text-primary); 
-            display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; transition: 0.2s; 
+            color: var(--text-primary) !important; 
+            display: flex !important; align-items: center !important; justify-content: center !important; 
+            cursor: pointer !important; transition: 0.2s !important; 
             padding: 0 !important; margin: 0 !important; 
             outline: none !important; box-shadow: none !important;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent !important;
+            overflow: hidden !important; /* 锁死边界，防止线条溢出 */
         }
-        .btn-icon:focus, .btn-icon:active, .btn-icon:focus-visible { outline: none !important; border-color: transparent !important; box-shadow: none !important; }
-        .btn-icon:hover { background: var(--border-subtle); }
-        .btn-icon:active { transform: scale(0.9); }
-        .btn-icon svg { width: 20px; height: 20px; flex-shrink: 0; }
+        .btn-icon:hover { background: var(--border-subtle) !important; }
+        .btn-icon:active { transform: scale(0.9) !important; }
+        .btn-icon svg { 
+            width: 20px !important; height: 20px !important; 
+            flex: 0 0 20px !important; display: block !important; 
+            pointer-events: none !important; 
+        }
 
         /* 聊天区域 */
         #chat-container { 
@@ -239,10 +242,20 @@
         .inline-model-select select:hover { border-color: var(--text-tertiary); color: var(--text-primary); }
         .inline-model-select svg { position: absolute; right: 8px; width: 12px; height: 12px; color: var(--text-tertiary); pointer-events: none;}
 
-        .btn-up { width: 36px; height: 36px; border-radius: 50%; background: var(--text-primary); color: var(--bg-surface); border: none; cursor: pointer; transition: 0.3s var(--spring); display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+        .btn-up { 
+            width: 36px !important; height: 36px !important; 
+            flex: 0 0 36px !important; border-radius: 50% !important; 
+            background: var(--text-primary); color: var(--bg-surface); 
+            border: none !important; cursor: pointer; transition: 0.3s var(--spring); 
+            display: flex !important; align-items: center !important; justify-content: center !important; 
+            padding: 0 !important; outline: none !important;
+            -webkit-appearance: none !important; appearance: none !important;
+            overflow: hidden !important;
+        }
         .btn-up:hover { transform: scale(1.05); }
         .btn-up:active { transform: scale(0.95); }
-        .btn-up.stop-mode { background: #FF3B30; border-radius: 12px; transform: scale(0.9); color: white;}
+        .btn-up.stop-mode { background: #FF3B30 !important; border-radius: 12px !important; transform: scale(0.9); color: white !important;}
+        .btn-up svg { width: 18px !important; height: 18px !important; display: block !important; }
 
         #tts-style-container { display: none; width: 100%; animation: pop 0.3s forwards;}
         #tts-style-container.active { display: block; margin-bottom: 10px;}
@@ -372,9 +385,10 @@
 
 <div id="app-container">
     <header>
-        <button class="btn-icon" onclick="window.toggleHistory(true)" id="icon-menu"></button>
+        <!-- 将 button 替换为彻底规避浏览器默认样式的 div 标签 -->
+        <div class="btn-icon" onclick="window.toggleHistory(true)" id="icon-menu" role="button"></div>
         <h1>MIMO</h1>
-        <button class="btn-icon" onclick="window.toggleM(true)" id="icon-gear"></button>
+        <div class="btn-icon" onclick="window.toggleM(true)" id="icon-gear" role="button"></div>
     </header>
     
     <main id="chat-container"></main>
@@ -572,7 +586,7 @@
     window.initIcons();
 
     // 全局基础配置
-    const PROXY = "https://patient-queen-f9d8.z2098732021.workers.dev";
+    const PROXY = "https://delicate-bread-d122.z2098732021.workers.dev";
     const API = "https://api.xiaomimimo.com/v1/chat/completions";
 
     window.currentUser = sessionStorage.getItem('mimo_current_user');
@@ -1230,8 +1244,36 @@
         }
 
         if (isFinished && msgObj.usage) {
-            const usageM = (msgObj.usage / 1000000).toFixed(6);
-            html += `<div class="token-usage">${icons.bolt} 消耗: ${usageM} M Tokens</div>`;
+            // 兼容历史纯数字数据与新版对象数据
+            let total = typeof msgObj.usage === 'number' ? msgObj.usage : (msgObj.usage.total || 0);
+            let prompt = typeof msgObj.usage === 'object' ? (msgObj.usage.prompt || (total / 2)) : (total / 2);
+            let comp = typeof msgObj.usage === 'object' ? (msgObj.usage.completion || (total / 2)) : (total / 2);
+            
+            let cost = 0;
+            const mod = msgObj.modelUsed || 'mimo-v2-flash'; // 默认回退
+            
+            // 精准费率核算引擎
+            if (mod === 'mimo-v2-pro') {
+                if (total <= 256000) cost = (prompt / 1000000) * 7.00 + (comp / 1000000) * 21.00;
+                else cost = (prompt / 1000000) * 14.00 + (comp / 1000000) * 42.00;
+            } else if (mod === 'mimo-v2-omni') {
+                cost = (prompt / 1000000) * 2.80 + (comp / 1000000) * 14.00;
+            } else if (mod === 'mimo-v2-flash') {
+                cost = (prompt / 1000000) * 0.70 + (comp / 1000000) * 2.10;
+            } else if (mod === 'mimo-v2-tts') {
+                cost = 0;
+            }
+            
+            // 联网插件附加费计算
+            if (msgObj.searchUsed) cost += 0.025; // 联网搜索 ¥25/1000次
+
+            const usageM = (total / 1000000).toFixed(6);
+            let costStr = cost === 0 ? '限时免费' : `预计 ¥${cost.toFixed(4)}`;
+            
+            html += `<div class="token-usage">
+                        ${icons.bolt} 消耗: ${usageM} M Tokens
+                        <span style="margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--border-subtle); color: var(--text-secondary);">${costStr}</span>
+                     </div>`;
         }
 
         bubble.innerHTML = html || `<div class="typing-indicator"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
@@ -1396,7 +1438,18 @@
         chat.scrollTop = chat.scrollHeight;
 
         const isTTS = window.config.mod === 'mimo-v2-tts';
-        const msgObj = { id: (Date.now() + 1).toString(), role: 'assistant', reasoning: "", content: "", annotations: [], audioData: null, usage: 0 };
+        // 核心修复：在新消息创建时，捕获当前所使用的模型和联网状态，供渲染计费使用
+        const msgObj = { 
+            id: (Date.now() + 1).toString(), 
+            role: 'assistant', 
+            reasoning: "", 
+            content: "", 
+            annotations: [], 
+            audioData: null, 
+            usage: null,
+            modelUsed: window.config.mod,
+            searchUsed: (window.config.search && !isTTS)
+        };
         
         let reqBody = { model: window.config.mod };
 
@@ -1448,7 +1501,8 @@
                 if (data.error) throw new Error(data.error.message);
                 msgObj.audioData = data.choices?.[0]?.message?.audio?.data;
                 msgObj.content = txt; 
-                if (data.usage) msgObj.usage = data.usage.total_tokens;
+                // 核心修复：全量保存输入和输出 Token 供精密计费
+                if (data.usage) msgObj.usage = { total: data.usage.total_tokens || 0, prompt: data.usage.prompt_tokens || 0, completion: data.usage.completion_tokens || 0 };
                 window.renderOutput(bubble, msgObj, true);
             } else {
                 const reader = res.body.getReader();
@@ -1467,8 +1521,9 @@
                                 const json = JSON.parse(dataStr);
                                 const delta = json.choices?.[0]?.delta;
                                 
-                                if (json.usage && json.usage.total_tokens) {
-                                    msgObj.usage = json.usage.total_tokens;
+                                // 核心修复：流式输出中全量同步各类型 Token 供精密计费
+                                if (json.usage) {
+                                    msgObj.usage = { total: json.usage.total_tokens || 0, prompt: json.usage.prompt_tokens || 0, completion: json.usage.completion_tokens || 0 };
                                 }
 
                                 if (delta) {
@@ -1770,7 +1825,16 @@
                     const data = await res.json();
                     const aiText = data.choices?.[0]?.message?.content || "抱歉，我没有理解。";
 
-                    const msgObj = { id: Date.now().toString(), role: 'assistant', content: aiText, audioData: null, usage: data.usage?.total_tokens || 0 };
+                    const msgObj = { 
+                        id: Date.now().toString(), 
+                        role: 'assistant', 
+                        content: aiText, 
+                        audioData: null, 
+                        // Omni 模式计费同步
+                        usage: data.usage ? { total: data.usage.total_tokens || 0, prompt: data.usage.prompt_tokens || 0, completion: data.usage.completion_tokens || 0 } : null,
+                        modelUsed: 'mimo-v2-omni',
+                        searchUsed: false
+                    };
                     session.messages.push(msgObj);
                     window.saveSessions();
 
