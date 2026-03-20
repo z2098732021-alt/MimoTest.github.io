@@ -1112,7 +1112,7 @@
         `;
     };
 
-    // 核心重写：采用稳如磐石的切分算法，无缝分离代码与文本
+    // 核心修复：使用字符串拼接代替正则表达式里的反引号，彻底避免 Markdown 解析器把文件拦腰截断！
     window.parse = function(text, isFinished = false) {
         if(!text) return "";
         
@@ -1120,93 +1120,67 @@
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         };
 
-        let lines = text.split('\n');
-        let inCodeBlock = false;
-        let lang = 'code';
-        let codeBuffer = [];
-        let textBuffer = [];
+        const marker = '`' + '`' + '`';
+        // 清理模型输出的异规结尾符，通过拼接规避环境截断
+        text = text.replace(new RegExp(marker + '[ \\t]*eof', 'gi'), marker);
+        
+        let parts = text.split(marker);
         let res = "";
-
-        const flushText = () => {
-            if (textBuffer.length > 0) {
-                let str = textBuffer.join('\n');
-                let sub = encodeHTML(str);
+        
+        for(let i = 0; i < parts.length; i++) {
+            if (i % 2 === 0) {
+                let sub = encodeHTML(parts[i]);
                 sub = sub.replace(/^### (.*$)/gim, '<h3>$1</h3>');
                 sub = sub.replace(/^## (.*$)/gim, '<h2>$1</h2>');
                 sub = sub.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
                 sub = sub.replace(/`([^`\n]+)`/g, '<code class="inline-code">$1</code>');
                 sub = sub.replace(/\n/g, '<br>');
                 res += sub;
-                textBuffer = [];
-            }
-        };
-
-        const flushCode = () => {
-            let rawCode = codeBuffer.join('\n');
-            let isPreviewable = ['html', 'xml', 'svg'].includes(lang);
-            let isPreviewActive = isPreviewable && isFinished;
-            
-            let contentHtml = `<pre class="pre-area" style="display:${isPreviewActive ? 'none' : 'block'}"><code>${encodeHTML(rawCode)}</code></pre>`;
-            let previewHtml = '';
-            let btnHtml = `<button class="code-action-btn" onclick="window.cpBubble(this, true)">${icons.copy} 复制</button>`;
-
-            if (isPreviewable) {
-                let injectCode = rawCode;
-                // 核心修复：强制注入 UTF-8 编码，彻底解决移动端 iframe 中文乱码问题 (Mojibake Fix)
-                if (lang === 'html' && !injectCode.toLowerCase().includes('charset=')) {
-                    injectCode = '<meta charset="UTF-8">\n' + injectCode;
-                }
-                const safeSrcDoc = encodeHTML(injectCode);
-                previewHtml = `<div class="inline-preview" style="display:${isPreviewActive ? 'block' : 'none'}"><iframe srcdoc="${safeSrcDoc}" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe></div>`;
-                btnHtml = `<button class="code-action-btn ${isPreviewActive ? 'active' : ''}" onclick="window.toggleCodeView(this)">${icons.play} 源码/沙盒</button>` + btnHtml;
-                btnHtml += `<button class="code-action-btn" onclick="window.pv(this)">${icons.expand}</button>`;
-            }
-
-            res += `
-            <div class="code-box">
-                <div class="code-nav">
-                    <div class="code-lang">${encodeHTML(lang)}</div>
-                    <div style="display:flex;">${btnHtml}</div>
-                </div>
-                ${contentHtml}
-                ${previewHtml}
-            </div>`;
-            
-            codeBuffer = [];
-            lang = 'code';
-        };
-
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
-            if (line.trim().startsWith('```')) {
-                if (inCodeBlock) {
-                    inCodeBlock = false;
-                    flushCode();
-                } else {
-                    flushText();
-                    inCodeBlock = true;
-                    let langLine = line.trim().substring(3);
-                    lang = langLine.split(':')[0].trim().toLowerCase() || 'code';
-                    if (lang === 'eof') { 
-                        inCodeBlock = false;
-                        lang = 'code';
-                    }
-                }
             } else {
-                if (inCodeBlock) {
-                    codeBuffer.push(line);
-                } else {
-                    textBuffer.push(line);
+                let block = parts[i];
+                let lang = 'code';
+                let rawCode = block;
+                
+                let langMatch = block.match(/^([a-z0-9_+\-#:\.]+)[ \t]*(\n)?/i);
+                if (langMatch) {
+                    lang = langMatch[1].split(':')[0].toLowerCase() || 'code';
+                    rawCode = block.substring(langMatch[0].length);
+                } else if (block.startsWith('\n')) {
+                    rawCode = block.substring(1);
                 }
+                
+                if(rawCode.endsWith('\n')) rawCode = rawCode.slice(0, -1);
+
+                let isPreviewable = ['html', 'xml', 'svg'].includes(lang);
+                let isPreviewActive = isPreviewable && isFinished;
+                
+                let contentHtml = `<pre class="pre-area" style="display:${isPreviewActive ? 'none' : 'block'}"><code>${encodeHTML(rawCode)}</code></pre>`;
+                let previewHtml = '';
+                let btnHtml = `<button class="code-action-btn" onclick="window.cpBubble(this, true)">${icons.copy} 复制</button>`;
+
+                if (isPreviewable) {
+                    let injectCode = rawCode;
+                    if (lang === 'html' && !injectCode.toLowerCase().includes('charset=')) {
+                        injectCode = '<meta charset="UTF-8">\n' + injectCode;
+                    }
+                    const safeSrcDoc = encodeHTML(injectCode);
+                    previewHtml = `<div class="inline-preview" style="display:${isPreviewActive ? 'block' : 'none'}"><iframe srcdoc="${safeSrcDoc}" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe></div>`;
+                    btnHtml = `<button class="code-action-btn ${isPreviewActive ? 'active' : ''}" onclick="window.toggleCodeView(this)">${icons.play} 源码/沙盒</button>` + btnHtml;
+                    btnHtml += `<button class="code-action-btn" onclick="window.pv(this)">${icons.expand}</button>`;
+                }
+
+                res += `
+                <div class="code-box">
+                    <div class="code-nav">
+                        <div class="code-lang">${encodeHTML(lang)}</div>
+                        <div style="display:flex;">${btnHtml}</div>
+                    </div>
+                    ${contentHtml}
+                    ${previewHtml}
+                </div>`;
             }
         }
-
-        if (inCodeBlock) {
-            flushCode();
-        } else {
-            flushText();
-        }
-
+        
         return res;
     };
 
@@ -1525,10 +1499,7 @@
 
             if (!res.ok) {
                 let errDetail = `HTTP ${res.status}`;
-                try {
-                    const errData = await res.json();
-                    errDetail = errData.error?.message || JSON.stringify(errData);
-                } catch(e) {}
+                try { const errData = await res.json(); errDetail = errData.error?.message || JSON.stringify(errData); } catch(e) {}
                 throw new Error(`请求失败: ${errDetail}`);
             }
 
@@ -1864,7 +1835,6 @@
                         role: 'assistant', 
                         content: aiText, 
                         audioData: null, 
-                        // Omni 模式计费同步
                         usage: data.usage ? { total: data.usage.total_tokens || 0, prompt: data.usage.prompt_tokens || 0, completion: data.usage.completion_tokens || 0 } : null,
                         modelUsed: 'mimo-v2-omni',
                         searchUsed: false
