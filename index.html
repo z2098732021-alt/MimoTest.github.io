@@ -38,7 +38,7 @@
                 --border-subtle: rgba(255, 255, 255, 0.1);
                 --accent-glow: radial-gradient(circle at center, rgba(255,255,255,0.06) 0%, transparent 70%);
                 --user-bubble: #2C2C2E;
-                --shadow-float: 0 20px 40px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3);
+                --shadow-float: 0 20px 40px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
             }
         }
 
@@ -120,26 +120,29 @@
         }
         header h1 { font-size: 17px; font-weight: 600; letter-spacing: 0.05em; color: var(--text-primary); margin: 0; user-select: none;}
         
-        /* 核心修复：核弹级清除浏览器默认按钮样式 */
+        /* 核心修复：更严格的图标形状重置 */
         .btn-icon { 
-            all: unset !important;
+            -webkit-appearance: none; appearance: none;
             box-sizing: border-box !important;
-            background: transparent !important; 
-            border: none !important; 
+            background: transparent; 
+            border: 1px solid transparent; 
             width: 36px !important; height: 36px !important; 
             min-width: 36px !important; min-height: 36px !important; 
             max-width: 36px !important; max-height: 36px !important;
+            flex: 0 0 36px !important; /* 强制flex下的宽度 */
+            aspect-ratio: 1 / 1 !important; /* 强制保持1:1比例 */
             border-radius: 50% !important; 
-            color: var(--text-primary) !important; 
-            display: flex !important; align-items: center !important; justify-content: center !important; 
-            cursor: pointer !important; transition: 0.2s !important; flex-shrink: 0 !important;
+            color: var(--text-primary); 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; transition: 0.2s; 
             padding: 0 !important; margin: 0 !important; 
             outline: none !important; box-shadow: none !important;
-            -webkit-tap-highlight-color: transparent !important;
+            -webkit-tap-highlight-color: transparent;
         }
-        .btn-icon:focus, .btn-icon:active, .btn-icon:focus-visible { outline: none !important; border: none !important; box-shadow: none !important; }
-        .btn-icon:hover { background: var(--border-subtle) !important; }
-        .btn-icon:active { transform: scale(0.9) !important; }
+        .btn-icon:focus, .btn-icon:active, .btn-icon:focus-visible { outline: none !important; border-color: transparent !important; box-shadow: none !important; }
+        .btn-icon:hover { background: var(--border-subtle); }
+        .btn-icon:active { transform: scale(0.9); }
+        .btn-icon svg { width: 20px; height: 20px; flex-shrink: 0; }
 
         /* 聊天区域 */
         #chat-container { 
@@ -179,7 +182,6 @@
         .citation-pill img { width: 14px; height: 14px; border-radius: 4px; }
         .citation-pill span { max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* 精密 Token 面板 */
         .token-usage { font-size: 11px; color: var(--text-tertiary); margin-top: 16px; text-align: right; font-family: 'SF Mono', ui-monospace, monospace; font-weight: 600; display: flex; justify-content: flex-end; align-items: center; gap: 4px;}
 
         /* Canvas 级内嵌代码与自动预览框 */
@@ -265,7 +267,7 @@
         .sheet-handle { width: 40px; height: 5px; background: var(--border-subtle); border-radius: 10px; margin: 16px auto; }
         .sheet-nav { padding: 0 24px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;}
         .sheet-nav h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em;}
-        .btn-close-sheet { background: var(--bg-base); border: 1px solid var(--border-subtle); padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600; color: var(--text-primary); cursor: pointer;}
+        .btn-close-sheet { background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600; color: var(--text-primary); cursor: pointer;}
         
         .form-group { background: var(--bg-surface); border-radius: 20px; margin: 0 24px 24px; border: 1px solid var(--border-subtle); overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.02); }
         .form-item { padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 8px; }
@@ -335,7 +337,6 @@
 
         .voice-subtitle { margin-top: 60px; font-size: 22px; font-weight: 500; text-align: center; max-width: 80%; min-height: 80px; letter-spacing: 0.02em; line-height: 1.4; opacity: 0.9; color: #FFF; word-break: break-word;}
         .voice-status { position: absolute; bottom: 60px; font-size: 13px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;}
-        .error-message { font-size: 14px; color: #FF3B30; background: rgba(255, 59, 48, 0.1); padding: 12px; border-radius: 12px; border: 1px solid rgba(255, 59, 48, 0.3); margin-top: 8px; display: flex; align-items: center; gap: 8px;}
 
         /* 全屏预览沙盒 (毛玻璃) */
         #preview-page {
@@ -349,7 +350,6 @@
 </head>
 <body class="app-locked">
 
-<!-- 启动/登录通行证覆盖层 -->
 <div id="login-overlay">
     <div class="login-card" id="login-card-ui">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" style="margin-bottom:16px"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
@@ -522,7 +522,7 @@
 
 <div id="preview-page">
     <div class="sheet-nav">
-        <h2>代码沙盒</h2>
+        <h2>全屏沙盒</h2>
         <button class="btn-close-sheet" onclick="window.closeAll()">关闭</button>
     </div>
     <iframe id="p-frame" style="width:100%; height:calc(100vh - 80px); border:none; background:#fff"></iframe>
@@ -532,7 +532,7 @@
     // --- SVG 图标库 ---
     const icons = {
         menu: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="18" x2="14" y2="18"></line></svg>`,
-        gear: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
+        gear: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
         send: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>`,
         stop: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>`,
         plus: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
@@ -572,7 +572,7 @@
     window.initIcons();
 
     // 全局基础配置
-    const PROXY = "https://delicate-bread-d122.z2098732021.workers.dev";
+    const PROXY = "https://patient-queen-f9d8.z2098732021.workers.dev";
     const API = "https://api.xiaomimimo.com/v1/chat/completions";
 
     window.currentUser = sessionStorage.getItem('mimo_current_user');
@@ -1095,7 +1095,7 @@
         `;
     };
 
-    // 核心重写：彻底抛弃正则！采用坚如磐石的 Line-by-Line 逐行解析算法，完美切分代码，支持无极长度
+    // 核心重写：采用稳如磐石的切分算法，无视任何诡异换行格式
     window.parse = function(text, isFinished = false) {
         if(!text) return "";
         
@@ -1103,92 +1103,62 @@
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         };
 
-        let lines = text.split('\n');
-        let inCodeBlock = false;
-        let lang = 'code';
-        let codeBuffer = [];
-        let textBuffer = [];
+        // 安全替换结束符
+        text = text.replace(new RegExp('`{3}eof', 'gi'), '```');
+        
+        let parts = text.split('```');
         let res = "";
-
-        const flushText = () => {
-            if (textBuffer.length > 0) {
-                let str = textBuffer.join('\n');
-                let sub = encodeHTML(str);
+        
+        for(let i = 0; i < parts.length; i++) {
+            if (i % 2 === 0) {
+                // 普通文本处理区
+                let sub = encodeHTML(parts[i]);
                 sub = sub.replace(/^### (.*$)/gim, '<h3>$1</h3>');
                 sub = sub.replace(/^## (.*$)/gim, '<h2>$1</h2>');
                 sub = sub.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
                 sub = sub.replace(/`([^`\n]+)`/g, '<code class="inline-code">$1</code>');
                 sub = sub.replace(/\n/g, '<br>');
                 res += sub;
-                textBuffer = [];
-            }
-        };
-
-        const flushCode = () => {
-            let rawCode = codeBuffer.join('\n');
-            let isPreviewable = ['html', 'xml', 'svg'].includes(lang);
-            let isPreviewActive = isPreviewable && isFinished;
-            
-            let contentHtml = `<pre class="pre-area" style="display:${isPreviewActive ? 'none' : 'block'}"><code>${encodeHTML(rawCode)}</code></pre>`;
-            let previewHtml = '';
-            let btnHtml = `<button class="code-action-btn" onclick="window.cpBubble(this, true)">${icons.copy} 复制</button>`;
-
-            if (isPreviewable) {
-                // 使用极其纯净的 srcdoc 直推渲染，绕过所有安全限制与跨域阻断，告别白屏！
-                const safeSrcDoc = encodeHTML(rawCode);
-                previewHtml = `<div class="inline-preview" style="display:${isPreviewActive ? 'block' : 'none'}"><iframe srcdoc="${safeSrcDoc}" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe></div>`;
-                btnHtml = `<button class="code-action-btn ${isPreviewActive ? 'active' : ''}" onclick="window.toggleCodeView(this)">${icons.play} 源码/沙盒</button>` + btnHtml;
-                btnHtml += `<button class="code-action-btn" onclick="window.pv(this)">${icons.expand}</button>`;
-            }
-
-            res += `
-            <div class="code-box">
-                <div class="code-nav">
-                    <div class="code-lang">${encodeHTML(lang)}</div>
-                    <div style="display:flex;">${btnHtml}</div>
-                </div>
-                ${contentHtml}
-                ${previewHtml}
-            </div>`;
-            
-            codeBuffer = [];
-            lang = 'code';
-        };
-
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
-            // 完美捕获标准 markdown 及安全处理截断异常
-            if (line.trim().startsWith('```')) {
-                if (inCodeBlock) {
-                    inCodeBlock = false;
-                    flushCode();
-                } else {
-                    flushText();
-                    inCodeBlock = true;
-                    // 智能提取语言标签
-                    let langLine = line.trim().substring(3);
-                    lang = langLine.split(':')[0].trim().toLowerCase() || 'code';
-                    if (lang === 'eof') { // 屏蔽大模型偶尔发狂输出的 eof
-                        inCodeBlock = false;
-                        lang = 'code';
-                    }
-                }
             } else {
-                if (inCodeBlock) {
-                    codeBuffer.push(line);
-                } else {
-                    textBuffer.push(line);
+                // 代码块处理区
+                let block = parts[i];
+                let firstNewline = block.indexOf('\n');
+                let lang = 'code';
+                let rawCode = block;
+                
+                if (firstNewline !== -1) {
+                    lang = block.substring(0, firstNewline).trim().split(':')[0].toLowerCase() || 'code';
+                    rawCode = block.substring(firstNewline + 1);
                 }
+                
+                if(rawCode.endsWith('\n')) rawCode = rawCode.slice(0, -1);
+
+                let isPreviewable = ['html', 'xml', 'svg'].includes(lang);
+                let isPreviewActive = isPreviewable && isFinished;
+                
+                let contentHtml = `<pre class="pre-area" style="display:${isPreviewActive ? 'none' : 'block'}"><code>${encodeHTML(rawCode)}</code></pre>`;
+                let previewHtml = '';
+                let btnHtml = `<button class="code-action-btn" onclick="window.cpBubble(this, true)">${icons.copy} 复制</button>`;
+
+                if (isPreviewable) {
+                    const safeSrcDoc = encodeHTML(rawCode);
+                    previewHtml = `<div class="inline-preview" style="display:${isPreviewActive ? 'block' : 'none'}"><iframe srcdoc="${safeSrcDoc}" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe></div>`;
+                    btnHtml = `<button class="code-action-btn ${isPreviewActive ? 'active' : ''}" onclick="window.toggleCodeView(this)">${icons.play} 源码/沙盒</button>` + btnHtml;
+                    btnHtml += `<button class="code-action-btn" onclick="window.pv(this)">${icons.expand}</button>`;
+                }
+
+                res += `
+                <div class="code-box">
+                    <div class="code-nav">
+                        <div class="code-lang">${encodeHTML(lang)}</div>
+                        <div style="display:flex;">${btnHtml}</div>
+                    </div>
+                    ${contentHtml}
+                    ${previewHtml}
+                </div>`;
             }
         }
-
-        // 扫尾处理：防止 AI 输出中断导致的代码块未闭合
-        if (inCodeBlock) {
-            flushCode();
-        } else {
-            flushText();
-        }
-
+        
         return res;
     };
 
@@ -1196,11 +1166,20 @@
         const box = btn.closest('.code-box');
         const pre = box.querySelector('.pre-area');
         const preview = box.querySelector('.inline-preview');
+        const iframe = preview.querySelector('iframe');
         
         if (preview.style.display === 'none') {
             preview.style.display = 'block';
             pre.style.display = 'none';
             btn.classList.add('active');
+            
+            if (iframe && !iframe.dataset.loaded) {
+                try {
+                    const rawCode = pre.querySelector('code').textContent;
+                    iframe.srcdoc = rawCode;
+                    iframe.dataset.loaded = "true";
+                } catch(e) { console.error("Sandbox Render Error", e); }
+            }
         } else {
             preview.style.display = 'none';
             pre.style.display = 'block';
@@ -1256,6 +1235,21 @@
         }
 
         bubble.innerHTML = html || `<div class="typing-indicator"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
+
+        if (isFinished) {
+            const codeBoxes = bubble.querySelectorAll('.code-box');
+            codeBoxes.forEach(box => {
+                const iframe = box.querySelector('.inline-preview iframe');
+                const codeEl = box.querySelector('.pre-area code');
+                if (iframe && codeEl && !iframe.dataset.loaded) {
+                    try {
+                        const rawCode = codeEl.textContent;
+                        iframe.srcdoc = rawCode;
+                        iframe.dataset.loaded = "true";
+                    } catch(e) { console.error("Sandbox Render Error", e); }
+                }
+            });
+        }
     };
 
     window.readAloud = async function(btn, msgId) {
@@ -1532,7 +1526,6 @@
         let text = "";
         const originalHtml = btn.innerHTML;
         if (isCodeBlock) {
-            // 从最高精度的原生 iframe.srcdoc 获取代码
             const box = btn.closest('.code-box');
             const iframe = box.querySelector('.inline-preview iframe');
             if (iframe && iframe.srcdoc) {
