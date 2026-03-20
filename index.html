@@ -3,1035 +3,1674 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Shanxi Odyssey Pro Max</title>
-    <!-- 引入 Markdown 解析库 -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MIMO Cloud</title>
     <style>
-        /* --- 🎨 Design System: Midnight Gold (Ultimate) --- */
         :root {
-            --bg-body: #000000;
-            --bg-card: rgba(28, 28, 30, 0.75);
-            --bg-glass: rgba(255, 255, 255, 0.05);
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-tertiary: rgba(255, 255, 255, 0.35);
-            --accent: #d4af37; /* 黑神话金 */
-            --accent-glow: rgba(212, 175, 55, 0.3);
-            --divider: rgba(255, 255, 255, 0.12);
-            --ai-blue: #4285f4; 
+            /* 巅峰级原生质感调色板 */
+            --bg-base: #F2F2F7;
+            --bg-surface: #FFFFFF;
+            --bg-elevated: rgba(255, 255, 255, 0.75);
+            --bg-panel: rgba(250, 250, 252, 0.85);
+            --text-primary: #000000;
+            --text-secondary: #666668;
+            --text-tertiary: #99999C;
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --accent-glow: radial-gradient(circle at center, rgba(0,122,255,0.1) 0%, transparent 70%);
+            --user-bubble: #E9E9EB;
             
-            /* iOS Spring Animation Curves - 极致丝滑 */
-            --ease-ios-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
-            --ease-ios-smooth: cubic-bezier(0.32, 0.72, 0, 1);
-            
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            /* 关键：防止浏览器默认的橡皮筋回弹效果干扰 JS 滚动 */
-            overscroll-behavior: none; 
-        }
-
-        /* --- 🌌 Parallax Ambient Background --- */
-        .ambient-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000000 100%);
-            perspective: 1000px;
-        }
-        .orb {
-            position: absolute; border-radius: 50%;
-            filter: blur(80px); opacity: 0.3;
-            transition: transform 1.2s var(--ease-ios-smooth);
-            will-change: transform;
-        }
-        .orb-1 { width: 80vw; height: 80vw; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); top: -20%; left: -20%; }
-        .orb-2 { width: 60vw; height: 60vw; background: radial-gradient(circle, #4285f4 0%, transparent 70%); bottom: -20%; right: -20%; opacity: 0.15; }
-
-        /* --- 🎞️ Horizontal Slider Container --- */
-        .slider {
-            display: flex;
-            overflow-x: scroll;
-            overflow-y: hidden;
-            scroll-snap-type: x mandatory;
-            height: 100%;
-            width: 100%;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            overscroll-behavior-x: none; /* 禁止水平方向的浏览器默认导航 */
-        }
-        .slider::-webkit-scrollbar { display: none; }
-
-        /* --- 📱 Slide Layout --- */
-        .slide {
-            flex: 0 0 100vw;
-            height: 100%;
-            scroll-snap-align: start;
-            scroll-snap-stop: always;
-            position: relative;
-            padding: calc(60px + var(--safe-top)) 24px calc(90px + var(--safe-bottom));
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-            scrollbar-width: none;
-            /* 允许内部垂直滚动，但触底时交给 JS 处理 */
-            overscroll-behavior-y: contain; 
-        }
-        .slide::-webkit-scrollbar { display: none; }
-
-        /* --- 🎭 Staggered Animations (iOS Style) --- */
-        .anim-group > * {
-            opacity: 0;
-            transform: translateY(40px) scale(0.96);
-            transition: opacity 0.8s var(--ease-ios-smooth), transform 0.8s var(--ease-ios-spring);
-        }
-        /* 当 Slide 激活时，子元素依次进场 */
-        .slide.active .anim-group > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: translateY(0) scale(1); }
-        .slide.active .anim-group > *:nth-child(2) { transition-delay: 0.15s; opacity: 1; transform: translateY(0) scale(1); }
-        .slide.active .anim-group > *:nth-child(3) { transition-delay: 0.25s; opacity: 1; transform: translateY(0) scale(1); }
-        .slide.active .anim-group > *:nth-child(4) { transition-delay: 0.35s; opacity: 1; transform: translateY(0) scale(1); }
-        .slide.active .anim-group > *:nth-child(5) { transition-delay: 0.45s; opacity: 1; transform: translateY(0) scale(1); }
-
-        /* --- 🖋️ Typography & Header --- */
-        .header-section { margin-bottom: 24px; flex-shrink: 0; }
-        
-        .day-badge {
-            display: inline-flex; align-items: center; justify-content: center;
-            height: 26px; padding: 0 14px; border-radius: 14px;
-            background: rgba(212, 175, 55, 0.15); 
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            color: var(--accent);
-            font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
-            margin-bottom: 12px;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
-            backdrop-filter: blur(10px);
+            --spring: cubic-bezier(0.2, 0.8, 0.2, 1);
+            --blur-heavy: blur(40px) saturate(200%);
+            --shadow-float: 0 20px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+            --sidebar-w: 300px;
         }
         
-        h1.title {
-            font-size: 38px; font-weight: 800; line-height: 1.05; letter-spacing: -1px;
-            background: linear-gradient(180deg, #fff 0%, #b0b0b0 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 8px; text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-base: #000000;
+                --bg-surface: #1C1C1E;
+                --bg-elevated: rgba(28, 28, 30, 0.75);
+                --bg-panel: rgba(20, 20, 22, 0.85);
+                --text-primary: #FFFFFF;
+                --text-secondary: #EBEBF5;
+                --text-tertiary: #8E8E93;
+                --border-subtle: rgba(255, 255, 255, 0.1);
+                --accent-glow: radial-gradient(circle at center, rgba(255,255,255,0.06) 0%, transparent 70%);
+                --user-bubble: #2C2C2E;
+                --shadow-float: 0 20px 40px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+            }
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
-        p.subtitle { font-size: 17px; color: var(--text-secondary); font-weight: 400; line-height: 1.4; letter-spacing: -0.3px; }
-
-        /* --- 🧱 Glass Cards (Pro Look) --- */
-        .card {
-            background: var(--bg-card);
-            backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-top: 1px solid rgba(255,255,255,0.15);
-            border-radius: 28px;
-            padding: 28px;
-            margin-bottom: 20px;
-            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.6);
+        body, html { 
+            height: 100%; width: 100%; overflow: hidden; 
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; 
+            background: var(--bg-base); color: var(--text-primary); 
+            letter-spacing: -0.01em; -webkit-font-smoothing: antialiased;
         }
+        svg { vertical-align: middle; }
 
-        /* Timeline Styles */
-        .timeline-item { position: relative; padding-left: 24px; margin-bottom: 36px; }
-        .timeline-item:last-child { margin-bottom: 0; }
+        /* ================= 云端登录舱 ================= */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(242, 242, 247, 0.5); z-index: 9999; 
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.6s var(--spring), transform 0.6s var(--spring);
+            backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy);
+        }
+        @media (prefers-color-scheme: dark) { #login-overlay { background: rgba(0, 0, 0, 0.5); } }
+
+        .login-card {
+            background: var(--bg-elevated); padding: 48px 40px; border-radius: 36px;
+            box-shadow: var(--shadow-float); width: 90%; max-width: 380px;
+            border: 1px solid var(--border-subtle); text-align: center;
+            transform: translateY(0); transition: 0.5s var(--spring);
+            backdrop-filter: blur(50px) saturate(200%); -webkit-backdrop-filter: blur(50px) saturate(200%);
+        }
+        .login-card svg { margin-bottom: 24px; color: var(--text-primary); }
+        .login-card h2 { font-size: 28px; margin-bottom: 8px; font-weight: 700; letter-spacing: -0.02em;}
+        .login-card p { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; line-height: 1.5;}
         
-        .timeline-line {
-            position: absolute; left: 5px; top: 24px; bottom: -24px;
-            width: 1px; background: linear-gradient(to bottom, var(--divider) 0%, transparent 100%);
-        }
-        .timeline-item:not(:last-child) .timeline-line { background: var(--divider); }
-
-        .timeline-dot {
-            position: absolute; left: 0; top: 7px;
-            width: 11px; height: 11px; border-radius: 50%;
-            background: #000; border: 2px solid var(--text-secondary);
-            z-index: 2; transition: all 0.3s;
-        }
-        .timeline-item.highlight .timeline-dot {
-            border-color: var(--accent); background: var(--accent);
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
-
-        .time-label {
-            font-family: "SF Mono", monospace; font-size: 12px; color: var(--accent);
-            margin-bottom: 6px; display: block; opacity: 0.9; font-weight: 600;
-        }
-
-        .event-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; letter-spacing: -0.3px; }
-        .event-desc { font-size: 15px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px; }
-
-        /* Tags */
-        .tags-row { display: flex; gap: 8px; flex-wrap: wrap; }
-        .capsule {
-            font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 8px;
-            background: var(--bg-glass); color: var(--text-secondary);
-            border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 4px;
-        }
-        .capsule.price { color: #81b0ff; background: rgba(10, 132, 255, 0.15); border-color: rgba(10, 132, 255, 0.2); }
-        .capsule.gear { color: #ff9f0a; background: rgba(255, 159, 10, 0.15); border-color: rgba(255, 159, 10, 0.2); }
-        .capsule.stay { color: #32d74b; background: rgba(50, 215, 75, 0.15); border-color: rgba(50, 215, 75, 0.2); }
-
-        /* --- 📷 Gear Tip Block --- */
-        .gear-block {
-            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-            border-radius: 20px; padding: 20px; margin-top: 16px;
-            border: 1px solid rgba(255,255,255,0.08);
-            position: relative; overflow: hidden;
-        }
-        .gear-block::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
-            background: linear-gradient(90deg, var(--ai-blue), transparent); opacity: 0.5;
-        }
-        .gear-head { 
-            display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
-        }
-        .gear-title-text {
-            font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary); font-weight: 700;
-        }
-        .gear-text { font-size: 14px; color: #ddd; line-height: 1.5; }
-        .gear-highlight { color: var(--accent); font-weight: 600; }
-
-        /* --- 🧭 Progress Bar --- */
-        .progress-container {
-            position: fixed; top: calc(12px + var(--safe-top)); left: 24px; right: 24px;
-            height: 3px; background: rgba(255,255,255,0.1); z-index: 100; border-radius: 2px; overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%; background: var(--accent); width: 0%; 
-            transition: width 0.8s var(--ease-ios-spring);
-            box-shadow: 0 0 15px var(--accent);
-        }
-
-        /* --- 📊 Cover Stats --- */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 32px; }
-        .stat-item {
-            background: var(--bg-glass); padding: 20px 16px; border-radius: 20px;
-            text-align: center; border: 1px solid var(--divider);
-        }
-        .stat-val { font-size: 28px; font-weight: 700; color: var(--accent); display: block; margin-bottom: 4px; font-family: "SF Pro Display"; }
-        .stat-lbl { font-size: 12px; color: var(--text-tertiary); font-weight: 500; }
+        #login-error-msg { display: none; text-align: left; font-size: 13px; line-height: 1.5; margin-bottom: 16px; background: rgba(255, 59, 48, 0.1); color: #FF3B30; padding: 12px; border-radius: 12px; border: 1px solid rgba(255, 59, 48, 0.3); align-items: flex-start; gap: 8px;}
         
-        /* --- ✨ AI Interaction UI --- */
-        .ai-tip-btn {
-            background: rgba(66, 133, 244, 0.15); color: #8ab4f8;
-            border: 1px solid rgba(66, 133, 244, 0.3); border-radius: 14px; padding: 6px 12px;
-            font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-            transition: all 0.2s; animation: pulse-border 3s infinite;
+        .login-input-group { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
+        .login-input {
+            background: var(--bg-surface); border: 1px solid var(--border-subtle);
+            padding: 16px 20px; border-radius: 16px; font-size: 16px; color: var(--text-primary);
+            outline: none; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
-        .ai-tip-btn:active { transform: scale(0.95); background: rgba(66, 133, 244, 0.3); }
-        @keyframes pulse-border { 0% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(66, 133, 244, 0); } 100% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0); } }
+        .login-input:focus { border-color: var(--text-primary); }
+        .btn-login {
+            background: var(--text-primary); color: var(--bg-base); border: none;
+            width: 100%; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: 0.3s var(--spring);
+        }
+        .btn-login:hover { transform: scale(1.02); }
+        .btn-login:active { transform: scale(0.96); }
 
-        .ai-fab {
-            position: fixed; bottom: calc(24px + var(--safe-bottom)); right: 24px;
-            width: 60px; height: 60px; border-radius: 30px;
-            background: linear-gradient(135deg, #1a73e8, #8ab4f8);
-            box-shadow: 0 12px 40px rgba(26, 115, 232, 0.5);
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 28px; cursor: pointer; z-index: 200;
-            transition: transform 0.3s var(--ease-ios-spring);
-        }
-        .ai-fab:active { transform: scale(0.9); }
-        .ai-fab-close { display: none; font-size: 32px; }
-        .ai-fab.open .ai-fab-icon { display: none; }
-        .ai-fab.open .ai-fab-close { display: block; }
+        /* ================= 启动视图状态 ================= */
+        body.app-locked #app-container { opacity: 0; transform: scale(0.92) translateY(20px); filter: blur(10px); }
+        body.app-locked header { opacity: 0; transform: translateY(-20px); }
+        body.app-locked .footer-island { opacity: 0; transform: translate(-50%, 40px); }
+        body.app-loaded #app-container { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        body.app-loaded header { opacity: 1; transform: translateY(0); }
+        body.app-loaded .footer-island { opacity: 1; transform: translateX(-50%); }
 
-        .chat-window {
-            position: fixed; bottom: calc(96px + var(--safe-bottom)); right: 24px;
-            width: 340px; height: 500px;
-            background: rgba(22, 22, 24, 0.95);
-            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255,255,255,0.15); border-radius: 28px;
-            display: flex; flex-direction: column;
-            transform: translateY(40px) scale(0.9); opacity: 0; pointer-events: none;
-            transition: all 0.4s var(--ease-ios-spring);
-            z-index: 199; box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+        /* 主容器 */
+        #app-container { 
+            display: flex; flex-direction: column; height: 100%; 
+            transition: transform 0.6s var(--spring), opacity 0.6s var(--spring), filter 0.6s var(--spring), border-radius 0.5s; 
+            background: var(--bg-base); z-index: 10; position: relative;
         }
-        .chat-window.open { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+        body.modal-open #app-container, body.media-open #app-container { transform: scale(0.95) translateY(-10px); border-radius: 24px; overflow: hidden; }
+        body.history-open #app-container { transform: scale(0.95) translateX(calc(var(--sidebar-w) / 2)); border-radius: 24px; overflow: hidden; }
+        body.voice-open #app-container { transform: scale(0.92); border-radius: 32px; overflow: hidden; opacity: 0.8; filter: blur(4px); }
+
+        /* 纯净毛玻璃导航栏 */
+        header { 
+            padding: calc(env(safe-area-inset-top) + 12px) 20px 12px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            z-index: 20; position: fixed; top: 0; left: 0; right: 0; 
+            background: var(--bg-elevated);
+            backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid var(--border-subtle);
+            transition: transform 0.7s var(--spring) 0.1s, opacity 0.7s var(--spring) 0.1s;
+        }
+        header h1 { font-size: 17px; font-weight: 600; letter-spacing: 0.05em; color: var(--text-primary); margin: 0; user-select: none;}
         
-        .chat-header {
-            padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;
+        .btn-icon { 
+            background: transparent; border: none; width: 36px; height: 36px; border-radius: 50%; color: var(--text-primary); 
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
         }
-        .chat-messages {
-            flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px;
+        .btn-icon:hover { background: var(--border-subtle); }
+        .btn-icon:active { transform: scale(0.9); }
+
+        /* 聊天区域 */
+        #chat-container { 
+            flex: 1; padding: calc(env(safe-area-inset-top) + 70px) 0 160px; overflow-y: auto; display: flex; flex-direction: column; 
+            scroll-behavior: smooth; max-width: 800px; margin: 0 auto; width: 100%;
         }
-        .chat-msg { max-width: 85%; padding: 14px 18px; border-radius: 20px; font-size: 14px; line-height: 1.5; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .chat-msg.ai { align-self: flex-start; background: rgba(255,255,255,0.1); color: #eee; border-bottom-left-radius: 4px; }
-        .chat-msg.user { align-self: flex-end; background: #1a73e8; color: #fff; border-bottom-right-radius: 4px; }
-        .chat-msg p { margin: 0; }
+        #chat-container::-webkit-scrollbar { display: none; }
         
-        .chat-input-area {
-            padding: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px;
-        }
-        .chat-input {
-            flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px; padding: 12px 18px; color: #fff; font-size: 14px; outline: none;
-        }
-        .chat-send {
-            background: transparent; border: none; color: var(--ai-blue); font-weight: 700; cursor: pointer; padding: 0 8px;
+        .wrapper { display: flex; width: 100%; padding: 16px 24px; animation: fadeIn 0.5s var(--spring) forwards; opacity: 0; transform: translateY(10px); flex-direction: column;}
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        
+        .msg-role-label { font-size: 12px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;}
+        .bubble { font-size: 16px; line-height: 1.6; word-wrap: break-word; color: var(--text-primary); }
+        .wrapper-user { align-items: flex-end; }
+        .wrapper-user .msg-role-label { text-align: right; }
+        .bubble-user { background: var(--user-bubble); padding: 14px 20px; border-radius: 20px 20px 4px 20px; max-width: 85%; }
+        .wrapper-bot { align-items: flex-start; }
+        .bubble-bot { max-width: 100%; width: 100%; }
+
+        .bubble strong { font-weight: 600; color: var(--text-primary); }
+        .bubble p { margin-bottom: 16px; }
+        .bubble p:last-child { margin-bottom: 0; }
+        .bubble h2, .bubble h3 { margin: 24px 0 12px; font-size: 1.1em; font-weight: 600; color: var(--text-primary); }
+        .bubble ul, .bubble ol { margin-bottom: 16px; padding-left: 20px; color: var(--text-secondary); }
+        .bubble li { margin-bottom: 6px; }
+        .inline-code { background: var(--border-subtle); padding: 3px 6px; border-radius: 6px; font-family: 'SF Mono', ui-monospace, monospace; font-size: 0.85em; color: var(--text-primary); }
+        
+        .reasoning-box { margin-bottom: 20px; background: transparent; border-left: 2px solid var(--border-subtle); padding: 4px 0 4px 16px; font-size: 14.5px; color: var(--text-secondary); transition: 0.3s; }
+        .reasoning-box:hover { border-color: var(--text-tertiary); }
+        .reasoning-box summary { font-weight: 500; cursor: pointer; outline: none; list-style: none; display: flex; align-items: center; gap: 8px; user-select: none;}
+        .reasoning-box summary::-webkit-details-marker { display: none; }
+        .reasoning-content { margin-top: 12px; line-height: 1.6; opacity: 0.85; animation: fadeIn 0.4s; }
+        
+        .citations { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+        .citation-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 500; color: var(--text-secondary); text-decoration: none; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
+        .citation-pill:hover { background: var(--border-subtle); color: var(--text-primary); }
+        .citation-pill img { width: 14px; height: 14px; border-radius: 4px; }
+        .citation-pill span { max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* 精密 Token 面板 */
+        .token-usage { font-size: 11px; color: var(--text-tertiary); margin-top: 16px; text-align: right; font-family: 'SF Mono', ui-monospace, monospace; font-weight: 600; display: flex; justify-content: flex-end; align-items: center; gap: 4px;}
+
+        /* Canvas 级内嵌代码与自动预览框 */
+        .code-box { margin: 20px 0; background: var(--bg-surface); border-radius: 16px; border: 1px solid var(--border-subtle); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .code-nav { padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); background: rgba(0,0,0,0.01); }
+        .code-lang { font-size: 11px; font-weight: 600; color: var(--text-tertiary); font-family: 'SF Mono', ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.05em;}
+        .pre-area { padding: 16px; overflow-x: auto; font-family: 'SF Mono', ui-monospace, monospace; font-size: 13px; color: var(--text-secondary); line-height: 1.6; white-space: pre; margin: 0; background: transparent; }
+        
+        .inline-preview { width: 100%; height: 380px; background: #FFFFFF; position: relative; border-radius: 0 0 16px 16px;}
+        .inline-preview iframe { width: 100%; height: 100%; border: none; border-radius: 0 0 16px 16px;}
+
+        .code-action-btn { background: transparent; color: var(--text-secondary); border: none; font-size: 12px; font-weight: 500; cursor: pointer; margin-left: 12px; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px;}
+        .code-action-btn:hover { background: var(--border-subtle); color: var(--text-primary); }
+        .code-action-btn.active { color: var(--text-primary); background: var(--border-subtle); font-weight: 600;}
+
+        /* 底部岛式悬浮舱 */
+        .footer-island { 
+            position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); width: calc(100% - 48px); max-width: 760px; 
+            background: var(--bg-elevated); backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy);
+            border-radius: 32px; padding: 12px 16px; border: 1px solid var(--border-subtle);
+            box-shadow: var(--shadow-float); z-index: 50; display: flex; flex-direction: column;
+            transition: transform 0.7s var(--spring) 0.15s, opacity 0.7s var(--spring) 0.15s, box-shadow 0.3s;
         }
 
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px);
-            z-index: 300; display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        .chat-toggles { display: flex; gap: 8px; margin-bottom: 12px; padding: 0 4px; align-items: center; flex-wrap: wrap;}
+        .mini-toggle { 
+            background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 6px 12px; border-radius: 100px; 
+            font-size: 12px; font-weight: 600; color: var(--text-tertiary); cursor: pointer; transition: 0.3s var(--spring);
+            display: inline-flex; align-items: center; gap: 6px; user-select: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .modal-overlay.open { opacity: 1; pointer-events: auto; }
-        .modal-card {
-            width: 88%; max-width: 420px; background: #1c1c1e; border: 1px solid var(--accent);
-            border-radius: 28px; padding: 28px;
-            transform: scale(0.9) translateY(20px); transition: transform 0.4s var(--ease-ios-spring);
-            box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
-        }
-        .modal-overlay.open .modal-card { transform: scale(1) translateY(0); }
-        .modal-title { color: var(--accent); font-size: 20px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-        .modal-body { color: #ccc; font-size: 15px; line-height: 1.7; max-height: 60vh; overflow-y: auto; }
-        .modal-close {
-            margin-top: 20px; width: 100%; padding: 14px; background: rgba(255,255,255,0.1);
-            border: none; border-radius: 16px; color: #fff; font-weight: 700; cursor: pointer;
-        }
+        .mini-toggle:active { transform: scale(0.95); }
+        .mini-toggle.active { background: var(--text-primary); color: var(--bg-surface); border-color: var(--text-primary); }
         
-        .typing-dots span {
-            display: inline-block; width: 5px; height: 5px; background: #ccc; border-radius: 50%;
-            animation: dot-wave 1.4s infinite ease-in-out both; margin: 0 2px;
-        }
-        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes dot-wave { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        .attachment-preview { padding: 0 12px; margin-bottom: 8px; display: none; align-items: center;}
+        .attach-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-surface); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; color: var(--text-primary); max-width: 100%; border: 1px solid var(--border-subtle); box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
+        .attach-url { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+        .btn-remove-attach { background: none; border: none; color: var(--text-tertiary); cursor: pointer; display: flex; align-items: center; }
 
+        .input-row { display: flex; width: 100%; gap: 6px; align-items: center; }
+        .btn-attach, .btn-mic { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 10px; transition: 0.2s; border-radius: 50%; display: flex; align-items: center;}
+        .btn-attach:hover, .btn-mic:hover { background: var(--border-subtle); color: var(--text-primary); }
+        
+        .input-box { flex: 1; display: flex; align-items: center; min-height: 40px; margin-left: 4px;}
+        input[type="text"] { width: 100%; border: none; background: transparent; font-size: 15px; color: var(--text-primary); outline: none; }
+        input[type="text"]::placeholder { color: var(--text-tertiary); }
+        
+        .inline-model-select { position: relative; display: flex; align-items: center; margin-right: 4px; }
+        .inline-model-select select {
+            background: var(--bg-surface); border: 1px solid var(--border-subtle);
+            padding: 6px 24px 6px 12px; border-radius: 14px; font-size: 13px; font-weight: 600;
+            color: var(--text-secondary); cursor: pointer; transition: 0.3s var(--spring);
+            appearance: none; -webkit-appearance: none; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .inline-model-select select:hover { border-color: var(--text-tertiary); color: var(--text-primary); }
+        .inline-model-select svg { position: absolute; right: 8px; width: 12px; height: 12px; color: var(--text-tertiary); pointer-events: none;}
+
+        .btn-up { width: 36px; height: 36px; border-radius: 50%; background: var(--text-primary); color: var(--bg-surface); border: none; cursor: pointer; transition: 0.3s var(--spring); display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+        .btn-up:hover { transform: scale(1.05); }
+        .btn-up:active { transform: scale(0.95); }
+        .btn-up.stop-mode { background: #FF3B30; border-radius: 12px; transform: scale(0.9); color: white;}
+
+        #tts-style-container { display: none; width: 100%; animation: pop 0.3s forwards;}
+        #tts-style-container.active { display: block; margin-bottom: 10px;}
+        .tts-style-input { width: 100%; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 8px 14px; font-size: 13px; color: var(--text-primary); outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);}
+        .tts-style-input::placeholder { color: var(--text-tertiary); }
+
+        /* ================= 模态遮罩与弹窗 ================= */
+        #overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: 0.5s; z-index: 900; backdrop-filter: blur(12px) saturate(150%); -webkit-backdrop-filter: blur(12px) saturate(150%);
+        }
+        body.modal-open #overlay, body.history-open #overlay, body.preview-open #overlay, body.media-open #overlay { opacity: 1; pointer-events: auto; }
+        
+        #sheet, #media-modal { 
+            position: fixed; bottom: 0; left: 50%; width: 100%; max-width: 800px;
+            background: var(--bg-panel); border-radius: 32px 32px 0 0; 
+            transform: translate(-50%, 100%); transition: transform 0.6s var(--spring); 
+            z-index: 1000; box-shadow: var(--shadow-float); max-height: 90vh; overflow-y: auto;
+            backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy); border-top: 1px solid var(--border-subtle);
+        }
+        body.modal-open #sheet, body.media-open #media-modal { transform: translate(-50%, 0); }
+        
+        .sheet-handle { width: 40px; height: 5px; background: var(--border-subtle); border-radius: 10px; margin: 16px auto; }
+        .sheet-nav { padding: 0 24px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;}
+        .sheet-nav h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em;}
+        .btn-close-sheet { background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600; color: var(--text-primary); cursor: pointer;}
+        
+        .form-group { background: var(--bg-surface); border-radius: 20px; margin: 0 24px 24px; border: 1px solid var(--border-subtle); overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.02); }
+        .form-item { padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 8px; }
+        .form-item:last-child { border-bottom: none; }
+        .form-item-row { display: flex; justify-content: space-between; align-items: center; flex-direction: row; }
+        .form-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+        .form-input { border: none; background: transparent; font-size: 16px; color: var(--text-primary); outline: none; width: 100%; }
+        select.form-input { -webkit-appearance: none; cursor: pointer; }
+
+        /* 左侧历史记录抽屉 */
+        #history-drawer { 
+            position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100%; 
+            background: var(--bg-panel); z-index: 1000; transform: translateX(-100%); transition: transform 0.6s var(--spring); 
+            display: flex; flex-direction: column; border-right: 1px solid var(--border-subtle); 
+            backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy);
+        }
+        body.history-open #history-drawer { transform: translateX(0); }
+        .drawer-header { padding: calc(env(safe-area-inset-top) + 24px) 24px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); margin-bottom: 8px;}
+        .drawer-header h2 { font-size: 18px; font-weight: 600;}
+        .btn-new-chat { background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-subtle); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;}
+        .btn-new-chat:hover { background: var(--border-subtle); }
+        #session-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        
+        .session-item { padding: 14px 16px; border-radius: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; border: 1px solid transparent; position: relative;}
+        .session-item:hover { background: var(--bg-surface); box-shadow: 0 2px 8px rgba(0,0,0,0.03);}
+        .session-item.active { background: var(--bg-surface); border-color: var(--border-subtle); font-weight: 500; box-shadow: 0 2px 12px rgba(0,0,0,0.05);}
+        .session-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; color: var(--text-primary); transition: 0.2s;}
+        
+        .btn-del-session { color: var(--text-tertiary); background: none; border: none; padding: 6px; cursor: pointer; opacity: 0; transition: 0.2s; display: flex; align-items: center; justify-content: center; border-radius: 10px; position: absolute; right: 10px; }
+        .session-item:hover .session-title { padding-right: 30px; }
+        .session-item:hover .btn-del-session { opacity: 1; background: var(--bg-base); box-shadow: 0 2px 6px rgba(0,0,0,0.05);}
+        .btn-del-session:hover { color: #FF3B30; background: rgba(255, 59, 48, 0.1); }
+        @media (hover: none) { .btn-del-session { opacity: 1; position: static; background: transparent; box-shadow: none;} .session-item:hover .session-title { padding-right: 0; } }
+
+        .btn-local-file { width: 100%; background: var(--text-primary); color: var(--bg-base); border: none; padding: 16px; border-radius: 16px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
+        .btn-local-file:active { transform: scale(0.98); }
+        .media-guide { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px; padding: 12px 16px; background: var(--bg-surface); border-radius: 12px; border: 1px solid var(--border-subtle);}
+        .divider { display: flex; align-items: center; margin: 24px 0; color: var(--text-tertiary); font-size: 12px; font-weight: 500; text-transform: uppercase; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-subtle); }
+        .divider::before { margin-right: 12px; } .divider::after { margin-left: 12px; }
+
+        .typing-indicator { display: inline-flex; align-items: center; gap: 4px; padding: 8px 0; }
+        .t-dot { width: 6px; height: 6px; background: var(--text-tertiary); border-radius: 50%; animation: t-bounce 1.4s infinite ease-in-out both; }
+        .t-dot:nth-child(1) { animation-delay: -0.32s; } .t-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes t-bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
+
+        /* 沉浸式语音通话舱 */
+        #voice-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10,10,12,0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.5s var(--spring); color: white;
+        }
+        body.voice-open #voice-modal { opacity: 1; pointer-events: auto; }
+        
+        .voice-close-btn { position: absolute; top: calc(env(safe-area-inset-top) + 24px); right: 24px; background: rgba(255,255,255,0.1); border: none; width: 44px; height: 44px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(10px); transition: 0.2s;}
+        .voice-close-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+
+        .voice-orb { width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ff4b9c, #007AFF, #00C6FF); box-shadow: 0 0 60px rgba(0, 122, 255, 0.4); transition: all 0.2s ease-out; filter: blur(12px); cursor: pointer; }
+        .voice-orb.listening { animation: orbBreathe 3s ease-in-out infinite; }
+        .voice-orb.thinking { animation: orbSpin 1.5s linear infinite; border-radius: 40% 60% 60% 40% / 40% 50% 50% 60%; background: radial-gradient(circle at 50% 50%, #007AFF, #ff4b9c); }
+        .voice-orb.speaking { animation: orbPulse 0.4s ease-in-out infinite alternate; background: radial-gradient(circle at 70% 70%, #34C759, #00C6FF); }
+
+        @keyframes orbBreathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(0, 122, 255, 0.4); } 50% { transform: scale(1.15); box-shadow: 0 0 90px rgba(0, 122, 255, 0.7); } }
+        @keyframes orbSpin { 100% { transform: rotate(360deg); } }
+        @keyframes orbPulse { 0% { transform: scale(1); box-shadow: 0 0 50px rgba(52, 199, 89, 0.4); } 100% { transform: scale(1.3); box-shadow: 0 0 100px rgba(52, 199, 89, 0.8); } }
+
+        .voice-subtitle { margin-top: 60px; font-size: 22px; font-weight: 500; text-align: center; max-width: 80%; min-height: 80px; letter-spacing: 0.02em; line-height: 1.4; opacity: 0.9; color: #FFF; word-break: break-word;}
+        .voice-status { position: absolute; bottom: 60px; font-size: 13px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;}
+
+        /* 全屏预览沙盒 (毛玻璃) */
+        #preview-page {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 100%; max-width: 100%; border-radius: 0;
+            background: var(--bg-panel); backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy);
+            transform: translateY(100%); transition: transform 0.5s var(--spring); z-index: 1500;
+        }
+        body.preview-open #preview-page { transform: translateY(0); }
+        #preview-page .sheet-nav { background: transparent; padding: calc(env(safe-area-inset-top) + 16px) 24px 16px; border-bottom: 1px solid var(--border-subtle);}
     </style>
 </head>
-<body>
+<body class="app-locked">
 
-    <div class="ambient-bg">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-    </div>
-
-    <div class="progress-container"><div class="progress-fill" id="progress"></div></div>
-
-    <div class="slider" id="slider">
-
-        <!-- ====================== Slide 1: Cover ====================== -->
-        <section class="slide active">
-            <div class="anim-group" style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <div class="day-badge">2026 最终定稿</div>
-                    <h1 class="title" style="font-size: 48px; margin-bottom: 16px;">山西古建<br>影像巡礼</h1>
-                    <p class="subtitle" style="opacity: 0.9;">三人自驾 · 8天7晚 · 深度折中版<br>Audi Q5L (一嗨神价)</p>
-                </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-val">¥2,800</span>
-                        <span class="stat-lbl">人均落地预算</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-val">8 Days</span>
-                        <span class="stat-lbl">深度人文摄影</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-val">4 大</span>
-                        <span class="stat-lbl">国保古建</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-val">Q5L</span>
-                        <span class="stat-lbl">全时四驱</span>
-                    </div>
-                </div>
-
-                <div class="gear-block" style="margin-top: 40px;">
-                    <div class="gear-head">
-                        <span class="gear-title-text">📷 影像主力配置</span>
-                    </div>
-                    <div class="gear-text" style="text-align: center;">
-                        <span class="gear-highlight">Sony ZV-E1</span> 暗光视频 &nbsp;|&nbsp; 
-                        <span class="gear-highlight">Pocket 3</span> 模拟航拍 &nbsp;|&nbsp; 
-                        <span class="gear-highlight">A7M1</span> 建筑全景
-                    </div>
-                </div>
-            </div>
-            <div style="text-align: center; color: var(--text-tertiary); font-size: 12px; margin-top: 20px; animation: pulse 2s infinite;">
-                向左滑动开启旅程 →
-            </div>
-        </section>
-
-        <!-- ====================== Slide 2: Day 1 ====================== -->
-        <section class="slide">
-            <div class="anim-group">
-                <div class="header-section">
-                    <div class="day-badge">DAY 01 · 1.17 SAT</div>
-                    <h1 class="title">北上大同</h1>
-                    <p class="subtitle">落地提车 · 适应气候 · 肉食狂欢</p>
-                </div>
-
-                <div class="card">
-                    <div class="timeline-item">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">14:00</div>
-                        <div class="event-title">太原机场 · 提车</div>
-                        <p class="event-desc">一嗨租车提 Q5L。务必检查轮胎备胎，加满 95# 汽油。Pocket 3 拍开箱 Vlog。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">租车 ¥500/人</span>
-                            <span class="capsule gear">Pocket 3</span>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">15:00</div>
-                        <div class="event-title">高速巡航</div>
-                        <p class="event-desc">全程 280km 高速直奔大同，耗时3.5h。A7M1 拍沿途地貌变化。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">油路 ¥70/人</span>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item highlight">
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">19:30</div>
-                        <div class="event-title">晚餐：凯鸽火锅</div>
-                        <p class="event-desc">大同第一顿必须吃肉。大同黄糕、沙棘汁必点。宿全季或云冈建国。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">食宿 ¥220</span>
-                            <span class="capsule stay">大同古城</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="gear-block" data-location="大同冬季户外" data-gear="羽绒服, 电池保暖">
-                    <div class="gear-head">
-                        <span class="gear-title-text">💡 防寒提示</span>
-                        <button class="ai-tip-btn" onclick="getAiTips(this)">✨ AI 穿搭建议</button>
-                    </div>
-                    <div class="gear-text">大同夜间极冷 (-20°C)，下车前务必穿好羽绒服。电池贴身保温。</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ====================== Slide 3: Day 2 ====================== -->
-        <section class="slide">
-            <div class="anim-group">
-                <div class="header-section">
-                    <div class="day-badge">DAY 02 · 1.18 SUN</div>
-                    <h1 class="title">大佛与土林</h1>
-                    <p class="subtitle">云冈石窟 · 土林日落 · 摄影日</p>
-                </div>
-
-                <div class="card">
-                    <div class="timeline-item">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">09:30</div>
-                        <div class="event-title">云冈石窟</div>
-                        <p class="event-desc">不用赶早。重点拍第20窟露天大佛。ZV-E1 拍眼神光特写，A7M1 拍全景。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">门票 ¥100</span>
-                            <span class="capsule gear">ZV-E1 + A7M1</span>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item highlight">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">15:30</div>
-                        <div class="event-title">大同土林</div>
-                        <p class="event-desc"><strong>黄金时刻：</strong>夕阳打在土柱上呈金红色。Pocket 3 上长杆模拟无人机低空飞行穿梭。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">门票 ¥40</span>
-                            <span class="capsule gear">Pocket 3 FPV</span>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">19:00</div>
-                        <div class="event-title">宿 · 浑源县</div>
-                        <p class="event-desc">住恒山国际酒店（悬空寺脚下），为明天早起抢光线做准备。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">食宿 ¥110</span>
-                            <span class="capsule stay">浑源县</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="gear-block" data-location="云冈石窟第20窟 & 大同土林" data-gear="Sony ZV-E1, A7M1, Pocket 3">
-                    <div class="gear-head">
-                        <span class="gear-title-text">📷 影像建议</span>
-                        <button class="ai-tip-btn" onclick="getAiTips(this)">✨ AI 运镜指导</button>
-                    </div>
-                    <div class="gear-text">土林日落时分光比大，建议开启相机 Log 模式。大佛面部光线在上午 10-11 点最佳。</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ====================== Slide 4: Day 3 ====================== -->
-        <section class="slide">
-            <div class="anim-group">
-                <div class="header-section">
-                    <div class="day-badge">DAY 03 · 1.19 MON</div>
-                    <h1 class="title">神木与唐构</h1>
-                    <p class="subtitle">悬空寺 · 应县木塔 · 佛光寺</p>
-                </div>
-
-                <div class="card">
-                    <div class="timeline-item">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">07:30</div>
-                        <div class="event-title">悬空寺 (晨光)</div>
-                        <p class="event-desc"><strong>省钱策略：</strong>只买大门票不登临。早晨顺光最美，A7M1 长焦压缩画面。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">门票 ¥15</span>
-                            <span class="capsule gear">A7M1</span>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">09:30</div>
-                        <div class="event-title">应县木塔 (深度)</div>
-                        <p class="event-desc">买票进院，绕塔三周。Pocket 3 开启智能跟随，拍人与塔的合影。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">门票 ¥50</span>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item highlight">
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">14:00</div>
-                        <div class="event-title">佛光寺东大殿</div>
-                        <p class="event-desc">穿越五台山北麓看雪山（视路况）。看唐代斗拱。ZV-E1 拍开门瞬间。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">门票 ¥15</span>
-                            <span class="capsule gear">ZV-E1</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="gear-block" data-location="悬空寺 & 应县木塔" data-gear="长焦镜头, 广角镜头">
-                    <div class="gear-head">
-                        <span class="gear-title-text">💡 构图技巧</span>
-                        <button class="ai-tip-btn" onclick="getAiTips(this)">✨ AI 构图大师</button>
-                    </div>
-                    <div class="gear-text">悬空寺适合用长焦压缩透视。木塔适合低角度广角仰拍，展现斗拱的繁复结构。</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ====================== Slide 5: Day 4 ====================== -->
-        <section class="slide">
-            <div class="anim-group">
-                <div class="header-section">
-                    <div class="day-badge">DAY 04 · 1.20 TUE</div>
-                    <h1 class="title">满堂悬塑</h1>
-                    <p class="subtitle">双林寺 · 小西天 (核心)</p>
-                </div>
-
-                <div class="card">
-                    <div class="timeline-item">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">09:00</div>
-                        <div class="event-title">平遥双林寺 (可选)</div>
-                        <p class="event-desc">就在高速口，顺路看“天下第一韦驮”。彩塑表情极生动。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">门票 ¥35</span>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item highlight">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">14:30</div>
-                        <div class="event-title">隰县小西天</div>
-                        <p class="event-desc"><strong>核心必去。</strong>大雄宝殿极暗且窄。务必请讲解。严禁闪光灯。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">票+讲 ¥55</span>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">19:00</div>
-                        <div class="event-title">宿 · 临汾</div>
-                        <p class="event-desc">住临汾市区（金都花园）。晚餐必吃：牛肉丸子面（特辣过瘾）。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">食宿 ¥200</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="gear-block" data-location="隰县小西天大雄宝殿" data-gear="Sony ZV-E1, F1.8大光圈">
-                    <div class="gear-head">
-                        <span class="gear-title-text">📷 暗光对策</span>
-                        <button class="ai-tip-btn" onclick="getAiTips(this)">✨ AI 暗光参数</button>
-                    </div>
-                    <div class="gear-text"><span class="gear-highlight">ZV-E1 主力时刻：</span> 小西天大殿极暗。光圈全开 F1.8，ISO 拉高，拍摄满堂悬塑的金光质感。</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ====================== Slide 6: Day 5 ====================== -->
-        <section class="slide">
-            <div class="anim-group">
-                <div class="header-section">
-                    <div class="day-badge">DAY 05 · 1.21 WED</div>
-                    <h1 class="title">琉璃与青莲</h1>
-                    <p class="subtitle">广胜寺 · 南下晋城</p>
-                </div>
-
-                <div class="card">
-                    <div class="timeline-item">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">10:00</div>
-                        <div class="event-title">广胜寺飞虹塔</div>
-                        <p class="event-desc">世界最美琉璃塔，《西游记》扫塔处。A7M1 拍琉璃色彩细节。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">门票+车 ¥75</span>
-                            <span class="capsule gear">A7M1</span>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">15:30</div>
-                        <div class="event-title">青莲寺</div>
-                        <p class="event-desc">抵达晋城。看宋塑和古银杏树，远眺太行山，环境极幽静。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">门票 ¥10</span>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">19:00</div>
-                        <div class="event-title">晋城烧烤</div>
-                        <p class="event-desc">特色大肉串、把子肉。宿晋城国贸或金辇（性价比极高）。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">食宿 ¥300</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ====================== Slide 7: Day 6 ====================== -->
-        <section class="slide">
-            <div class="anim-group">
-                <div class="header-section">
-                    <div class="day-badge">DAY 06 · 1.22 THU</div>
-                    <h1 class="title">星宿神韵</h1>
-                    <p class="subtitle">玉皇庙 · 提前回省会</p>
-                </div>
-
-                <div class="card">
-                    <div class="timeline-item highlight">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">09:30</div>
-                        <div class="event-title">玉皇庙</div>
-                        <p class="event-desc"><strong>黑神话名场面：</strong>二十八星宿（亢金龙、虚日鼠）。需提前公众号预约。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">预约免费</span>
-                            <span class="capsule gear">ZV-E1</span>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">13:00</div>
-                        <div class="event-title">穿越太行</div>
-                        <p class="event-desc">走 G55 二广高速穿越太行山脉回太原，桥隧相连。Pocket 3 拍车内延时。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">油费 ¥80</span>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">18:00</div>
-                        <div class="event-title">宿 · 太原柳巷</div>
-                        <p class="event-desc">开启 Citywalk 模式。逛食品街，吃义井沾片子。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">食宿 ¥260</span>
-                            <span class="capsule stay">太原</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="gear-block" data-location="晋城玉皇庙二十八星宿" data-gear="ZV-E1 视频模式">
-                    <div class="gear-head">
-                        <span class="gear-title-text">📷 游戏取景</span>
-                        <button class="ai-tip-btn" onclick="getAiTips(this)">✨ AI 还原神话</button>
-                    </div>
-                    <div class="gear-text">拍摄雕塑时注意低角度仰拍，体现神像的压迫感。使用慢动作运镜模拟游戏视角。</div>
-                </div>
-            </div>
-        </section>
+<div id="login-overlay">
+    <div class="login-card">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" style="margin-bottom:16px"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        <h2>MIMO Cloud</h2>
+        <p>欢迎回到专属智能节点。<br>云端数据已通过边缘计算网络加密。</p>
         
-        <!-- ====================== Slide 8: Day 7 & 8 ====================== -->
-        <section class="slide">
-            <div class="anim-group">
-                <div class="header-section">
-                    <div class="day-badge">DAY 07-08 · 返程</div>
-                    <h1 class="title">晋祠收官</h1>
-                    <p class="subtitle">穿越太行 · 晋祠园林 · 机场</p>
-                </div>
+        <div id="login-error-msg"></div>
 
-                <div class="card">
-                    <div class="timeline-item">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">D7 10:00</div>
-                        <div class="event-title">太原Citywalk</div>
-                        <p class="event-desc">如果前一天没赶路，今天上午就是穿越太行山脉的时间。A7M1 拍山景。</p>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">D7 19:00</div>
-                        <div class="event-title">散伙饭</div>
-                        <p class="event-desc"><strong>老太原菜馆：</strong>过油肉、糖醋丸子、黄米凉糕。兄弟们走一个。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">聚餐 ¥100</span>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item highlight">
-                        <div class="timeline-line"></div>
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">D8 10:30</div>
-                        <div class="event-title">晋祠园林</div>
-                        <p class="event-desc">替代博物馆。逛难老泉、圣母殿、3000年周柏。自然与人文结合。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">门票 ¥80</span>
-                            <span class="capsule gear">A7M1</span>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="time-label">D8 16:30</div>
-                        <div class="event-title">还车起飞</div>
-                        <p class="event-desc">机场加满油还车。19:00 起飞回家。</p>
-                        <div class="tags-row">
-                            <span class="capsule price">加油 ¥150</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="text-align:center; color:var(--text-tertiary); font-size:12px; margin-top:20px; animation: pulse 2s infinite;">
-                    👋 旅途结束 · 期待成片
-                </div>
-            </div>
-        </section>
-
-    </div>
-
-    <!-- AI Chat Components -->
-    <div class="ai-fab" id="aiFab" onclick="toggleChat()">
-        <span class="ai-fab-icon">🤖</span>
-        <span class="ai-fab-close">×</span>
-    </div>
-
-    <div class="chat-window" id="chatWindow">
-        <div class="chat-header">
-            <span>✨ 晋行者 AI 助手</span>
+        <div class="login-input-group">
+            <input type="text" id="login-user" class="login-input" placeholder="系统标识 (Username)">
+            <input type="password" id="login-pass" class="login-input" placeholder="安全密钥 (Password)" onkeypress="if(event.key==='Enter') window.handleLoginBtn()">
         </div>
-        <div class="chat-messages" id="chatMessages">
-            <div class="chat-msg ai">
-                <p>你好！我是你的山西古建向导。关于这 8 天的行程、历史典故或拍摄点位，随时问我！📸</p>
+        <button class="btn-login" id="login-btn-action" onclick="window.handleLoginBtn()">安全连接</button>
+    </div>
+</div>
+
+<div id="app-container">
+    <header>
+        <button class="btn-icon" onclick="window.toggleHistory(true)" id="icon-menu"></button>
+        <h1>MIMO</h1>
+        <button class="btn-icon" onclick="window.toggleM(true)" id="icon-gear"></button>
+    </header>
+    
+    <main id="chat-container"></main>
+    
+    <div class="footer-island">
+        <div class="chat-toggles">
+            <div class="mini-toggle" id="toggle-think" onclick="window.toggleSetting('think')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>
+                深度思考
+            </div>
+            <div class="mini-toggle" id="toggle-search" onclick="window.toggleSetting('search')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                联网检索
             </div>
         </div>
-        <div class="chat-input-area">
-            <input type="text" class="chat-input" id="chatInput" placeholder="例如：云冈石窟几点光线最好？" onkeypress="handleKeyPress(event)">
-            <button class="chat-send" onclick="sendMessage()">发送</button>
+
+        <div id="tts-style-container" style="display:none; padding: 0 4px 8px;">
+            <input type="text" id="tts-style" class="tts-style-input" placeholder="输入朗读情绪/方言/角色 (选填)">
         </div>
-    </div>
-
-    <!-- Tip Modal -->
-    <div class="modal-overlay" id="tipModal">
-        <div class="modal-card">
-            <div class="modal-title">✨ Gemini 摄影锦囊</div>
-            <div class="modal-body" id="modalBody">
-                <div class="typing-dots"><span></span><span></span><span></span></div>
-            </div>
-            <button class="modal-close" onclick="closeModal()">关闭</button>
-        </div>
-    </div>
-
-    <script>
-        // =========================================================
-        // 🔧 【必读】 小米 MiMo / OpenAI 兼容 API 配置区域
-        // 请在此处替换为您自己的 API Key 和 接口地址。
-        // =========================================================
-        const API_CONFIG = {
-            // 1. 在这里填入您的 API KEY (例如小米 MiMo 提供的 API Key)
-            apiKey: "sk-cvf5h4cgpnpp1cotjsv0ouvlxgl3ejkr5kg5mlzlbu30vtri", 
-            
-            // 2. 在这里填入 API 地址 (Base URL)
-            // 如果是小米 MiMo 开放平台，请使用官方提供的兼容 OpenAI 格式的 endpoint
-            apiUrl: "https://api.xiaomimimo.com/v1/chat/completions", 
-            
-            // 3. 模型名称
-            modelName: "mimo-v2-flash",
-
-            // 4. CORS 代理 (已更换为更稳定的 corsproxy.io)
-            // 原理：通过第三方服务器中转请求，绕过浏览器的同源策略限制
-            corsProxy: "https://corsproxy.io/?"
-        };
-
-        // 3. AI 助手人设 (System Prompt) - 已更新：注入攻略内容，去除中二风格，增加设备车辆信息
-        const SYSTEM_PROMPT = `你是一位专业的山西古建旅行向导和资深摄影师，名字叫“MINO”。
+        <div id="attachment-preview" class="attachment-preview"></div>
         
-        【基础信息】：
-        - 车辆：Audi Q5L 
-        - 摄影设备：Sony ZV-E1 (主攻暗光视频/特写), DJI Pocket 3 (模拟航拍/Vlog), Sony A7M1 (建筑全景/照片)
-        - 旅行时间：2026年1月17日(周六) 至 2026年1月24日(周六)
+        <div class="input-row">
+            <button class="btn-attach" onclick="window.toggleMedia(true)" id="icon-attach"></button>
+            <button class="btn-mic" onclick="window.openVoiceMode()" id="icon-mic-btn"></button>
+            <div class="input-box">
+                <input type="text" id="user-in" placeholder="发送指令..." autocomplete="off" onkeypress="if(event.key==='Enter') window.handleSendAction()">
+            </div>
+            <div class="inline-model-select">
+                <select id="mod-in" onchange="window.saveConfig()">
+                    <option value="mimo-v2-flash">Flash</option>
+                    <option value="mimo-v2-pro">Pro</option>
+                    <option value="mimo-v2-omni">Omni</option>
+                    <option value="mimo-v2-tts">TTS</option>
+                </select>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+            <button class="btn-up" id="btn-action" onclick="window.handleSendAction()"></button>
+        </div>
+    </div>
+</div>
 
-        【当前用户行程路书 - 8天山西自驾】：
-        - Day 1 (1.17 Sat): 太原机场提车 -> 280km高速直奔大同 -> 晚餐凯鸽火锅 -> 宿大同古城。
-        - Day 2 (1.18 Sun): 云冈石窟(重点第20窟) -> 大同土林(拍日落) -> 宿浑源县(恒山国际酒店)。
-        - Day 3 (1.19 Mon): 悬空寺(赶早拍晨光，不登临) -> 应县木塔(买票进院绕塔) -> 佛光寺东大殿(唐构)。
-        - Day 4 (1.20 Tue): 平遥双林寺(顺路看韦驮) -> 隰县小西天(核心必去，大雄宝殿悬塑，极暗) -> 宿临汾(金都花园，吃牛肉丸子面)。
-        - Day 5 (1.21 Wed): 广胜寺飞虹塔(琉璃塔) -> 晋城青莲寺(宋塑) -> 晚餐晋城烧烤 -> 宿晋城(国贸或金辇)。
-        - Day 6 (1.22 Thu): 玉皇庙(二十八星宿，黑神话取景地，需预约) -> 穿越太行山高速回太原 -> 宿太原柳巷。
-        - Day 7 (1.23 Fri): 太原Citywalk/休整 -> 晚餐散伙饭(老太原菜馆)。
-        - Day 8 (1.24 Sat): 晋祠园林(难老泉/周柏) -> 机场还车返程。
+<div id="voice-modal">
+    <button class="voice-close-btn" onclick="window.closeVoiceMode()" id="icon-voice-close"></button>
+    <div class="voice-orb listening" id="voice-orb" onclick="window.stopRecordingAndSend()"></div>
+    <div class="voice-subtitle" id="voice-sub">准备中...</div>
+    <div class="voice-status" id="voice-status-text">INITIALIZING</div>
+</div>
 
-        【回答要求】：
-        1. **语气正常、稳重、专业**。请使用正常人类导游的口吻，**严禁**使用中二、戏谑、过度夸张或游戏角色的语言。
-        2. **基于行程**：回答问题时，必须结合上述具体的行程安排、日期和地点。
-        3. **设备结合**：针对摄影问题，结合用户手头的 ZV-E1、Pocket 3 和 A7M1 给出建议（例如：小西天极暗推荐用 ZV-E1）。
-        4. **格式清晰**：使用 Markdown 格式（列表、加粗）让阅读更清晰。`;
-        // =========================================================
+<div id="overlay" onclick="window.closeAll()"></div>
 
-        // --- 🌊 Slide Animation & Logic ---
-        const slider = document.getElementById('slider');
-        const progressFill = document.getElementById('progress');
-        const slides = document.querySelectorAll('.slide');
+<div id="history-drawer">
+    <div class="drawer-header">
+        <h2>云端对话</h2>
+        <div style="display:flex; gap:8px">
+            <button class="btn-new-chat" onclick="window.handleLogout()" title="退出系统" id="icon-logout"></button>
+            <button class="btn-new-chat" onclick="window.createNewSession()" id="icon-plus"></button>
+        </div>
+    </div>
+    <div id="session-list"></div>
+</div>
 
-        const observerOptions = { root: slider, threshold: 0.5 };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                    const index = Array.from(slides).indexOf(entry.target);
-                    const progress = ((index + 1) / slides.length) * 100;
-                    progressFill.style.width = `${progress}%`;
-                    
-                    // 视差滚动背景
-                    const orbs = document.querySelectorAll('.orb');
-                    orbs[0].style.transform = `translate(${index * 40}px, ${index * 20}px)`;
-                    orbs[1].style.transform = `translate(${-index * 40}px, ${-index * 20}px)`;
-                } else {
-                    entry.target.classList.remove('active');
-                }
+<div id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-nav">
+        <h2>系统偏好</h2>
+        <button class="btn-close-sheet" onclick="window.save()">完成</button>
+    </div>
+    
+    <div class="form-group">
+        <div class="form-item">
+            <label class="form-label">MIMO API KEY</label>
+            <input type="password" id="key-in" class="form-input" placeholder="sk-...">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="form-item form-item-row">
+            <label class="form-label">TTS 默认音色</label>
+            <select id="cfg-voice" class="form-input" style="width: auto; text-align: right;" onchange="window.saveConfig()">
+                <option value="mimo_default">默认女声</option>
+                <option value="default_zh">纯净中文</option>
+                <option value="default_en">纯净英文</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="form-item form-item-row" style="cursor:pointer;" onclick="window.exportData()">
+            <label class="form-label" style="color:var(--text-primary); display:flex; align-items:center; gap:8px;" id="icon-download">导出本地数据</label>
+        </div>
+        <div class="form-item form-item-row" style="cursor:pointer;" onclick="document.getElementById('import-file').click()">
+            <label class="form-label" style="color:var(--text-primary); display:flex; align-items:center; gap:8px;" id="icon-upload">导入数据恢复</label>
+            <input type="file" id="import-file" style="display:none" accept=".json" onchange="window.importData(event)">
+        </div>
+    </div>
+</div>
+
+<div id="media-modal">
+    <div class="sheet-handle"></div>
+    <div class="sheet-nav">
+        <h2>添加媒体附件</h2>
+        <button class="btn-close-sheet" onclick="window.closeAll()">取消</button>
+    </div>
+    <div style="padding: 0 24px 32px;">
+        <div class="media-guide">
+            <b>关于大文件解析：</b><br>
+            受限于浏览器内存限制，过大的文件会导致分析失败。<br>
+            若需处理超长视频，请提供<b>公共直链 URL</b>。
+        </div>
+        <input type="file" id="local-file-input" style="display:none" accept="image/*,video/*,audio/*" onchange="window.handleLocalFile(event)">
+        <button class="btn-local-file" onclick="document.getElementById('local-file-input').click()">
+            <span id="icon-media-upload" style="display:flex; align-items:center; margin-right:6px;"></span> 从相册图库上传 (智能压缩)
+        </button>
+        <div style="height: 24px;"></div>
+        <div class="form-group" style="margin: 0; background: var(--bg-surface);">
+            <div class="form-item">
+                <label class="form-label">资源类型</label>
+                <select id="media-type" class="form-input">
+                    <option value="image">图像直链</option>
+                    <option value="video">视频直链 (推荐)</option>
+                    <option value="audio">音频直链</option>
+                </select>
+            </div>
+            <div class="form-item">
+                <label class="form-label">资源 URL</label>
+                <input type="text" id="media-url" class="form-input" placeholder="https://...">
+            </div>
+        </div>
+        <button class="btn-local-file" style="margin-top: 16px; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-subtle); box-shadow:none;" onclick="window.confirmMediaUrl()">
+            解析网络直链
+        </button>
+    </div>
+</div>
+
+<div id="preview-page">
+    <div class="sheet-nav">
+        <h2>全屏沙盒</h2>
+        <button class="btn-close-sheet" onclick="window.closeAll()">关闭</button>
+    </div>
+    <iframe id="p-frame" style="width:100%; height:calc(100vh - 80px); border:none; background:#fff"></iframe>
+</div>
+
+<script>
+    // --- SVG 图标库 ---
+    const icons = {
+        menu: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="18" x2="14" y2="18"></line></svg>`,
+        gear: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
+        send: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>`,
+        stop: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>`,
+        plus: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+        attach: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>`,
+        close: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+        brain: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>`,
+        play: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`,
+        copy: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
+        link: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
+        image: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`,
+        video: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>`,
+        mic: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>`,
+        expand: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`,
+        trash: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+        logout: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
+        bolt: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
+        warning: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+        download: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`,
+        upload: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`
+    };
+
+    document.getElementById('icon-menu').innerHTML = icons.menu;
+    document.getElementById('icon-gear').innerHTML = icons.gear;
+    document.getElementById('btn-action').innerHTML = icons.send;
+    document.getElementById('icon-plus').innerHTML = icons.plus;
+    document.getElementById('icon-attach').innerHTML = icons.attach;
+    document.getElementById('icon-logout').innerHTML = icons.logout;
+    document.getElementById('icon-download').innerHTML = icons.download + '<span style="margin-left:8px;">导出本地数据</span>';
+    document.getElementById('icon-upload').innerHTML = icons.upload + '<span style="margin-left:8px;">导入数据恢复</span>';
+    document.getElementById('icon-media-upload').innerHTML = icons.upload;
+    document.getElementById('icon-mic-btn').innerHTML = icons.mic;
+    document.getElementById('icon-voice-close').innerHTML = icons.close;
+
+    // 全局基础配置
+    const PROXY = "https://patient-queen-f9d8.z2098732021.workers.dev";
+    const API = "https://api.xiaomimimo.com/v1/chat/completions";
+
+    window.currentUser = sessionStorage.getItem('mimo_current_user');
+    window.config = { key: '', mod: 'mimo-v2-flash', think: false, search: false, voice: 'mimo_default' };
+    window.sessions = [];
+    window.currentSessionId = null;
+    window.currentAbortController = null;
+    window.currentAttachment = null;
+
+    const chat = document.getElementById('chat-container');
+    const sessionListEl = document.getElementById('session-list');
+    const btnAction = document.getElementById('btn-action');
+    const attachmentPreview = document.getElementById('attachment-preview');
+
+    window.onload = () => { 
+        window.checkAuthAndInit();
+    };
+
+    window.checkAuthAndInit = function() {
+        if (!window.currentUser) {
+            document.body.classList.remove('app-loaded');
+            document.body.classList.add('app-locked');
+            document.getElementById('login-overlay').style.display = 'flex';
+            setTimeout(() => { document.getElementById('login-overlay').style.opacity = '1'; }, 10);
+        } else {
+            document.getElementById('login-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.body.classList.remove('app-locked');
+                requestAnimationFrame(() => document.body.classList.add('app-loaded'));
+            }, 500);
+            window.loadLocalData();
+            window.loadCloudDataBackground();
+        }
+    };
+
+    window.handleLoginBtn = async function() {
+        const user = document.getElementById('login-user').value.trim();
+        const pass = document.getElementById('login-pass').value.trim();
+        if(!user || !pass) return alert("请输入云端标识和安全密钥");
+
+        const btn = document.getElementById('login-btn-action');
+        btn.innerText = "连接中...";
+
+        try {
+            const res = await fetch(`${PROXY}/api/sync?user=${encodeURIComponent(user)}`, {
+                method: 'GET',
+                headers: { 'sync-key': pass }
             });
-        }, observerOptions);
-        slides.forEach(slide => observer.observe(slide));
 
-        // --- 🖱️ 电脑滚轮逻辑 (Smart Scroll Fix) ---
-        // 逻辑：如果当前内容没看完，就滚动内容；如果看完了，或者内容太短不需要滚，就翻页。
-        let isAnimating = false;
-
-        slider.addEventListener('wheel', (e) => {
-            const activeSlide = document.querySelector('.slide.active');
-            if (!activeSlide || isAnimating) return;
-
-            // 1. 过滤横向滚动 (如触摸板)
-            if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-
-            // 2. 检查边界状态
-            const isAtBottom = Math.ceil(activeSlide.scrollTop + activeSlide.clientHeight) >= activeSlide.scrollHeight - 2;
-            const isAtTop = activeSlide.scrollTop <= 0;
-            
-            // 3. 判断当前页是否“可滚动”（内容是否超出屏幕）
-            const isScrollable = activeSlide.scrollHeight > activeSlide.clientHeight;
-
-            if (e.deltaY > 0) { 
-                // --- 向下滚动 ---
-                
-                // 情况A：内容还没看完，让浏览器自己滚，不要插手
-                if (isScrollable && !isAtBottom) {
-                    return; 
+            if (!res.ok) {
+                const errText = await res.text();
+                if (res.status === 401) {
+                    btn.innerText = "安全连接";
+                    return alert("安全密钥错误，或该账号已被占用！");
+                } else if (res.status === 501) {
+                    throw new Error("Worker 未绑定 MIMO_DB");
+                } else if (res.status === 404) {
+                    throw new Error("找不到 /api/sync 接口，请更新 Worker 代码");
+                } else {
+                    throw new Error(`网络或接口异常 (${res.status})`);
                 }
-                
-                // 情况B：内容看完了(isAtBottom) 或者 内容根本不够滚(!isScrollable) -> 翻到下一页
-                if (activeSlide.nextElementSibling) {
-                    e.preventDefault();
-                    isAnimating = true;
-                    activeSlide.nextElementSibling.scrollIntoView({ behavior: 'smooth' });
-                    setTimeout(() => isAnimating = false, 600); 
-                }
+            }
+
+            const data = await res.json();
+            if (data.status !== "new") {
+                window.config = data.config || window.config;
+                window.sessions = data.sessions || [];
             } else {
-                // --- 向上滚动 ---
-                
-                // 情况A：还没滚到顶，让浏览器自己滚
-                if (isScrollable && !isAtTop) {
-                    return; 
-                }
-                
-                // 情况B：到顶了 或者 不需要滚 -> 回到上一页
-                if (activeSlide.previousElementSibling) {
-                    e.preventDefault();
-                    isAnimating = true;
-                    activeSlide.previousElementSibling.scrollIntoView({ behavior: 'smooth' });
-                    setTimeout(() => isAnimating = false, 600);
+                window.sessions = [];
+            }
+            
+            window.config.syncKey = pass;
+            sessionStorage.setItem('mimo_current_user', user);
+            window.currentUser = user;
+            document.getElementById('login-pass').value = '';
+            
+            window.refreshUIState();
+            window.unlockApp();
+        } catch (e) {
+            console.warn("Cloud sync failed, falling back to local", e);
+            let userMsg = e.message;
+            if (userMsg.includes('Failed to fetch') || userMsg.includes('NetworkError')) {
+                userMsg = "网络请求失败，请检查网络连接或 Worker URL。";
+            }
+            const errMsg = document.getElementById('login-error-msg');
+            errMsg.style.display = 'flex';
+            errMsg.innerHTML = `${icons.warning} <div>云端连接失败，正在降级本地模式。<br><span style="font-size:11px; opacity:0.8">${userMsg}</span></div>`;
+            btn.innerText = "进入本地模式";
+            setTimeout(() => {
+                errMsg.style.display = 'none';
+                window.localLogin(user, pass);
+            }, 2500);
+        }
+    };
+
+    window.localLogin = function(user, pass) {
+        let localUsers = JSON.parse(localStorage.getItem('mimo_users') || '{}');
+        if (localUsers[user]) {
+            if (localUsers[user] !== pass) {
+                document.querySelector('.btn-login').innerText = "安全连接";
+                return alert("安全密钥错误！");
+            }
+        } else {
+            localUsers[user] = pass;
+            localStorage.setItem('mimo_users', JSON.stringify(localUsers));
+        }
+
+        sessionStorage.setItem('mimo_current_user', user);
+        window.currentUser = user;
+        document.getElementById('login-pass').value = '';
+        window.config.syncKey = pass;
+        
+        window.loadLocalData();
+        window.unlockApp();
+    };
+
+    window.handleLogout = function() {
+        sessionStorage.removeItem('mimo_current_user');
+        window.currentUser = null;
+        window.closeAll();
+        
+        document.body.classList.remove('app-loaded');
+        document.body.classList.add('app-locked');
+        document.getElementById('login-overlay').style.display = 'flex';
+        document.querySelector('.btn-login').innerText = "安全连接";
+        setTimeout(() => { document.getElementById('login-overlay').style.opacity = '1'; }, 10);
+    };
+
+    window.unlockApp = function() {
+        document.getElementById('login-overlay').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.body.classList.remove('app-locked');
+            requestAnimationFrame(() => document.body.classList.add('app-loaded'));
+        }, 500);
+    };
+
+    window.loadLocalData = function() {
+        window.config = JSON.parse(localStorage.getItem(`mimo_cfg_v5_${window.currentUser}`)) || { key: '', mod: 'mimo-v2-flash', think: false, search: false, voice: 'mimo_default' };
+        window.sessions = JSON.parse(localStorage.getItem(`mimo_sessions_v5_${window.currentUser}`)) || [];
+        window.refreshUIState();
+    };
+
+    window.loadCloudDataBackground = async function() {
+        if (!window.currentUser || !window.config.syncKey) return;
+        try {
+            const res = await fetch(`${PROXY}/api/sync?user=${encodeURIComponent(window.currentUser)}`, {
+                method: 'GET',
+                headers: { 'sync-key': window.config.syncKey }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.status !== "new") {
+                    window.config = data.config || window.config;
+                    window.sessions = data.sessions || [];
+                    window.refreshUIState();
                 }
             }
-        }, { passive: false });
+        } catch(e) { console.warn("Background cloud sync skipped."); }
+    };
 
+    window.syncToCloud = async function() {
+        if (!window.currentUser || !window.config.syncKey) return;
+        try {
+            await fetch(`${PROXY}/api/sync?user=${encodeURIComponent(window.currentUser)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'sync-key': window.config.syncKey },
+                body: JSON.stringify({ config: window.config, sessions: window.sessions })
+            });
+        } catch(e) { console.error("Cloud Sync Failed", e); }
+    };
 
-        // --- 🤖 通用 LLM 调用函数 (兼容 OpenAI 格式) ---
-        async function callLLM(userPrompt) {
-            if (!API_CONFIG.apiKey || API_CONFIG.apiKey === "YOUR_API_KEY_HERE" || API_CONFIG.apiKey.includes("在此处")) {
-                return "🚨 **配置错误**：请在代码第 890 行填入您的 API Key (必须是纯英文字符)。";
+    window.refreshUIState = function() {
+        document.getElementById('key-in').value = window.config.key || '';
+        document.getElementById('mod-in').value = window.config.mod || 'mimo-v2-flash';
+        if(!window.config.key) window.toggleM(true); 
+        window.initToggles();
+        if(window.sessions.length === 0) window.createNewSession(false);
+        else {
+            window.currentSessionId = window.sessions[0].id;
+            window.renderSessionList();
+            window.loadSessionToUI();
+        }
+        window.checkTTSMode();
+    };
+
+    window.saveSessions = function() { 
+        if(!window.currentUser) return;
+        try { localStorage.setItem(`mimo_sessions_v5_${window.currentUser}`, JSON.stringify(window.sessions)); } 
+        catch (e) { console.warn("Quota exceeded."); }
+        window.syncToCloud();
+    };
+
+    window.saveConfig = function() {
+        if(!window.currentUser) return;
+        window.config.key = document.getElementById('key-in').value.trim();
+        window.config.mod = document.getElementById('mod-in').value;
+        window.config.voice = document.getElementById('cfg-voice').value;
+        localStorage.setItem(`mimo_cfg_v5_${window.currentUser}`, JSON.stringify(window.config));
+        window.syncToCloud();
+        window.checkTTSMode();
+    };
+
+    window.save = function() { window.saveConfig(); window.closeAll(); };
+
+    window.initToggles = function() {
+        if(window.config.think) document.getElementById('toggle-think').classList.add('active');
+        else document.getElementById('toggle-think').classList.remove('active');
+        if(window.config.search) document.getElementById('toggle-search').classList.add('active');
+        else document.getElementById('toggle-search').classList.remove('active');
+    };
+
+    window.toggleSetting = function(type) {
+        if(!window.currentUser) return;
+        window.config[type] = !window.config[type];
+        const el = document.getElementById(`toggle-${type}`);
+        if(window.config[type]) el.classList.add('active');
+        else el.classList.remove('active');
+        localStorage.setItem(`mimo_cfg_v5_${window.currentUser}`, JSON.stringify(window.config));
+        window.syncToCloud();
+    };
+
+    window.checkTTSMode = function() {
+        const mod = document.getElementById('mod-in') ? document.getElementById('mod-in').value : window.config.mod;
+        const container = document.getElementById('tts-style-container');
+        if (mod === 'mimo-v2-tts') container.style.display = 'block';
+        else container.style.display = 'none';
+    };
+
+    window.exportData = function() {
+        const data = { config: window.config, sessions: window.sessions };
+        const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `MIMO_Backup_${window.currentUser}_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    window.importData = function(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if(data.config) window.config = data.config;
+                if(data.sessions) window.sessions = data.sessions;
+                window.saveSessions();
+                window.saveConfig();
+                alert("数据恢复成功！");
+                window.refreshUIState();
+            } catch(err) { alert("备份文件格式错误"); }
+        };
+        reader.readAsText(file);
+    };
+
+    window.createNewSession = function(switchUI = true) {
+        const newId = Date.now().toString();
+        window.sessions.unshift({ id: newId, title: '新的探索', messages: [] });
+        window.currentSessionId = newId;
+        window.saveSessions();
+        if(switchUI) {
+            window.renderSessionList();
+            window.loadSessionToUI();
+            window.closeAll();
+        }
+    };
+
+    window.switchSession = function(id) {
+        if(window.currentSessionId === id) return;
+        window.currentSessionId = id;
+        window.renderSessionList();
+        window.loadSessionToUI();
+        window.closeAll();
+    };
+
+    window.deleteSession = function(id, e) {
+        e.stopPropagation();
+        window.sessions = window.sessions.filter(s => s.id !== id);
+        if(window.sessions.length === 0) window.createNewSession(false);
+        else if(window.currentSessionId === id) window.currentSessionId = window.sessions[0].id;
+        window.saveSessions();
+        window.renderSessionList();
+        window.loadSessionToUI();
+    };
+
+    window.renderSessionList = function() {
+        sessionListEl.innerHTML = '';
+        window.sessions.forEach(s => {
+            const div = document.createElement('div');
+            div.className = `session-item ${s.id === window.currentSessionId ? 'active' : ''}`;
+            div.onclick = () => window.switchSession(s.id);
+            div.innerHTML = `
+                <div class="session-title">${s.title}</div>
+                <button class="btn-del-session" onclick="window.deleteSession('${s.id}', event)">${icons.trash}</button>
+            `;
+            sessionListEl.appendChild(div);
+        });
+    };
+
+    window.loadSessionToUI = function() {
+        chat.innerHTML = '';
+        const session = window.sessions.find(s => s.id === window.currentSessionId);
+        if(!session || session.messages.length === 0) {
+            chat.innerHTML = `<div class="wrapper wrapper-bot" style="align-items:center; opacity:0.6; margin-top:20px;">
+                <div style="text-align:center;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom:16px"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path><path d="M12 12 2.1 7.1"></path><path d="M12 12l9.9 4.9"></path></svg>
+                    <br>欢迎回来，${window.currentUser}
+                </div>
+            </div>`;
+            return;
+        }
+
+        session.messages.forEach(msg => {
+            const w = document.createElement('div');
+            w.className = `wrapper wrapper-${msg.role === 'user' ? 'user' : 'bot'}`;
+            
+            if (msg.role === 'user') {
+                w.innerHTML = `<div class="msg-role-label">You</div>`;
+                const b = document.createElement('div');
+                b.className = 'bubble bubble-user';
+                let userHtml = "";
+                if (msg.attachment) {
+                    if (msg.attachment.type === 'image') userHtml += `<img src="${msg.attachment.url}" style="max-width:100%; border-radius:12px; margin-bottom:8px; display:block;">`;
+                    if (msg.attachment.type === 'video') userHtml += `<div style="background:rgba(0,0,0,0.1); padding:8px 12px; border-radius:12px; margin-bottom:8px; display:inline-flex; align-items:center; gap:8px;">${icons.video} 视频分析请求</div>`;
+                    if (msg.attachment.type === 'audio') userHtml += `<div style="background:rgba(0,0,0,0.1); padding:8px 12px; border-radius:12px; margin-bottom:8px; display:inline-flex; align-items:center; gap:8px;">${icons.mic} 音频分析请求</div>`;
+                }
+                userHtml += `<div>${msg.content}</div>`;
+                b.innerHTML = userHtml;
+                w.appendChild(b);
+            } else {
+                w.innerHTML = `<div class="msg-role-label">MIMO</div>`;
+                const b = document.createElement('div');
+                b.className = 'bubble bubble-bot';
+                window.renderOutput(b, msg, true);
+                w.appendChild(b);
             }
+            chat.appendChild(w);
+        });
+        setTimeout(() => { chat.scrollTop = chat.scrollHeight; }, 100);
+    };
 
-            const messages = [
-                { role: "system", content: SYSTEM_PROMPT },
-                { role: "user", content: userPrompt }
-            ];
+    window.toggleM = function(s) {
+        document.body.classList.toggle('modal-open', s);
+        if(s) {
+            document.getElementById('key-in').value = window.config.key || '';
+            document.getElementById('mod-in').value = window.config.mod || 'mimo-v2-flash';
+            document.getElementById('cfg-voice').value = window.config.voice || 'mimo_default';
+        }
+    };
+    window.toggleHistory = function(s) { document.body.classList.toggle('history-open', s); };
+    window.toggleMedia = function(s) { document.body.classList.toggle('media-open', s); };
+    window.closeAll = function() { document.body.classList.remove('modal-open', 'history-open', 'preview-open', 'media-open'); };
 
-            const payload = {
-                model: API_CONFIG.modelName, 
-                messages: messages,
+    window.setButtonState = function(isGenerating) {
+        if (isGenerating) {
+            btnAction.className = 'btn-up stop-mode';
+            btnAction.innerHTML = icons.stop;
+        } else {
+            btnAction.className = 'btn-up';
+            btnAction.innerHTML = icons.send;
+        }
+    };
+
+    window.confirmMediaUrl = function() {
+        const type = document.getElementById('media-type').value;
+        const url = document.getElementById('media-url').value.trim();
+        if (!url) return window.closeAll();
+        window.setAttachment(type, url, false, url);
+        document.getElementById('media-url').value = '';
+    };
+
+    window.handleLocalFile = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        let type = 'image';
+        if (file.type.startsWith('video/')) type = 'video';
+        else if (file.type.startsWith('audio/')) type = 'audio';
+
+        if (type !== 'image') {
+            if (file.size > 5 * 1024 * 1024) {
+                alert("文件体积过大。\n受限于沙盒，仅支持解析 5MB 以内的短视频/语音。\n若需分析大文件，请在下方使用 [对象直链引擎] 解析。");
+                event.target.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) { window.setAttachment(type, e.target.result, true, file.name); };
+            reader.readAsDataURL(file);
+        } else {
+            window.compressImage(file, (base64) => { window.setAttachment(type, base64, true, file.name); });
+        }
+        event.target.value = '';
+    };
+
+    window.compressImage = function(file, callback) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width; let height = img.height;
+                const maxDim = 1000; 
+                if (width > maxDim || height > maxDim) {
+                    if (width > height) { height = Math.round((height *= maxDim / width)); width = maxDim; } 
+                    else { width = Math.round((width *= maxDim / height)); height = maxDim; }
+                }
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                callback(canvas.toDataURL('image/jpeg', 0.8)); 
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.setAttachment = function(type, url, isLocal, name) {
+        window.currentAttachment = { type, url, isLocal, name };
+        window.renderAttachmentPreview();
+        if (window.config.mod !== 'mimo-v2-omni') {
+            window.config.mod = 'mimo-v2-omni';
+            document.getElementById('mod-in').value = 'mimo-v2-omni';
+            if(window.currentUser) {
+                localStorage.setItem(`mimo_cfg_v5_${window.currentUser}`, JSON.stringify(window.config));
+            }
+            if(window.syncToCloud) window.syncToCloud();
+            window.checkTTSMode();
+        }
+        window.closeAll();
+    };
+
+    window.removeAttachment = function() { window.currentAttachment = null; window.renderAttachmentPreview(); };
+
+    window.renderAttachmentPreview = function() {
+        if (!window.currentAttachment) {
+            attachmentPreview.style.display = 'none';
+            attachmentPreview.innerHTML = '';
+            return;
+        }
+        attachmentPreview.style.display = 'flex';
+        let mIcon = icons.image;
+        if(window.currentAttachment.type === 'video') mIcon = icons.video;
+        if(window.currentAttachment.type === 'audio') mIcon = icons.mic;
+
+        const displayName = window.currentAttachment.isLocal ? window.currentAttachment.name : "云端资源链接";
+
+        attachmentPreview.innerHTML = `
+            <div class="attach-pill">
+                ${mIcon}
+                <span class="attach-url">${displayName}</span>
+                <button class="btn-remove-attach" onclick="window.removeAttachment()">${icons.close}</button>
+            </div>
+        `;
+    };
+
+    window.parse = function(text, isFinished = false) {
+        if(!text) return "";
+        let safe = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        let parts = safe.split(/```/);
+        let res = "";
+        
+        parts.forEach((part, i) => {
+            if (i % 2 === 0) {
+                let sub = part.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+                sub = sub.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+                sub = sub.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+                sub = sub.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+                sub = sub.replace(/\n/g, '<br>');
+                res += sub;
+            } else {
+                let lines = part.split('\n');
+                let lang = lines.shift().trim().toLowerCase() || 'code';
+                let code = lines.join('\n').trim();
+                let isPreviewable = ['html', 'xml', 'svg'].includes(lang);
+                
+                const safeIframeCode = code.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                
+                const isPreviewActive = isPreviewable && isFinished;
+                let contentHtml = `<pre class="pre-area" style="display:${isPreviewActive ? 'none' : 'block'}"><code>${code}</code></pre>`;
+                let previewHtml = '';
+                let btnHtml = `<button class="code-action-btn" onclick="window.cpBubble(this, true)">${icons.copy} 复制</button>`;
+
+                if (isPreviewable) {
+                    previewHtml = `<div class="inline-preview" style="display:${isPreviewActive ? 'block' : 'none'}"><iframe srcdoc="${safeIframeCode}" sandbox="allow-scripts allow-modals allow-forms"></iframe></div>`;
+                    btnHtml = `<button class="code-action-btn ${isPreviewActive ? 'active' : ''}" onclick="window.toggleCodeView(this)">${icons.play} 源码/沙盒</button>` + btnHtml;
+                    btnHtml += `<button class="code-action-btn" onclick="window.pv(this)">${icons.expand}</button>`;
+                }
+
+                res += `
+                <div class="code-box">
+                    <div class="code-nav">
+                        <div class="code-lang">${lang}</div>
+                        <div style="display:flex;">${btnHtml}</div>
+                    </div>
+                    ${contentHtml}
+                    ${previewHtml}
+                </div>`;
+            }
+        });
+        return res;
+    };
+
+    window.toggleCodeView = function(btn) {
+        const box = btn.closest('.code-box');
+        const pre = box.querySelector('.pre-area');
+        const preview = box.querySelector('.inline-preview');
+        
+        if (preview.style.display === 'none') {
+            preview.style.display = 'block';
+            pre.style.display = 'none';
+            btn.classList.add('active');
+        } else {
+            preview.style.display = 'none';
+            pre.style.display = 'block';
+            btn.classList.remove('active');
+        }
+    };
+
+    window.renderOutput = function(bubble, msgObj, isFinished = false) {
+        let html = "";
+        
+        if (msgObj.audioData) {
+            html += `<audio controls src="data:audio/wav;base64,${msgObj.audioData}" style="width:100%; outline:none; margin-bottom: 16px; border-radius:12px; background:var(--bg-surface); border:1px solid var(--border-subtle); display:block;"></audio>`;
+            if(!msgObj.content) {
+                bubble.innerHTML = html;
+                return;
+            }
+        }
+
+        if (msgObj.reasoning) {
+            html += `<details class="reasoning-box" ${msgObj.content ? '' : 'open'}>
+                        <summary>${icons.brain} 推理逻辑已折叠</summary>
+                        <div class="reasoning-content">${window.parse(msgObj.reasoning, isFinished)}</div>
+                     </details>`;
+        }
+        if (msgObj.content) html += window.parse(msgObj.content, isFinished);
+        
+        if (msgObj.annotations && msgObj.annotations.length > 0) {
+            html += `<div class="citations">`;
+            const uniqueAnns = []; const urls = new Set();
+            for(let ann of msgObj.annotations) {
+                if(!urls.has(ann.url)) { urls.add(ann.url); uniqueAnns.push(ann); }
+            }
+            uniqueAnns.forEach((ann, idx) => {
+                const title = ann.site_name || ann.title || `引文 ${idx+1}`;
+                html += `<a href="${ann.url}" target="_blank" class="citation-pill">
+                            ${ann.logo_url ? `<img src="${ann.logo_url}" onerror="this.style.display='none'">` : icons.link}
+                            <span>${title}</span>
+                         </a>`;
+            });
+            html += `</div>`;
+        }
+
+        if (isFinished && msgObj.content && !msgObj.audioData && msgObj.role === 'assistant') {
+            html += `<div style="display:flex; gap:16px; margin-top:16px; align-items:center;">
+                        <button class="code-action-btn" style="margin:0; background:transparent;" onclick="window.readAloud(this, '${msgObj.id}')">${icons.play} 朗读</button>
+                        <button class="code-action-btn" style="margin:0; background:transparent;" onclick="window.cpBubble(this)">${icons.copy} 复制</button>
+                     </div>`;
+        }
+
+        if (isFinished && msgObj.usage) {
+            const usageM = (msgObj.usage / 1000000).toFixed(6);
+            html += `<div class="token-usage">${icons.bolt} 消耗: ${usageM} M Tokens</div>`;
+        }
+
+        bubble.innerHTML = html || `<div class="typing-indicator"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
+    };
+
+    window.readAloud = async function(btn, msgId) {
+        const session = window.sessions.find(s => s.id === window.currentSessionId);
+        const msg = session.messages.find(m => m.id === msgId);
+        if (!msg || !msg.content) return;
+
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = `<span class="t-dot" style="margin-right:2px; background:currentColor"></span><span class="t-dot" style="margin-right:2px; background:currentColor"></span><span class="t-dot" style="margin-right:6px; background:currentColor"></span>解析中`;
+        btn.disabled = true;
+
+        const bubble = btn.closest('.bubble');
+        const audioEl = document.createElement('audio');
+        audioEl.controls = true;
+        audioEl.style.width = '100%';
+        audioEl.style.outline = 'none';
+        audioEl.style.marginBottom = '16px';
+        audioEl.style.borderRadius = '12px';
+        audioEl.style.background = 'var(--bg-surface)';
+        audioEl.style.border = '1px solid var(--border-subtle)';
+        audioEl.style.display = 'none'; 
+        bubble.insertBefore(audioEl, bubble.firstChild);
+
+        try {
+            const cleanText = msg.content.replace(/[#*`_~>]/g, '');
+            const reqBody = {
+                model: 'mimo-v2-tts',
+                messages: [
+                    { role: "user", content: "请根据语境朗读：" },
+                    { role: "assistant", content: cleanText.substring(0, 1000) }
+                ],
                 stream: false,
-                temperature: 0.7,
-                thinking: { type: "disabled" } // Xiaomi MiMo specific param
+                audio: { format: "wav", voice: window.config.voice || "mimo_default" }
             };
 
-            // 使用代理后的 URL
-            // 注意：corsproxy.io 的用法是 https://corsproxy.io/?<目标URL>
-            const finalUrl = API_CONFIG.corsProxy ? (API_CONFIG.corsProxy + encodeURIComponent(API_CONFIG.apiUrl)) : API_CONFIG.apiUrl;
+            const res = await fetch(PROXY, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.config.key}`, 'api-key': window.config.key, 'x-target-url': API },
+                body: JSON.stringify(reqBody)
+            });
 
-            try {
-                const response = await fetch(finalUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'api-key': API_CONFIG.apiKey // Changed to api-key based on Xiaomi MiMo docs
-                    },
-                    body: JSON.stringify(payload)
-                });
+            if (!res.ok) {
+                let errDetail = `HTTP ${res.status}`;
+                try {
+                    const errData = await res.json();
+                    errDetail = errData.error?.message || JSON.stringify(errData);
+                } catch(e) {}
+                throw new Error(errDetail);
+            }
+            
+            const data = await res.json();
+            if (data.error) throw new Error(data.error.message);
 
-                if (!response.ok) {
-                    if (response.status === 403 || response.status === 429) {
-                         return "❌ **CORS 代理繁忙**：\n公共代理服务（corsproxy.io）可能限制了请求频率。\n建议：\n1. 等待几秒后重试。\n2. 或者在本地使用 VS Code Live Server 运行（最稳定）。";
-                    }
-                    const errText = await response.text();
-                    console.error("API Error:", errText);
-                    return `API 请求失败 (${response.status})。请检查 Key 或 URL 是否正确。`;
-                }
+            const audioData = data.choices?.[0]?.message?.audio?.data;
+            if (audioData) {
+                msg.audioData = audioData; 
+                window.saveSessions();
+                audioEl.src = `data:audio/wav;base64,${audioData}`;
+                audioEl.style.display = 'block';
+                audioEl.play().catch(e => console.log('Autoplay issue', e));
+                btn.remove(); 
+            } else { throw new Error("Null Audio Data"); }
+        } catch (e) {
+            audioEl.remove();
+            btn.innerHTML = `<span style="color:#FF3B30">失败: ${e.message}</span>`;
+            setTimeout(() => { btn.innerHTML = originalHtml; btn.disabled = false; }, 3000);
+        }
+    };
 
-                const data = await response.json();
-                
-                // 兼容性解析: 尝试读取 OpenAI 标准格式
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    return data.choices[0].message.content;
-                } else if (data.reply) { // 部分国产模型旧格式兼容
-                    return data.reply;
-                } else {
-                    return "无法解析返回结果，请检查控制台日志。";
-                }
-
-            } catch (error) {
-                console.error("Network Error:", error);
-                if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-                    // 更新错误提示
-                    return "❌ **网络请求失败 (CORS)**：\n这是由于 GitHub Pages 等静态网页的浏览器安全限制导致的。\n\n**当前状态：**\n已尝试使用 `corsproxy.io` 代理，但连接仍被阻断。\n\n**终极解决方法：**\n请在本地使用 VS Code 的 **Live Server** 插件运行此 HTML 文件，本地环境通常能绕过此限制。";
-                }
-                return `网络连接失败: ${error.message}`;
+    window.getMediaPayloadObj = function(attachment) {
+        let format = "wav";
+        let dataStr = attachment.url;
+        
+        if (dataStr.startsWith("data:")) {
+            const mime = dataStr.split(';')[0].split(':')[1];
+            if (mime) {
+                format = mime.split('/')[1] || "wav";
+                if (format === "mpeg") format = "mp3";
+            }
+            if (attachment.type === 'audio') {
+                 return { type: "input_audio", input_audio: { data: dataStr } };
+            } else if (attachment.type === 'image') {
+                 return { type: "image_url", image_url: { url: dataStr } };
             }
         }
 
-        // --- 💬 Chat Logic ---
-        const aiFab = document.getElementById('aiFab');
-        const chatWindow = document.getElementById('chatWindow');
-        const chatMessages = document.getElementById('chatMessages');
-        const chatInput = document.getElementById('chatInput');
+        if (attachment.type === 'image') return { type: "image_url", image_url: { url: attachment.url } };
+        else if (attachment.type === 'video') return { type: "video_url", video_url: { url: attachment.url, fps: 2, media_resolution: "default" } };
+        else if (attachment.type === 'audio') return { type: "input_audio", input_audio: { data: attachment.url } };
+        return null;
+    };
 
-        function toggleChat() {
-            const isOpen = chatWindow.classList.contains('open');
-            if (isOpen) {
-                chatWindow.classList.remove('open');
-                aiFab.classList.remove('open');
+    window.handleSendAction = async function() {
+        if (window.currentAbortController) {
+            window.currentAbortController.abort();
+            window.currentAbortController = null;
+            window.setButtonState(false);
+            return;
+        }
+
+        const inp = document.getElementById('user-in');
+        const txt = inp.value.trim();
+        if(!txt && !window.currentAttachment) return;
+        if(!window.config.key) { window.toggleM(true); return; }
+
+        const session = window.sessions.find(s => s.id === window.currentSessionId);
+        if (session.messages.length === 0) {
+            session.title = txt ? (txt.substring(0, 16)) : '多模态探索';
+            window.renderSessionList();
+        }
+
+        const msgUserObj = { id: Date.now().toString(), role: 'user', content: txt, attachment: window.currentAttachment };
+        session.messages.push(msgUserObj);
+        window.saveSessions();
+        
+        const uw = document.createElement('div');
+        uw.className = 'wrapper wrapper-user';
+        uw.innerHTML = `<div class="msg-role-label">You</div>`;
+        const ub = document.createElement('div');
+        ub.className = 'bubble bubble-user';
+        let userHtml = "";
+        if (window.currentAttachment) {
+            if (window.currentAttachment.type === 'image') userHtml += `<img src="${window.currentAttachment.url}" class="chat-media">`;
+            if (window.currentAttachment.type === 'video') userHtml += `<div style="background:rgba(0,0,0,0.1); padding:8px 12px; border-radius:12px; margin-bottom:8px; display:inline-flex; align-items:center; gap:8px; font-size:14px">${icons.video} 视频分析请求</div>`;
+            if (window.currentAttachment.type === 'audio') userHtml += `<div style="background:rgba(0,0,0,0.1); padding:8px 12px; border-radius:12px; margin-bottom:8px; display:inline-flex; align-items:center; gap:8px; font-size:14px">${icons.mic} 音频分析请求</div>`;
+        }
+        if (txt) userHtml += `<div>${txt}</div>`;
+        ub.innerHTML = userHtml;
+        uw.appendChild(ub);
+        chat.appendChild(uw);
+
+        inp.value = ''; inp.blur();
+        window.currentAttachment = null;
+        window.renderAttachmentPreview();
+
+        const bw = document.createElement('div');
+        bw.className = 'wrapper wrapper-bot';
+        bw.innerHTML = `<div class="msg-role-label">MIMO</div>`;
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble bubble-bot';
+        bubble.innerHTML = `<div class="typing-indicator"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
+        bw.appendChild(bubble);
+        chat.appendChild(bw);
+        chat.scrollTop = chat.scrollHeight;
+
+        const isTTS = window.config.mod === 'mimo-v2-tts';
+        const msgObj = { id: (Date.now() + 1).toString(), role: 'assistant', reasoning: "", content: "", annotations: [], audioData: null, usage: 0 };
+        
+        let reqBody = { model: window.config.mod };
+
+        if (isTTS) {
+            const stylePrompt = document.getElementById('tts-style').value.trim();
+            const sysPrompt = stylePrompt ? `请用【${stylePrompt}】的风格朗读以下文本：` : "请根据语义情感朗读：";
+            reqBody.messages = [
+                { role: "user", content: sysPrompt },
+                { role: "assistant", content: txt }
+            ];
+            reqBody.stream = false;
+            reqBody.audio = { format: "wav", voice: window.config.voice || "mimo_default" };
+        } else {
+            reqBody.messages = session.messages.slice(-10).map(m => {
+                if (m.role === 'user' && m.attachment) {
+                    const mediaObj = window.getMediaPayloadObj(m.attachment);
+                    return { role: m.role, content: [mediaObj, { type: "text", text: m.content || "请描述附件内容" }] };
+                }
+                return { role: m.role, content: m.content || "继续" };
+            });
+
+            reqBody.stream = true;
+            if (window.config.think) reqBody.thinking = { type: "enabled" };
+            if (window.config.search) reqBody.tools = [{ type: "web_search", max_keyword: 3, force_search: true, limit: 3 }];
+        }
+
+        window.currentAbortController = new AbortController();
+        window.setButtonState(true);
+
+        try {
+            const res = await fetch(PROXY, {
+                method: 'POST',
+                signal: window.currentAbortController.signal,
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.config.key}`, 'api-key': window.config.key, 'x-target-url': API },
+                body: JSON.stringify(reqBody)
+            });
+
+            if (!res.ok) {
+                let errDetail = `HTTP ${res.status}`;
+                try {
+                    const errData = await res.json();
+                    errDetail = errData.error?.message || JSON.stringify(errData);
+                } catch(e) {}
+                throw new Error(`请求失败: ${errDetail}`);
+            }
+
+            if (isTTS) {
+                const data = await res.json();
+                if (data.error) throw new Error(data.error.message);
+                msgObj.audioData = data.choices?.[0]?.message?.audio?.data;
+                msgObj.content = txt; 
+                if (data.usage) msgObj.usage = data.usage.total_tokens;
+                window.renderOutput(bubble, msgObj, true);
             } else {
-                chatWindow.classList.add('open');
-                aiFab.classList.add('open');
-                setTimeout(() => chatInput.focus(), 300);
+                const reader = res.body.getReader();
+                const dec = new TextDecoder();
+                while(true) {
+                    const {done, value} = await reader.read();
+                    if(done) break;
+                    
+                    const chunk = dec.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+                    for(let line of lines) {
+                        if(line.startsWith('data: ')) {
+                            const dataStr = line.replace('data: ', '').trim();
+                            if(dataStr === '[DONE]') break;
+                            try {
+                                const json = JSON.parse(dataStr);
+                                const delta = json.choices?.[0]?.delta;
+                                
+                                if (json.usage && json.usage.total_tokens) {
+                                    msgObj.usage = json.usage.total_tokens;
+                                }
+
+                                if (delta) {
+                                    if (delta.reasoning_content) msgObj.reasoning += delta.reasoning_content;
+                                    if (delta.content) msgObj.content += delta.content;
+                                    if (delta.annotations && delta.annotations.length > 0) msgObj.annotations = msgObj.annotations.concat(delta.annotations);
+                                }
+
+                                window.renderOutput(bubble, msgObj, false); 
+                                if (chat.scrollHeight - chat.scrollTop < 1000) chat.scrollTop = chat.scrollHeight;
+                            } catch(e){}
+                        }
+                    }
+                }
+                window.renderOutput(bubble, msgObj, true); 
             }
+
+            session.messages.push(msgObj);
+            window.saveSessions();
+        } catch(e) { 
+            if (e.name === 'AbortError') {
+                msgObj.content += "\n\n<span style='color:var(--text-tertiary); font-size:13px'>*[ 已中止 ]*</span>";
+                window.renderOutput(bubble, msgObj, true);
+                session.messages.push(msgObj);
+                window.saveSessions();
+            } else {
+                bubble.innerHTML = `<div class="error-message">${icons.warning} API 回应: ${e.message}</div>`; 
+            }
+        } finally {
+            window.currentAbortController = null;
+            window.setButtonState(false);
         }
+    };
 
-        function appendMessage(text, type) {
-            const div = document.createElement('div');
-            div.className = `chat-msg ${type}`;
-            div.innerHTML = marked.parse(text); 
-            chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+    window.fallbackCopyTextToClipboard = function(text, btn, originalHtml) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.top = "-9999px";
+        textArea.style.left = "-9999px";
+        textArea.style.position = "fixed";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            btn.innerHTML = `${icons.copy} 已复制`;
+        } catch (err) {
+            btn.innerHTML = `复制失败`;
         }
+        document.body.removeChild(textArea);
+        setTimeout(() => btn.innerHTML = originalHtml, 1500);
+    };
 
-        async function sendMessage() {
-            const text = chatInput.value.trim();
-            if (!text) return;
-
-            appendMessage(text, 'user');
-            chatInput.value = '';
+    window.cpBubble = function(btn, isCodeBlock = false) {
+        let text = "";
+        const originalHtml = btn.innerHTML;
+        if (isCodeBlock) {
+            text = btn.closest('.code-box').querySelector('code').textContent;
+        } else {
+            const clone = btn.closest('.wrapper-bot').cloneNode(true);
+            const b = clone.querySelector('.bubble-bot');
+            const actionBars = b.querySelectorAll('div[style*="display:flex; gap:16px"], .token-usage');
+            actionBars.forEach(bar => bar.remove());
+            const reasoning = b.querySelector('details');
+            if(reasoning) reasoning.remove();
             
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'chat-msg ai';
-            loadingDiv.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
-            chatMessages.appendChild(loadingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            const previews = b.querySelectorAll('.inline-preview');
+            previews.forEach(p => p.remove());
 
-            const reply = await callLLM(text);
-            
-            chatMessages.removeChild(loadingDiv);
-            appendMessage(reply, 'ai');
+            text = b.innerText.trim();
         }
+        
+        window.fallbackCopyTextToClipboard(text, btn, originalHtml);
+    };
 
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') sendMessage();
+    window.pv = function(btn) {
+        const c = btn.closest('.code-box').querySelector('code').textContent;
+        document.body.classList.add('preview-open');
+        const iframe = document.getElementById('p-frame');
+        const blob = new Blob([c], { type: 'text/html;charset=utf-8' });
+        iframe.src = URL.createObjectURL(blob);
+    };
+
+    window.audioBufferToWav = function(buffer) {
+        let numOfChan = buffer.numberOfChannels,
+            length = buffer.length * numOfChan * 2 + 44,
+            bufferArray = new ArrayBuffer(length),
+            view = new DataView(bufferArray),
+            channels = [], i, sample, offset = 0, pos = 0;
+
+        function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+        function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+
+        setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
+        setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
+        setUint32(buffer.sampleRate); setUint32(buffer.sampleRate * 2 * numOfChan);
+        setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(length - pos - 4);
+
+        for(i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+        while(pos < length) {
+            for(i = 0; i < numOfChan; i++) {
+                sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767)|0;
+                view.setInt16(pos, sample, true);
+                pos += 2;
+            }
+            offset++;
         }
+        return new Blob([bufferArray], {type: "audio/wav"});
+    };
 
-        // --- ✨ Contextual Tips Logic ---
-        const tipModal = document.getElementById('tipModal');
-        const modalBody = document.getElementById('modalBody');
+    let globalMicStream = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isVoiceMode = false;
+    let voiceAudioEl = new Audio(); 
+    let audioCtx = null;
+    let analyser = null;
+    let dataArray = null;
+    let lastSpeechTime = 0;
+    let vadRafId = null;
 
-        async function getAiTips(btn) {
-            const parent = btn.closest('.gear-block');
-            const location = parent.dataset.location || "当前景点";
-            const gear = parent.dataset.gear || "相机";
+    window.openVoiceMode = async function() {
+        if (!window.config.key) return window.toggleM(true);
+        try {
+            globalMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            isVoiceMode = true;
+            document.body.classList.add('voice-open');
             
-            modalBody.innerHTML = '<div style="text-align:center; padding: 20px;"><div class="typing-dots"><span></span><span></span><span></span></div><p style="margin-top:10px; color:#888;">AI 正在分析今日光影...</p></div>';
-            tipModal.classList.add('open');
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            voiceAudioEl.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+            voiceAudioEl.play().catch(e => {});
 
-            const prompt = `我正在${location}旅行，手头有${gear}。请给我3个具体的摄影建议，包括构图技巧、推荐的相机参数设置（光圈、快门、ISO）以及最佳拍摄时间。请用列表形式回答，简短实用。`;
-            
-            const tips = await callLLM(prompt);
-            
-            modalBody.innerHTML = marked.parse(tips);
+            window.startRecording();
+        } catch(e) {
+            alert("无法访问麦克风，请检查权限。");
         }
+    };
 
-        function closeModal() {
-            tipModal.classList.remove('open');
+    window.startRecording = function() {
+        if (!globalMicStream || !isVoiceMode) return;
+        
+        mediaRecorder = new MediaRecorder(globalMicStream);
+        audioChunks = [];
+        
+        mediaRecorder.ondataavailable = e => {
+            if (e.data.size > 0) audioChunks.push(e.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+            if (!isVoiceMode) return;
+            cancelAnimationFrame(vadRafId);
+            const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' }); 
+            window.handleOmniVoice(blob);
+        };
+        
+        mediaRecorder.start(200);
+
+        analyser = audioCtx.createAnalyser();
+        const source = audioCtx.createMediaStreamSource(globalMicStream);
+        source.connect(analyser);
+        analyser.fftSize = 256;
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+        lastSpeechTime = Date.now();
+
+        function monitorVAD() {
+            if (!isVoiceMode || mediaRecorder.state !== 'recording') return;
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+            let avg = sum / dataArray.length;
+
+            const orb = document.getElementById('voice-orb');
+            const sub = document.getElementById('voice-sub');
+
+            if (avg > 15) { 
+                lastSpeechTime = Date.now();
+                orb.style.transform = `scale(${1 + Math.min(avg/100, 0.4)})`; 
+                if (sub.innerText !== "正在倾听...") sub.innerText = "正在倾听...";
+            } else {
+                orb.style.transform = `scale(1)`;
+                let quietTime = Date.now() - lastSpeechTime;
+                if (quietTime > 3000) { 
+                    window.stopRecordingAndSend();
+                    return;
+                } else if (quietTime > 1000) {
+                    sub.innerText = `静音中... (${Math.ceil((3000 - quietTime)/1000)}s 后发送)`;
+                }
+            }
+            vadRafId = requestAnimationFrame(monitorVAD);
         }
-    </script>
+        monitorVAD();
+        window.setVoiceState('listening');
+    };
+
+    window.stopRecordingAndSend = function() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop(); 
+            window.setVoiceState('thinking');
+            document.getElementById('voice-sub').innerText = "上传音频中...";
+        }
+    };
+
+    window.closeVoiceMode = function() {
+        isVoiceMode = false;
+        document.body.classList.remove('voice-open');
+        cancelAnimationFrame(vadRafId);
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+        if (globalMicStream) {
+            globalMicStream.getTracks().forEach(t => t.stop());
+            globalMicStream = null;
+        }
+        voiceAudioEl.pause();
+        voiceAudioEl.src = "";
+        window.loadSessionToUI(); 
+    };
+
+    window.setVoiceState = function(state) {
+        const orb = document.getElementById('voice-orb');
+        orb.className = 'voice-orb ' + state;
+        const statusText = document.getElementById('voice-status-text');
+        if(state === 'listening') statusText.innerText = 'LISTENING';
+        if(state === 'thinking') statusText.innerText = 'THINKING';
+        if(state === 'speaking') statusText.innerText = 'SPEAKING';
+    };
+
+    window.handleOmniVoice = async function(audioBlob) {
+        if (!isVoiceMode) return;
+        window.setVoiceState('thinking');
+        document.getElementById('voice-sub').innerText = "安全格式转码中...";
+        
+        try {
+            const arrayBuffer = await audioBlob.arrayBuffer();
+            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            const wavBlob = window.audioBufferToWav(audioBuffer);
+
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                let base64Wav = reader.result;
+                let rawBase64 = base64Wav.split(',')[1];
+
+                document.getElementById('voice-sub').innerText = "多模态思考中...";
+
+                const session = window.sessions.find(s => s.id === window.currentSessionId);
+                if (session.messages.length === 0) {
+                    session.title = "语音对话";
+                    window.renderSessionList();
+                }
+                
+                session.messages.push({ 
+                    id: Date.now().toString(), role: 'user', content: "[语音输入]", 
+                    attachment: { type: 'audio', url: base64Wav, isLocal: true, name: 'VoiceRecord' } 
+                });
+                
+                try {
+                    const reqBody = {
+                        model: 'mimo-v2-omni',
+                        messages: [
+                            {
+                                role: "user",
+                                content: [
+                                    { type: "input_audio", input_audio: { data: rawBase64, format: "wav" } },
+                                    { type: "text", text: "请回应我的语音内容。" }
+                                ]
+                            }
+                        ],
+                        stream: false
+                    };
+
+                    const res = await fetch(PROXY, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.config.key}`, 'api-key': window.config.key, 'x-target-url': API },
+                        body: JSON.stringify(reqBody)
+                    });
+                    
+                    if (!res.ok) {
+                        let errDetail = `HTTP ${res.status}`;
+                        try { const errData = await res.json(); errDetail = errData.error?.message || JSON.stringify(errData); } catch(e) {}
+                        throw new Error(`多模态接口异常: ${errDetail}`);
+                    }
+
+                    const data = await res.json();
+                    const aiText = data.choices?.[0]?.message?.content || "抱歉，我没有理解。";
+
+                    const msgObj = { id: Date.now().toString(), role: 'assistant', content: aiText, audioData: null, usage: data.usage?.total_tokens || 0 };
+                    session.messages.push(msgObj);
+                    window.saveSessions();
+
+                    if (!isVoiceMode) return;
+                    document.getElementById('voice-sub').innerText = "合成语音中...";
+
+                    const cleanText = aiText.replace(/[#*`_~>]/g, '');
+                    const ttsReqBody = {
+                        model: 'mimo-v2-tts',
+                        messages: [
+                            { role: "user", content: "请根据语境朗读：" },
+                            { role: "assistant", content: cleanText.substring(0, 500) }
+                        ],
+                        stream: false,
+                        audio: { format: "wav", voice: window.config.voice || "mimo_default" }
+                    };
+
+                    const ttsRes = await fetch(PROXY, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.config.key}`, 'api-key': window.config.key, 'x-target-url': API },
+                        body: JSON.stringify(ttsReqBody)
+                    });
+
+                    if(!ttsRes.ok) {
+                        let errDetail = `HTTP ${ttsRes.status}`;
+                        try { const errData = await ttsRes.json(); errDetail = errData.error?.message || JSON.stringify(errData); } catch(e) {}
+                        throw new Error(`语音合成异常: ${errDetail}`);
+                    }
+
+                    const ttsData = await ttsRes.json();
+                    const audioBase64Out = ttsData.choices?.[0]?.message?.audio?.data;
+
+                    if (audioBase64Out && isVoiceMode) {
+                        msgObj.audioData = audioBase64Out;
+                        window.saveSessions();
+
+                        window.setVoiceState('speaking');
+                        document.getElementById('voice-sub').innerText = aiText;
+                        voiceAudioEl.src = `data:audio/wav;base64,${audioBase64Out}`;
+                        voiceAudioEl.play();
+                        
+                        voiceAudioEl.onended = () => {
+                            if (isVoiceMode) {
+                                window.startRecording();
+                            }
+                        };
+                    } else { throw new Error("无音频流返回"); }
+
+                } catch (err) {
+                    if(!isVoiceMode) return;
+                    document.getElementById('voice-sub').innerHTML = `<span style="color:#FF3B30; font-size:16px;">错误: ${err.message}</span>`;
+                    window.setVoiceState('listening');
+                    setTimeout(() => { if(isVoiceMode) window.startRecording(); }, 4000);
+                }
+            };
+            reader.readAsDataURL(wavBlob);
+        } catch (convertErr) {
+            document.getElementById('voice-sub').innerHTML = `<span style="color:#FF3B30; font-size:16px;">音频转码失败</span>`;
+            setTimeout(() => { if(isVoiceMode) window.startRecording(); }, 3000);
+        }
+    };
+</script>
 </body>
 </html>
