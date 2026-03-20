@@ -120,7 +120,7 @@
         }
         header h1 { font-size: 17px; font-weight: 600; letter-spacing: 0.05em; color: var(--text-primary); margin: 0; user-select: none;}
         
-        /* 核心修复：终极解决 iOS Safari 按钮坍塌导致的“线条乱飘”问题 */
+        /* 彻底消除 iOS 控件干扰的 div 图标 */
         .btn-icon { 
             -webkit-appearance: none !important; appearance: none !important;
             box-sizing: border-box !important;
@@ -137,7 +137,7 @@
             padding: 0 !important; margin: 0 !important; 
             outline: none !important; box-shadow: none !important;
             -webkit-tap-highlight-color: transparent !important;
-            overflow: hidden !important; /* 锁死边界，防止线条溢出 */
+            overflow: hidden !important;
         }
         .btn-icon:hover { background: var(--border-subtle) !important; }
         .btn-icon:active { transform: scale(0.9) !important; }
@@ -147,23 +147,25 @@
             pointer-events: none !important; 
         }
 
-        /* 聊天区域 */
+        /* 聊天区域 核心修复：防止手机端被长代码撑破屏幕 */
         #chat-container { 
-            flex: 1; padding: calc(env(safe-area-inset-top) + 70px) 0 160px; overflow-y: auto; display: flex; flex-direction: column; 
+            flex: 1; padding: calc(env(safe-area-inset-top) + 70px) 0 160px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; 
             scroll-behavior: smooth; max-width: 800px; margin: 0 auto; width: 100%;
         }
         #chat-container::-webkit-scrollbar { display: none; }
         
-        .wrapper { display: flex; width: 100%; padding: 16px 24px; animation: fadeIn 0.5s var(--spring) forwards; opacity: 0; transform: translateY(10px); flex-direction: column;}
+        .wrapper { display: flex; width: 100%; max-width: 100%; box-sizing: border-box; padding: 16px 24px; animation: fadeIn 0.5s var(--spring) forwards; opacity: 0; transform: translateY(10px); flex-direction: column;}
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
         
         .msg-role-label { font-size: 12px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;}
-        .bubble { font-size: 16px; line-height: 1.6; word-wrap: break-word; color: var(--text-primary); }
+        .bubble { font-size: 16px; line-height: 1.6; word-wrap: break-word; overflow-wrap: break-word; color: var(--text-primary); min-width: 0; max-width: 100%; }
         .wrapper-user { align-items: flex-end; }
         .wrapper-user .msg-role-label { text-align: right; }
         .bubble-user { background: var(--user-bubble); padding: 14px 20px; border-radius: 20px 20px 4px 20px; max-width: 85%; }
-        .wrapper-bot { align-items: flex-start; }
-        .bubble-bot { max-width: 100%; width: 100%; }
+        
+        /* 防止机器人气泡被 flex 子元素强行撑破 */
+        .wrapper-bot { align-items: flex-start; max-width: 100%; }
+        .bubble-bot { max-width: 100%; width: 100%; min-width: 0; overflow-x: hidden; }
 
         .bubble strong { font-weight: 600; color: var(--text-primary); }
         .bubble p { margin-bottom: 16px; }
@@ -187,14 +189,16 @@
 
         .token-usage { font-size: 11px; color: var(--text-tertiary); margin-top: 16px; text-align: right; font-family: 'SF Mono', ui-monospace, monospace; font-weight: 600; display: flex; justify-content: flex-end; align-items: center; gap: 4px;}
 
-        /* Canvas 级内嵌代码与自动预览框 */
-        .code-box { margin: 20px 0; background: var(--bg-surface); border-radius: 16px; border: 1px solid var(--border-subtle); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        /* Canvas 级内嵌代码与自动预览框 核心修复：锁死宽度 */
+        .code-box { margin: 20px 0; background: var(--bg-surface); border-radius: 16px; border: 1px solid var(--border-subtle); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.02); max-width: 100%; width: 100%; min-width: 0; box-sizing: border-box; }
         .code-nav { padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); background: rgba(0,0,0,0.01); }
         .code-lang { font-size: 11px; font-weight: 600; color: var(--text-tertiary); font-family: 'SF Mono', ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.05em;}
-        .pre-area { padding: 16px; overflow-x: auto; font-family: 'SF Mono', ui-monospace, monospace; font-size: 13px; color: var(--text-secondary); line-height: 1.6; white-space: pre; margin: 0; background: transparent; }
+        
+        /* 增加平滑触摸滚动机制 */
+        .pre-area { padding: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; box-sizing: border-box; font-family: 'SF Mono', ui-monospace, monospace; font-size: 13px; color: var(--text-secondary); line-height: 1.6; white-space: pre; margin: 0; background: transparent; }
         
         .inline-preview { width: 100%; height: 380px; background: #FFFFFF; position: relative; border-radius: 0 0 16px 16px; border-top: 1px solid var(--border-subtle); }
-        .inline-preview iframe { width: 100%; height: 100%; border: none; border-radius: 0 0 16px 16px;}
+        .inline-preview iframe { width: 100%; height: 100%; border: none; border-radius: 0 0 16px 16px; background: #FFFFFF; }
 
         .code-action-btn { background: transparent; color: var(--text-secondary); border: none; font-size: 12px; font-weight: 500; cursor: pointer; margin-left: 12px; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px;}
         .code-action-btn:hover { background: var(--border-subtle); color: var(--text-primary); }
@@ -385,7 +389,6 @@
 
 <div id="app-container">
     <header>
-        <!-- 将 button 替换为彻底规避浏览器默认样式的 div 标签 -->
         <div class="btn-icon" onclick="window.toggleHistory(true)" id="icon-menu" role="button"></div>
         <h1>MIMO</h1>
         <div class="btn-icon" onclick="window.toggleM(true)" id="icon-gear" role="button"></div>
@@ -1109,7 +1112,7 @@
         `;
     };
 
-    // 核心重写：采用稳如磐石的切分算法，无视任何诡异换行格式
+    // 核心重写：采用稳如磐石的切分算法，无缝分离代码与文本
     window.parse = function(text, isFinished = false) {
         if(!text) return "";
         
@@ -1117,62 +1120,93 @@
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         };
 
-        // 安全替换结束符
-        text = text.replace(new RegExp('`{3}eof', 'gi'), '```');
-        
-        let parts = text.split('```');
+        let lines = text.split('\n');
+        let inCodeBlock = false;
+        let lang = 'code';
+        let codeBuffer = [];
+        let textBuffer = [];
         let res = "";
-        
-        for(let i = 0; i < parts.length; i++) {
-            if (i % 2 === 0) {
-                // 普通文本处理区
-                let sub = encodeHTML(parts[i]);
+
+        const flushText = () => {
+            if (textBuffer.length > 0) {
+                let str = textBuffer.join('\n');
+                let sub = encodeHTML(str);
                 sub = sub.replace(/^### (.*$)/gim, '<h3>$1</h3>');
                 sub = sub.replace(/^## (.*$)/gim, '<h2>$1</h2>');
                 sub = sub.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
                 sub = sub.replace(/`([^`\n]+)`/g, '<code class="inline-code">$1</code>');
                 sub = sub.replace(/\n/g, '<br>');
                 res += sub;
+                textBuffer = [];
+            }
+        };
+
+        const flushCode = () => {
+            let rawCode = codeBuffer.join('\n');
+            let isPreviewable = ['html', 'xml', 'svg'].includes(lang);
+            let isPreviewActive = isPreviewable && isFinished;
+            
+            let contentHtml = `<pre class="pre-area" style="display:${isPreviewActive ? 'none' : 'block'}"><code>${encodeHTML(rawCode)}</code></pre>`;
+            let previewHtml = '';
+            let btnHtml = `<button class="code-action-btn" onclick="window.cpBubble(this, true)">${icons.copy} 复制</button>`;
+
+            if (isPreviewable) {
+                let injectCode = rawCode;
+                // 核心修复：强制注入 UTF-8 编码，彻底解决移动端 iframe 中文乱码问题 (Mojibake Fix)
+                if (lang === 'html' && !injectCode.toLowerCase().includes('charset=')) {
+                    injectCode = '<meta charset="UTF-8">\n' + injectCode;
+                }
+                const safeSrcDoc = encodeHTML(injectCode);
+                previewHtml = `<div class="inline-preview" style="display:${isPreviewActive ? 'block' : 'none'}"><iframe srcdoc="${safeSrcDoc}" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe></div>`;
+                btnHtml = `<button class="code-action-btn ${isPreviewActive ? 'active' : ''}" onclick="window.toggleCodeView(this)">${icons.play} 源码/沙盒</button>` + btnHtml;
+                btnHtml += `<button class="code-action-btn" onclick="window.pv(this)">${icons.expand}</button>`;
+            }
+
+            res += `
+            <div class="code-box">
+                <div class="code-nav">
+                    <div class="code-lang">${encodeHTML(lang)}</div>
+                    <div style="display:flex;">${btnHtml}</div>
+                </div>
+                ${contentHtml}
+                ${previewHtml}
+            </div>`;
+            
+            codeBuffer = [];
+            lang = 'code';
+        };
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+            if (line.trim().startsWith('```')) {
+                if (inCodeBlock) {
+                    inCodeBlock = false;
+                    flushCode();
+                } else {
+                    flushText();
+                    inCodeBlock = true;
+                    let langLine = line.trim().substring(3);
+                    lang = langLine.split(':')[0].trim().toLowerCase() || 'code';
+                    if (lang === 'eof') { 
+                        inCodeBlock = false;
+                        lang = 'code';
+                    }
+                }
             } else {
-                // 代码块处理区
-                let block = parts[i];
-                let firstNewline = block.indexOf('\n');
-                let lang = 'code';
-                let rawCode = block;
-                
-                if (firstNewline !== -1) {
-                    lang = block.substring(0, firstNewline).trim().split(':')[0].toLowerCase() || 'code';
-                    rawCode = block.substring(firstNewline + 1);
+                if (inCodeBlock) {
+                    codeBuffer.push(line);
+                } else {
+                    textBuffer.push(line);
                 }
-                
-                if(rawCode.endsWith('\n')) rawCode = rawCode.slice(0, -1);
-
-                let isPreviewable = ['html', 'xml', 'svg'].includes(lang);
-                let isPreviewActive = isPreviewable && isFinished;
-                
-                let contentHtml = `<pre class="pre-area" style="display:${isPreviewActive ? 'none' : 'block'}"><code>${encodeHTML(rawCode)}</code></pre>`;
-                let previewHtml = '';
-                let btnHtml = `<button class="code-action-btn" onclick="window.cpBubble(this, true)">${icons.copy} 复制</button>`;
-
-                if (isPreviewable) {
-                    const safeSrcDoc = encodeHTML(rawCode);
-                    previewHtml = `<div class="inline-preview" style="display:${isPreviewActive ? 'block' : 'none'}"><iframe srcdoc="${safeSrcDoc}" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe></div>`;
-                    btnHtml = `<button class="code-action-btn ${isPreviewActive ? 'active' : ''}" onclick="window.toggleCodeView(this)">${icons.play} 源码/沙盒</button>` + btnHtml;
-                    btnHtml += `<button class="code-action-btn" onclick="window.pv(this)">${icons.expand}</button>`;
-                }
-
-                res += `
-                <div class="code-box">
-                    <div class="code-nav">
-                        <div class="code-lang">${encodeHTML(lang)}</div>
-                        <div style="display:flex;">${btnHtml}</div>
-                    </div>
-                    ${contentHtml}
-                    ${previewHtml}
-                </div>`;
             }
         }
-        
+
+        if (inCodeBlock) {
+            flushCode();
+        } else {
+            flushText();
+        }
+
         return res;
     };
 
@@ -1189,7 +1223,10 @@
             
             if (iframe && !iframe.dataset.loaded) {
                 try {
-                    const rawCode = pre.querySelector('code').textContent;
+                    let rawCode = pre.querySelector('code').textContent;
+                    if (box.querySelector('.code-lang').textContent.toLowerCase() === 'html' && !rawCode.toLowerCase().includes('charset=')) {
+                        rawCode = '<meta charset="UTF-8">\n' + rawCode;
+                    }
                     iframe.srcdoc = rawCode;
                     iframe.dataset.loaded = "true";
                 } catch(e) { console.error("Sandbox Render Error", e); }
@@ -1244,15 +1281,13 @@
         }
 
         if (isFinished && msgObj.usage) {
-            // 兼容历史纯数字数据与新版对象数据
             let total = typeof msgObj.usage === 'number' ? msgObj.usage : (msgObj.usage.total || 0);
             let prompt = typeof msgObj.usage === 'object' ? (msgObj.usage.prompt || (total / 2)) : (total / 2);
             let comp = typeof msgObj.usage === 'object' ? (msgObj.usage.completion || (total / 2)) : (total / 2);
             
             let cost = 0;
-            const mod = msgObj.modelUsed || 'mimo-v2-flash'; // 默认回退
+            const mod = msgObj.modelUsed || 'mimo-v2-flash'; 
             
-            // 精准费率核算引擎
             if (mod === 'mimo-v2-pro') {
                 if (total <= 256000) cost = (prompt / 1000000) * 7.00 + (comp / 1000000) * 21.00;
                 else cost = (prompt / 1000000) * 14.00 + (comp / 1000000) * 42.00;
@@ -1264,8 +1299,7 @@
                 cost = 0;
             }
             
-            // 联网插件附加费计算
-            if (msgObj.searchUsed) cost += 0.025; // 联网搜索 ¥25/1000次
+            if (msgObj.searchUsed) cost += 0.025; 
 
             const usageM = (total / 1000000).toFixed(6);
             let costStr = cost === 0 ? '限时免费' : `预计 ¥${cost.toFixed(4)}`;
@@ -1285,7 +1319,10 @@
                 const codeEl = box.querySelector('.pre-area code');
                 if (iframe && codeEl && !iframe.dataset.loaded) {
                     try {
-                        const rawCode = codeEl.textContent;
+                        let rawCode = codeEl.textContent;
+                        if (box.querySelector('.code-lang').textContent.toLowerCase() === 'html' && !rawCode.toLowerCase().includes('charset=')) {
+                            rawCode = '<meta charset="UTF-8">\n' + rawCode;
+                        }
                         iframe.srcdoc = rawCode;
                         iframe.dataset.loaded = "true";
                     } catch(e) { console.error("Sandbox Render Error", e); }
@@ -1438,7 +1475,6 @@
         chat.scrollTop = chat.scrollHeight;
 
         const isTTS = window.config.mod === 'mimo-v2-tts';
-        // 核心修复：在新消息创建时，捕获当前所使用的模型和联网状态，供渲染计费使用
         const msgObj = { 
             id: (Date.now() + 1).toString(), 
             role: 'assistant', 
@@ -1501,7 +1537,6 @@
                 if (data.error) throw new Error(data.error.message);
                 msgObj.audioData = data.choices?.[0]?.message?.audio?.data;
                 msgObj.content = txt; 
-                // 核心修复：全量保存输入和输出 Token 供精密计费
                 if (data.usage) msgObj.usage = { total: data.usage.total_tokens || 0, prompt: data.usage.prompt_tokens || 0, completion: data.usage.completion_tokens || 0 };
                 window.renderOutput(bubble, msgObj, true);
             } else {
@@ -1521,7 +1556,6 @@
                                 const json = JSON.parse(dataStr);
                                 const delta = json.choices?.[0]?.delta;
                                 
-                                // 核心修复：流式输出中全量同步各类型 Token 供精密计费
                                 if (json.usage) {
                                     msgObj.usage = { total: json.usage.total_tokens || 0, prompt: json.usage.prompt_tokens || 0, completion: json.usage.completion_tokens || 0 };
                                 }
