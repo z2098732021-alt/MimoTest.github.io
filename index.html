@@ -146,13 +146,15 @@
         .bubble { font-size: 16px; line-height: 1.6; word-wrap: break-word; overflow-wrap: break-word; color: var(--text-primary); min-width: 0; max-width: 100%; }
         .wrapper-user { align-items: flex-end; }
         .wrapper-user .msg-role-label { text-align: right; }
-        .bubble-user { background: var(--user-bubble); padding: 14px 20px; border-radius: 20px 20px 4px 20px; max-width: 85%; }
+        /* 核心修复1：给用户气泡加上 white-space 保留换行符，防粘连 */
+        .bubble-user { background: var(--user-bubble); padding: 14px 20px; border-radius: 20px 20px 4px 20px; max-width: 85%; white-space: pre-wrap; }
         
         .wrapper-bot { align-items: flex-start; max-width: 100%; }
         .bubble-bot { max-width: 100%; width: 100%; min-width: 0; overflow-x: hidden; }
 
         .bubble strong { font-weight: 600; color: var(--text-primary); }
-        .bubble p { margin-bottom: 16px; word-wrap: break-word; word-break: break-word;}
+        /* 核心修复2：收紧段落行距，让聊天气泡排版恢复紧凑清爽的原生设计 */
+        .bubble p { margin-bottom: 6px; word-wrap: break-word; word-break: break-word;}
         .bubble p:last-child { margin-bottom: 0; }
         
         /* 旗舰级 Markdown 排版支持 */
@@ -222,24 +224,61 @@
         .attach-url { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
         .btn-remove-attach { background: none; border: none; color: var(--text-tertiary); cursor: pointer; display: flex; align-items: center; }
 
-        .input-row { display: flex; width: 100%; gap: 6px; align-items: center; }
-        .btn-attach, .btn-mic { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 10px; transition: 0.2s; border-radius: 50%; display: flex; align-items: center;}
-        .btn-attach:hover, .btn-mic:hover { background: var(--border-subtle); color: var(--text-primary); }
+        /* 核心修改：两行式弹性结构，文本输入在上，所有功能图标与发送按键分布在下 */
+        .input-wrapper { display: flex; flex-direction: column; width: 100%; gap: 8px; }
+        .input-tools { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .tools-left { display: flex; align-items: center; gap: 4px; }
+        .tools-right { display: flex; align-items: center; gap: 8px; }
         
-        .input-box { flex: 1; display: flex; align-items: center; min-height: 40px; margin-left: 4px;}
-        input[type="text"] { width: 100%; border: none; background: transparent; font-size: 15px; color: var(--text-primary); outline: none; }
-        input[type="text"]::placeholder { color: var(--text-tertiary); }
+        .btn-attach { background: transparent !important; border: none; color: var(--text-secondary); cursor: pointer; padding: 6px; transition: 0.2s; display: flex; align-items: center; justify-content: center; -webkit-appearance: none; }
+        .btn-attach:hover { color: var(--text-primary); }
+        .btn-attach svg { width: 22px; height: 22px; }
         
-        /* 集成式模型选择器 */
-        .inline-model-select { position: relative; display: flex; align-items: center; margin-right: 4px; flex-shrink: 0; }
-        .inline-model-select select {
-            background: var(--bg-surface); border: 1px solid var(--border-subtle);
-            padding: 6px 24px 6px 12px; border-radius: 14px; font-size: 13px; font-weight: 600;
-            color: var(--text-secondary); cursor: pointer; transition: 0.3s var(--spring);
-            appearance: none; -webkit-appearance: none; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        .mini-toggle { 
+            background: transparent !important; border: none; 
+            color: var(--text-secondary); cursor: pointer; transition: all 0.4s var(--spring);
+            display: inline-flex; align-items: center; justify-content: center; user-select: none;
+            overflow: hidden; white-space: nowrap; height: 32px; box-sizing: border-box; padding: 0 6px;
+            -webkit-appearance: none;
         }
-        .inline-model-select select:hover { border-color: var(--text-tertiary); color: var(--text-primary); }
-        .inline-model-select svg { position: absolute; right: 8px; width: 12px; height: 12px; color: var(--text-tertiary); pointer-events: none;}
+        .mini-toggle:hover { color: var(--text-primary); }
+        .mini-toggle svg { flex-shrink: 0; width: 20px; height: 20px; }
+        .mini-toggle span { max-width: 0; opacity: 0; display: inline-block; transition: all 0.4s var(--spring); pointer-events: none; font-size: 13px; font-weight: 600; }
+        .mini-toggle:active { transform: scale(0.95); }
+        .mini-toggle.active { background: var(--text-primary) !important; color: var(--bg-surface) !important; border-radius: 100px; padding: 0 12px; height: 32px;}
+        .mini-toggle.active:hover { color: var(--bg-surface); }
+        .mini-toggle.active span { max-width: 100px; opacity: 1; margin-left: 6px; }
+
+        .input-box { width: 100%; display: flex; align-items: center; }
+        .input-box textarea { 
+            width: 100%; border: none; background: transparent; font-size: 15px; color: var(--text-primary); 
+            outline: none; resize: none; overflow-y: auto; height: 42px; max-height: 88px; padding: 10px 0; 
+            font-family: inherit; line-height: 22px; -webkit-overflow-scrolling: touch; box-sizing: border-box;
+        }
+        .input-box textarea::-webkit-scrollbar { display: none; }
+        .input-box textarea::placeholder { color: var(--text-tertiary); }
+        
+        .user-action-bar { display: flex; gap: 16px; margin-top: 8px; justify-content: flex-end; opacity: 0.6; transition: opacity 0.3s; margin-right: 4px; }
+        .wrapper-user:hover .user-action-bar { opacity: 1; }
+        
+        /* 完全定制的无感模型弹窗 */
+        .inline-model-select { position: relative; display: flex; align-items: center; flex-shrink: 0; cursor: pointer;}
+        .model-trigger { display: flex; align-items: center; gap: 4px; color: var(--text-secondary); font-size: 13px; font-weight: 600; padding: 4px; transition: 0.2s;}
+        .model-trigger:hover { color: var(--text-primary); }
+        .model-trigger svg { width: 12px; height: 12px; transition: transform 0.3s var(--spring); }
+        .inline-model-select.open .model-trigger svg { transform: rotate(180deg); }
+        
+        .model-menu {
+            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(12px) scale(0.9);
+            background: var(--bg-elevated); backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy);
+            border: 1px solid var(--border-subtle); border-radius: 16px; padding: 6px;
+            display: flex; flex-direction: column; gap: 2px; box-shadow: var(--shadow-float);
+            opacity: 0; pointer-events: none; transition: all 0.4s var(--spring); transform-origin: bottom center;
+            z-index: 100;
+        }
+        .inline-model-select.open .model-menu { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(-10px) scale(1); }
+        .model-option { padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: center; transition: 0.2s; white-space: nowrap; }
+        .model-option:hover { background: var(--border-subtle); }
 
         .btn-up { 
             width: 36px !important; height: 36px !important; 
@@ -392,47 +431,49 @@
     <main id="chat-container"></main>
     
     <div class="footer-island">
-        <div class="chat-toggles">
-            <div class="mini-toggle" id="toggle-think" onclick="window.toggleSetting('think')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>
-                深度思考
-            </div>
-            <div class="mini-toggle" id="toggle-search" onclick="window.toggleSetting('search')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                联网检索
-            </div>
-        </div>
-
         <div id="tts-style-container" style="display:none; padding: 0 4px 8px;">
             <input type="text" id="tts-style" class="tts-style-input" placeholder="输入朗读情绪/方言/角色 (选填)">
         </div>
         <div id="attachment-preview" class="attachment-preview"></div>
         
-        <div class="input-row">
-            <button class="btn-attach" onclick="window.toggleMedia(true)" id="icon-attach"></button>
-            <button class="btn-mic" onclick="window.openVoiceMode()" id="icon-mic-btn"></button>
+        <div class="input-wrapper">
             <div class="input-box">
-                <input type="text" id="user-in" placeholder="发送指令..." autocomplete="off" onkeypress="if(event.key==='Enter') window.handleSendAction()">
+                <textarea id="user-in" rows="1" placeholder="发送指令..." autocomplete="off" onkeydown="window.handleEnter(event)" oninput="window.autoResize(this)"></textarea>
             </div>
-            <div class="inline-model-select">
-                <select id="mod-in-footer" onchange="window.syncModelSelects('mod-in-footer')">
-                    <option value="mimo-v2-flash">Flash</option>
-                    <option value="mimo-v2-pro">Pro</option>
-                    <option value="mimo-v2-omni">Omni</option>
-                    <option value="mimo-v2-tts">TTS</option>
-                </select>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            
+            <div class="input-tools">
+                <div class="tools-left">
+                    <button class="btn-attach" onclick="window.toggleMedia(true)" id="icon-attach"></button>
+                    <button class="mini-toggle" id="toggle-think" onclick="window.toggleSetting('think')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>
+                        <span>深度思考</span>
+                    </button>
+                    <button class="mini-toggle" id="toggle-search" onclick="window.toggleSetting('search')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        <span>联网检索</span>
+                    </button>
+                </div>
+
+                <div class="tools-right">
+                    <!-- 完全定制的防截断弹性模型选择器，脱离系统原生弹窗 -->
+                    <div class="inline-model-select" id="custom-model-select" onclick="window.toggleModelMenu(event)">
+                        <div class="model-trigger">
+                            <span id="mod-display">Flash</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                        <div class="model-menu" id="model-menu">
+                            <div class="model-option" onclick="window.selectModel('mimo-v2-flash', 'Flash', event)">Flash</div>
+                            <div class="model-option" onclick="window.selectModel('mimo-v2-pro', 'Pro', event)">Pro</div>
+                            <div class="model-option" onclick="window.selectModel('mimo-v2-omni', 'Omni', event)">Omni</div>
+                            <div class="model-option" onclick="window.selectModel('mimo-v2-tts', 'TTS', event)">TTS</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-up" id="btn-action" onclick="window.handleSendAction()"></button>
+                </div>
             </div>
-            <button class="btn-up" id="btn-action" onclick="window.handleSendAction()"></button>
         </div>
     </div>
-</div>
-
-<div id="voice-modal">
-    <button class="voice-close-btn" onclick="window.closeVoiceMode()" id="icon-voice-close"></button>
-    <div class="voice-orb listening" id="voice-orb" onclick="window.stopRecordingAndSend()"></div>
-    <div class="voice-subtitle" id="voice-sub">准备中...</div>
-    <div class="voice-status" id="voice-status-text">INITIALIZING</div>
 </div>
 
 <div id="overlay" onclick="window.closeAll()"></div>
@@ -560,8 +601,8 @@
         logout: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
         bolt: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
         warning: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
-        download: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`,
-        upload: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`
+        upload: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`,
+        edit: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`
     };
 
     window.initIcons = function() {
@@ -575,8 +616,6 @@
         if(el('icon-download')) el('icon-download').innerHTML = icons.download + '<span style="margin-left:8px;">导出本地数据</span>';
         if(el('icon-upload')) el('icon-upload').innerHTML = icons.upload + '<span style="margin-left:8px;">导入数据恢复</span>';
         if(el('icon-media-upload')) el('icon-media-upload').innerHTML = icons.upload;
-        if(el('icon-mic-btn')) el('icon-mic-btn').innerHTML = icons.mic;
-        if(el('icon-voice-close')) el('icon-voice-close').innerHTML = icons.close;
     };
     window.initIcons();
 
@@ -794,7 +833,12 @@
 
     window.refreshUIState = function() {
         document.getElementById('key-in').value = window.config.key || '';
-        document.getElementById('mod-in-footer').value = window.config.mod || 'mimo-v2-flash';
+        
+        // 核心修改：适配定制选择器显示
+        const displayMap = { 'mimo-v2-flash': 'Flash', 'mimo-v2-pro': 'Pro', 'mimo-v2-omni': 'Omni', 'mimo-v2-tts': 'TTS' };
+        const el = document.getElementById('mod-display');
+        if(el) el.innerText = displayMap[window.config.mod] || 'Flash';
+        
         document.getElementById('mod-in-sheet').value = window.config.mod || 'mimo-v2-flash';
         document.getElementById('cfg-voice').value = window.config.voice || 'mimo_default';
         if(!window.config.key) window.toggleM(true); 
@@ -815,21 +859,45 @@
         window.syncToCloud();
     };
 
+    // 核心修改：重构配置同步逻辑
     window.syncModelSelects = function(sourceId) {
         const val = document.getElementById(sourceId).value;
-        if (sourceId === 'mod-in-footer') {
-            document.getElementById('mod-in-sheet').value = val;
-        } else {
-            document.getElementById('mod-in-footer').value = val;
-        }
         window.config.mod = val;
+        
+        const displayMap = { 'mimo-v2-flash': 'Flash', 'mimo-v2-pro': 'Pro', 'mimo-v2-omni': 'Omni', 'mimo-v2-tts': 'TTS' };
+        const el = document.getElementById('mod-display');
+        if(el) el.innerText = displayMap[val] || 'Flash';
+        
         window.saveConfig();
     };
+    
+    // 核心新增：控制无感弹窗的 JS 动作
+    window.toggleModelMenu = function(e) {
+        e.stopPropagation();
+        document.getElementById('custom-model-select').classList.toggle('open');
+    };
+    
+    window.selectModel = function(val, text, e) {
+        e.stopPropagation();
+        document.getElementById('mod-display').innerText = text;
+        document.getElementById('custom-model-select').classList.remove('open');
+        window.config.mod = val;
+        document.getElementById('mod-in-sheet').value = val;
+        window.saveConfig();
+    };
+
+    // 点击页面任意空白处回收模型选择菜单
+    document.addEventListener('click', (e) => {
+        const menu = document.getElementById('custom-model-select');
+        if (menu && !menu.contains(e.target)) {
+            menu.classList.remove('open');
+        }
+    });
 
     window.saveConfig = function() {
         if(!window.currentUser) return;
         window.config.key = document.getElementById('key-in').value.trim();
-        window.config.mod = document.getElementById('mod-in-footer').value;
+        // 移除底部原 select 获取逻辑，改为直接调用全局 config，并向云端同步
         window.config.voice = document.getElementById('cfg-voice').value;
         localStorage.setItem(`mimo_cfg_v5_${window.currentUser}`, JSON.stringify(window.config));
         window.syncToCloud();
@@ -940,6 +1008,7 @@
         });
     };
 
+    // 核心修改5：加入针对用户输入气泡下方的操作栏（含复制、中止修改逻辑）
     window.loadSessionToUI = function() {
         chat.innerHTML = '';
         const session = window.sessions.find(s => s.id === window.currentSessionId);
@@ -953,7 +1022,7 @@
             return;
         }
 
-        session.messages.forEach(msg => {
+        session.messages.forEach((msg, i) => {
             const w = document.createElement('div');
             w.className = `wrapper wrapper-${msg.role === 'user' ? 'user' : 'bot'}`;
             
@@ -967,9 +1036,31 @@
                     if (msg.attachment.type === 'video') userHtml += `<div style="background:rgba(0,0,0,0.1); padding:8px 12px; border-radius:12px; margin-bottom:8px; display:inline-flex; align-items:center; gap:8px;">${icons.video} 视频分析请求</div>`;
                     if (msg.attachment.type === 'audio') userHtml += `<div style="background:rgba(0,0,0,0.1); padding:8px 12px; border-radius:12px; margin-bottom:8px; display:inline-flex; align-items:center; gap:8px;">${icons.mic} 音频分析请求</div>`;
                 }
-                userHtml += `<div>${msg.content}</div>`;
+                
+                // 核心修复3：彻底防注入，保障渲染的极度稳定并还原原始字符
+                const encodeTxt = (str) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                userHtml += `<div>${encodeTxt(msg.content)}</div>`;
+                
+                // 核心修复：把聊天文本装入气泡
                 b.innerHTML = userHtml;
                 w.appendChild(b);
+                
+                let isNextAborted = false;
+                if (i + 1 < session.messages.length && session.messages[i+1].role === 'assistant' && session.messages[i+1].isAborted) {
+                    isNextAborted = true;
+                }
+                
+                // 核心修复：把操作栏单独构建并作为气泡的兄弟节点附加，脱离提示框本体
+                let actionHtml = `<div class="user-action-bar">
+                    <button class="code-action-btn" style="margin:0; background:transparent;" onclick="window.cpUserBubble(this)">${icons.copy} 复制</button>`;
+                if (isNextAborted) {
+                    actionHtml += `<button class="code-action-btn" style="margin:0; background:transparent; color:var(--accent)" onclick="window.editUserMsg('${msg.id}')">${icons.edit} 修改</button>`;
+                }
+                actionHtml += `</div>`;
+                
+                const actionWrap = document.createElement('div');
+                actionWrap.innerHTML = actionHtml;
+                w.appendChild(actionWrap.firstElementChild);
             } else {
                 w.innerHTML = `<div class="msg-role-label">MIMO</div>`;
                 const b = document.createElement('div');
@@ -1067,7 +1158,11 @@
         window.renderAttachmentPreview();
         if (window.config.mod !== 'mimo-v2-omni') {
             window.config.mod = 'mimo-v2-omni';
-            document.getElementById('mod-in-footer').value = 'mimo-v2-omni';
+            
+            // 核心修改：当触发附件时同步更新定制模型选择器界面
+            const el = document.getElementById('mod-display');
+            if(el) el.innerText = 'Omni';
+            
             document.getElementById('mod-in-sheet').value = 'mimo-v2-omni';
             if(window.currentUser) {
                 localStorage.setItem(`mimo_cfg_v5_${window.currentUser}`, JSON.stringify(window.config));
@@ -1102,7 +1197,7 @@
         `;
     };
 
-    // 核心重写：双轨制 AST 解析引擎，支持全套 Markdown 且绝不吞噬代码，防截断处理
+    // 核心重写：零回溯极速双轨解析引擎！彻底解决 iOS 手机端因正则引擎崩溃导致的吞字、错位和代码框消失
     window.parse = function(text, isFinished = false) {
         if(!text) return "";
         
@@ -1110,19 +1205,16 @@
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         };
 
-        // 安全替换结束符，规避解析器异常截断
         const marker = '`' + '`' + '`';
         text = text.replace(new RegExp(marker + '[ \\t]*eof', 'gi'), marker);
         
-        // 隔离轨：安全剥离所有的代码块
         let codeBlocks = [];
-        const codeRegex = new RegExp(marker + '([a-z0-9_+\\-#:\\.]+)?\\s*\\n([\\s\\S]*?)(?:' + marker + '|$)', 'gi');
+        const codeRegex = new RegExp(marker + '([a-z0-9_+\\-#:\\.]+)?(?:[ \\t]*\\n)?([\\s\\S]*?)(?:' + marker + '|$)', 'gi');
         text = text.replace(codeRegex, (match, lang, code) => {
             codeBlocks.push({ lang: lang || 'code', code: code });
-            return `__MIMO_CDBLK_${codeBlocks.length - 1}__`;
+            return `\n__MIMO_CDBLK_${codeBlocks.length - 1}__\n`;
         });
 
-        // 解析轨：逐行扫描剩余的 Markdown 文本
         let lines = text.split('\n');
         let html = "";
         let inList = false;
@@ -1133,7 +1225,7 @@
             let s = encodeHTML(str);
             s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             s = s.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            s = s.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+            s = s.replace(new RegExp('\\`([^\\`]+)\\`', 'g'), '<code class="inline-code">$1</code>');
             return s;
         };
 
@@ -1222,7 +1314,6 @@
         if (inList) html += `</${listType}>`;
         if (inTable) html += '</tbody></table></div>';
 
-        // 重组轨：将保护好的代码框安全镶嵌回 HTML 骨架中
         codeBlocks.forEach((cb, idx) => {
             let rawCode = cb.code;
             if(rawCode.endsWith('\n')) rawCode = rawCode.slice(0, -1);
@@ -1237,12 +1328,7 @@
             let btnHtml = `<button class="code-action-btn" onclick="window.cpBubble(this, true)">${icons.copy} 复制</button>`;
 
             if (isPreviewable) {
-                let injectCode = rawCode;
-                if (lang === 'html' && !injectCode.toLowerCase().includes('charset=')) {
-                    injectCode = '<meta charset="UTF-8">\n' + injectCode;
-                }
-                const safeSrcDoc = encodeHTML(injectCode);
-                previewHtml = `<div class="inline-preview" style="display:${isPreviewActive ? 'block' : 'none'}"><iframe srcdoc="${safeSrcDoc}" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe></div>`;
+                previewHtml = `<div class="inline-preview" style="display:${isPreviewActive ? 'block' : 'none'}"><iframe sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe></div>`;
                 btnHtml = `<button class="code-action-btn ${isPreviewActive ? 'active' : ''}" onclick="window.toggleCodeView(this)">${icons.play} 源码/沙盒</button>` + btnHtml;
                 btnHtml += `<button class="code-action-btn" onclick="window.pv(this)">${icons.expand}</button>`;
             }
@@ -1257,7 +1343,7 @@
                 ${previewHtml}
             </div>`;
             
-            html = html.replace(`__MIMO_CDBLK_${idx}__`, boxHtml);
+            html = html.replace(`__MIMO_CDBLK_${idx}__`, () => boxHtml);
         });
 
         return html;
@@ -1474,6 +1560,21 @@
         return null;
     };
 
+    // 核心修改6：自适应高度输入及 Enter 无缝发送绑定
+    window.autoResize = function(el) {
+        el.style.height = '42px'; // 强制重置为单行基准高度，以便计算缩回
+        if (el.scrollHeight > 42) {
+            el.style.height = Math.min(el.scrollHeight, 88) + 'px'; // 随内容弹缩，最大预留 3 行
+        }
+    };
+
+    window.handleEnter = function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            window.handleSendAction();
+        }
+    };
+
     window.handleSendAction = async function() {
         if (window.currentAbortController) {
             window.currentAbortController.abort();
@@ -1508,12 +1609,27 @@
             if (window.currentAttachment.type === 'video') userHtml += `<div style="background:rgba(0,0,0,0.1); padding:8px 12px; border-radius:12px; margin-bottom:8px; display:inline-flex; align-items:center; gap:8px; font-size:14px">${icons.video} 视频分析请求</div>`;
             if (window.currentAttachment.type === 'audio') userHtml += `<div style="background:rgba(0,0,0,0.1); padding:8px 12px; border-radius:12px; margin-bottom:8px; display:inline-flex; align-items:center; gap:8px; font-size:14px">${icons.mic} 音频分析请求</div>`;
         }
-        if (txt) userHtml += `<div>${txt}</div>`;
+        
+        const encodeTxt = (str) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        if (txt) userHtml += `<div>${encodeTxt(txt)}</div>`;
+        
+        // 核心修复：先把用户文本挂载到气泡中
         ub.innerHTML = userHtml;
         uw.appendChild(ub);
+        
+        // 核心修复：操作栏独立挂载到外层，防止挤压文字提示框
+        let actionHtml = `<div class="user-action-bar">
+            <button class="code-action-btn" style="margin:0; background:transparent;" onclick="window.cpUserBubble(this)">${icons.copy} 复制</button>
+        </div>`;
+        const actionWrap = document.createElement('div');
+        actionWrap.innerHTML = actionHtml;
+        uw.appendChild(actionWrap.firstElementChild);
+        
         chat.appendChild(uw);
 
-        inp.value = ''; inp.blur();
+        inp.value = ''; 
+        window.autoResize(inp); // 核心修改：发送成功后清理高度
+        inp.blur();
         window.currentAttachment = null;
         window.renderAttachmentPreview();
 
@@ -1592,12 +1708,16 @@
             } else {
                 const reader = res.body.getReader();
                 const dec = new TextDecoder();
+                let buffer = ''; // 核心修复1：引入网络数据缓冲区
                 while(true) {
                     const {done, value} = await reader.read();
                     if(done) break;
                     
                     const chunk = dec.decode(value, { stream: true });
-                    const lines = chunk.split('\n');
+                    buffer += chunk; // 将新收到的数据包追加到缓冲区
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // 核心修复2：把最后一行“被切断的不完整数据”留在缓冲区里，不进行解析，等待下个数据包拼接
+                    
                     for(let line of lines) {
                         if(line.startsWith('data: ')) {
                             const dataStr = line.replace('data: ', '').trim();
@@ -1618,7 +1738,7 @@
 
                                 window.renderOutput(bubble, msgObj, false); 
                                 if (chat.scrollHeight - chat.scrollTop < 1000) chat.scrollTop = chat.scrollHeight;
-                            } catch(e){}
+                            } catch(e){} 
                         }
                     }
                 }
@@ -1630,9 +1750,11 @@
         } catch(e) { 
             if (e.name === 'AbortError') {
                 msgObj.content += "\n\n<span style='color:var(--text-tertiary); font-size:13px'>*[ 已中止 ]*</span>";
+                msgObj.isAborted = true; // 核心修改7：附加中止状态，让用户聊天框能显示修改按钮
                 window.renderOutput(bubble, msgObj, true);
                 session.messages.push(msgObj);
                 window.saveSessions();
+                window.loadSessionToUI(); // 触发UI重载，挂载编辑按钮
             } else {
                 bubble.innerHTML = `<div class="error-message">${icons.warning} API 回应: ${e.message}</div>`; 
             }
@@ -1698,286 +1820,52 @@
         }
     };
 
+    // 核心修改8：针对用户独立增加拷贝和二次修改的底层执行逻辑
+    window.cpUserBubble = function(btn) {
+        const wrapper = btn.closest('.wrapper-user');
+        const bubble = wrapper.querySelector('.bubble-user');
+        
+        // 核心修复：更智能地剥离非文本媒介（如视频分析请求提示框），只拷贝真实文字
+        const clone = bubble.cloneNode(true);
+        const mediaNodes = clone.querySelectorAll('img, div[style*="background:rgba(0,0,0,0.1)"]');
+        mediaNodes.forEach(n => n.remove());
+        let text = clone.innerText.trim();
+        
+        const originalHtml = btn.innerHTML;
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                btn.innerHTML = `${icons.copy} 已复制`;
+                setTimeout(() => btn.innerHTML = originalHtml, 1500);
+            }).catch(() => { window.fallbackCopyTextToClipboard(text, btn, originalHtml); });
+        } else {
+            window.fallbackCopyTextToClipboard(text, btn, originalHtml);
+        }
+    };
+
+    window.editUserMsg = function(msgId) {
+        const session = window.sessions.find(s => s.id === window.currentSessionId);
+        const msg = session.messages.find(m => m.id === msgId);
+        if (msg) {
+            const inp = document.getElementById('user-in');
+            inp.value = msg.content;
+            window.autoResize(inp);
+            inp.focus();
+        }
+    };
+
     window.pv = function(btn) {
         const box = btn.closest('.code-box');
         const iframeSource = box.querySelector('.inline-preview iframe');
-        const c = iframeSource ? iframeSource.srcdoc : box.querySelector('code').textContent;
+        // 核心修复3：精准判定加载状态，并为全屏沙盒引入同等的防乱码保护
+        let c = (iframeSource && iframeSource.dataset.loaded) ? iframeSource.srcdoc : box.querySelector('code').textContent;
+        
+        if (box.querySelector('.code-lang').textContent.toLowerCase() === 'html' && !c.toLowerCase().includes('charset=')) {
+            c = '<meta charset="UTF-8">\n' + c;
+        }
         
         document.body.classList.add('preview-open');
         const iframe = document.getElementById('p-frame');
         iframe.srcdoc = c;
-    };
-
-    window.audioBufferToWav = function(buffer) {
-        let numOfChan = buffer.numberOfChannels,
-            length = buffer.length * numOfChan * 2 + 44,
-            bufferArray = new ArrayBuffer(length),
-            view = new DataView(bufferArray),
-            channels = [], i, sample, offset = 0, pos = 0;
-
-        function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
-        function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
-
-        setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
-        setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
-        setUint32(buffer.sampleRate); setUint32(buffer.sampleRate * 2 * numOfChan);
-        setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(length - pos - 4);
-
-        for(i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
-        while(pos < length) {
-            for(i = 0; i < numOfChan; i++) {
-                sample = Math.max(-1, Math.min(1, channels[i][offset]));
-                sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767)|0;
-                view.setInt16(pos, sample, true);
-                pos += 2;
-            }
-            offset++;
-        }
-        return new Blob([bufferArray], {type: "audio/wav"});
-    };
-
-    let globalMicStream = null;
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let isVoiceMode = false;
-    let voiceAudioEl = new Audio(); 
-    let audioCtx = null;
-    let analyser = null;
-    let dataArray = null;
-    let lastSpeechTime = 0;
-    let vadRafId = null;
-
-    window.openVoiceMode = async function() {
-        if (!window.config.key) return window.toggleM(true);
-        try {
-            globalMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            isVoiceMode = true;
-            document.body.classList.add('voice-open');
-            
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            voiceAudioEl.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-            voiceAudioEl.play().catch(e => {});
-
-            window.startRecording();
-        } catch(e) {
-            alert("无法访问麦克风，请检查权限。");
-        }
-    };
-
-    window.startRecording = function() {
-        if (!globalMicStream || !isVoiceMode) return;
-        
-        mediaRecorder = new MediaRecorder(globalMicStream);
-        audioChunks = [];
-        
-        mediaRecorder.ondataavailable = e => {
-            if (e.data.size > 0) audioChunks.push(e.data);
-        };
-        
-        mediaRecorder.onstop = () => {
-            if (!isVoiceMode) return;
-            cancelAnimationFrame(vadRafId);
-            const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' }); 
-            window.handleOmniVoice(blob);
-        };
-        
-        mediaRecorder.start(200);
-
-        analyser = audioCtx.createAnalyser();
-        const source = audioCtx.createMediaStreamSource(globalMicStream);
-        source.connect(analyser);
-        analyser.fftSize = 256;
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
-        lastSpeechTime = Date.now();
-
-        function monitorVAD() {
-            if (!isVoiceMode || mediaRecorder.state !== 'recording') return;
-            analyser.getByteFrequencyData(dataArray);
-            let sum = 0;
-            for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
-            let avg = sum / dataArray.length;
-
-            const orb = document.getElementById('voice-orb');
-            const sub = document.getElementById('voice-sub');
-
-            if (avg > 15) { 
-                lastSpeechTime = Date.now();
-                orb.style.transform = `scale(${1 + Math.min(avg/100, 0.4)})`; 
-                if (sub.innerText !== "正在倾听...") sub.innerText = "正在倾听...";
-            } else {
-                orb.style.transform = `scale(1)`;
-                let quietTime = Date.now() - lastSpeechTime;
-                if (quietTime > 3000) { 
-                    window.stopRecordingAndSend();
-                    return;
-                } else if (quietTime > 1000) {
-                    sub.innerText = `静音中... (${Math.ceil((3000 - quietTime)/1000)}s 后发送)`;
-                }
-            }
-            vadRafId = requestAnimationFrame(monitorVAD);
-        }
-        monitorVAD();
-        window.setVoiceState('listening');
-    };
-
-    window.stopRecordingAndSend = function() {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop(); 
-            window.setVoiceState('thinking');
-            document.getElementById('voice-sub').innerText = "上传音频中...";
-        }
-    };
-
-    window.closeVoiceMode = function() {
-        isVoiceMode = false;
-        document.body.classList.remove('voice-open');
-        cancelAnimationFrame(vadRafId);
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-        if (globalMicStream) {
-            globalMicStream.getTracks().forEach(t => t.stop());
-            globalMicStream = null;
-        }
-        voiceAudioEl.pause();
-        voiceAudioEl.src = "";
-        window.loadSessionToUI(); 
-    };
-
-    window.setVoiceState = function(state) {
-        const orb = document.getElementById('voice-orb');
-        orb.className = 'voice-orb ' + state;
-        const statusText = document.getElementById('voice-status-text');
-        if(state === 'listening') statusText.innerText = 'LISTENING';
-        if(state === 'thinking') statusText.innerText = 'THINKING';
-        if(state === 'speaking') statusText.innerText = 'SPEAKING';
-    };
-
-    window.handleOmniVoice = async function(audioBlob) {
-        if (!isVoiceMode) return;
-        window.setVoiceState('thinking');
-        document.getElementById('voice-sub').innerText = "安全格式转码中...";
-        
-        try {
-            const arrayBuffer = await audioBlob.arrayBuffer();
-            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-            const wavBlob = window.audioBufferToWav(audioBuffer);
-
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                let base64Wav = reader.result;
-                let rawBase64 = base64Wav.split(',')[1];
-
-                document.getElementById('voice-sub').innerText = "多模态思考中...";
-
-                const session = window.sessions.find(s => s.id === window.currentSessionId);
-                if (session.messages.length === 0) {
-                    session.title = "语音对话";
-                    window.renderSessionList();
-                }
-                
-                session.messages.push({ 
-                    id: Date.now().toString(), role: 'user', content: "[语音输入]", 
-                    attachment: { type: 'audio', url: base64Wav, isLocal: true, name: 'VoiceRecord' } 
-                });
-                
-                try {
-                    const reqBody = {
-                        model: 'mimo-v2-omni',
-                        messages: [
-                            {
-                                role: "user",
-                                content: [
-                                    { type: "input_audio", input_audio: { data: rawBase64, format: "wav" } },
-                                    { type: "text", text: "请回应我的语音内容。" }
-                                ]
-                            }
-                        ],
-                        stream: false
-                    };
-
-                    const res = await fetch(PROXY, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.config.key}`, 'api-key': window.config.key, 'x-target-url': API },
-                        body: JSON.stringify(reqBody)
-                    });
-                    
-                    if (!res.ok) {
-                        let errDetail = `HTTP ${res.status}`;
-                        try { const errData = await res.json(); errDetail = errData.error?.message || JSON.stringify(errData); } catch(e) {}
-                        throw new Error(`多模态接口异常: ${errDetail}`);
-                    }
-
-                    const data = await res.json();
-                    const aiText = data.choices?.[0]?.message?.content || "抱歉，我没有理解。";
-
-                    const msgObj = { 
-                        id: Date.now().toString(), 
-                        role: 'assistant', 
-                        content: aiText, 
-                        audioData: null, 
-                        usage: data.usage ? { total: data.usage.total_tokens || 0, prompt: data.usage.prompt_tokens || 0, completion: data.usage.completion_tokens || 0 } : null,
-                        modelUsed: 'mimo-v2-omni',
-                        searchUsed: false
-                    };
-                    session.messages.push(msgObj);
-                    window.saveSessions();
-
-                    if (!isVoiceMode) return;
-                    document.getElementById('voice-sub').innerText = "合成语音中...";
-
-                    const cleanText = aiText.replace(/[#*`_~>]/g, '');
-                    const ttsReqBody = {
-                        model: 'mimo-v2-tts',
-                        messages: [
-                            { role: "user", content: "请根据语境朗读：" },
-                            { role: "assistant", content: cleanText.substring(0, 500) }
-                        ],
-                        stream: false,
-                        audio: { format: "wav", voice: window.config.voice || "mimo_default" }
-                    };
-
-                    const ttsRes = await fetch(PROXY, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.config.key}`, 'api-key': window.config.key, 'x-target-url': API },
-                        body: JSON.stringify(ttsReqBody)
-                    });
-
-                    if(!ttsRes.ok) {
-                        let errDetail = `HTTP ${ttsRes.status}`;
-                        try { const errData = await ttsRes.json(); errDetail = errData.error?.message || JSON.stringify(errData); } catch(e) {}
-                        throw new Error(`语音合成异常: ${errDetail}`);
-                    }
-
-                    const ttsData = await ttsRes.json();
-                    const audioBase64Out = ttsData.choices?.[0]?.message?.audio?.data;
-
-                    if (audioBase64Out && isVoiceMode) {
-                        msgObj.audioData = audioBase64Out;
-                        window.saveSessions();
-
-                        window.setVoiceState('speaking');
-                        document.getElementById('voice-sub').innerText = aiText;
-                        voiceAudioEl.src = `data:audio/wav;base64,${audioBase64Out}`;
-                        voiceAudioEl.play();
-                        
-                        voiceAudioEl.onended = () => {
-                            if (isVoiceMode) {
-                                window.startRecording();
-                            }
-                        };
-                    } else { throw new Error("无音频流返回"); }
-
-                } catch (err) {
-                    if(!isVoiceMode) return;
-                    document.getElementById('voice-sub').innerHTML = `<span style="color:#FF3B30; font-size:16px;">错误: ${err.message}</span>`;
-                    window.setVoiceState('listening');
-                    setTimeout(() => { if(isVoiceMode) window.startRecording(); }, 4000);
-                }
-            };
-            reader.readAsDataURL(wavBlob);
-        } catch (convertErr) {
-            document.getElementById('voice-sub').innerHTML = `<span style="color:#FF3B30; font-size:16px;">音频转码失败</span>`;
-            setTimeout(() => { if(isVoiceMode) window.startRecording(); }, 3000);
-        }
     };
 </script>
 </body>
