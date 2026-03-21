@@ -120,34 +120,19 @@
         }
         header h1 { font-size: 17px; font-weight: 600; letter-spacing: 0.05em; color: var(--text-primary); margin: 0; user-select: none;}
         
-        /* 彻底消除 iOS 控件干扰的 div 图标 */
         .btn-icon { 
-            -webkit-appearance: none !important; appearance: none !important;
-            box-sizing: border-box !important;
-            background: transparent !important; 
-            border: none !important; 
-            width: 36px !important; height: 36px !important; 
-            min-width: 36px !important; min-height: 36px !important; 
-            max-width: 36px !important; max-height: 36px !important;
-            flex: 0 0 36px !important; 
-            border-radius: 50% !important; 
-            color: var(--text-primary) !important; 
-            display: flex !important; align-items: center !important; justify-content: center !important; 
-            cursor: pointer !important; transition: 0.2s !important; 
-            padding: 0 !important; margin: 0 !important; 
-            outline: none !important; box-shadow: none !important;
-            -webkit-tap-highlight-color: transparent !important;
-            overflow: hidden !important;
+            background: transparent; border: none; 
+            width: 36px; height: 36px; 
+            border-radius: 50%; color: var(--text-primary); 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; transition: 0.2s; flex-shrink: 0;
+            padding: 0; outline: none; -webkit-tap-highlight-color: transparent;
         }
-        .btn-icon:hover { background: var(--border-subtle) !important; }
-        .btn-icon:active { transform: scale(0.9) !important; }
-        .btn-icon svg { 
-            width: 20px !important; height: 20px !important; 
-            flex: 0 0 20px !important; display: block !important; 
-            pointer-events: none !important; 
-        }
+        .btn-icon:hover { background: var(--border-subtle); }
+        .btn-icon:active { transform: scale(0.9); }
+        .btn-icon svg { width: 20px; height: 20px; display: block; pointer-events: none;}
 
-        /* 聊天区域 核心修复：防止手机端被长代码撑破屏幕 */
+        /* 聊天区域 */
         #chat-container { 
             flex: 1; padding: calc(env(safe-area-inset-top) + 70px) 0 160px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; 
             scroll-behavior: smooth; max-width: 800px; margin: 0 auto; width: 100%;
@@ -163,16 +148,28 @@
         .wrapper-user .msg-role-label { text-align: right; }
         .bubble-user { background: var(--user-bubble); padding: 14px 20px; border-radius: 20px 20px 4px 20px; max-width: 85%; }
         
-        /* 防止机器人气泡被 flex 子元素强行撑破 */
         .wrapper-bot { align-items: flex-start; max-width: 100%; }
         .bubble-bot { max-width: 100%; width: 100%; min-width: 0; overflow-x: hidden; }
 
         .bubble strong { font-weight: 600; color: var(--text-primary); }
-        .bubble p { margin-bottom: 16px; }
+        .bubble p { margin-bottom: 16px; word-wrap: break-word; word-break: break-word;}
         .bubble p:last-child { margin-bottom: 0; }
-        .bubble h2, .bubble h3 { margin: 24px 0 12px; font-size: 1.1em; font-weight: 600; color: var(--text-primary); }
-        .bubble ul, .bubble ol { margin-bottom: 16px; padding-left: 20px; color: var(--text-secondary); }
-        .bubble li { margin-bottom: 6px; }
+        
+        /* 旗舰级 Markdown 排版支持 */
+        .md-h1 { font-size: 1.5em; font-weight: 700; margin: 24px 0 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px; color: var(--text-primary);}
+        .md-h2 { font-size: 1.3em; font-weight: 600; margin: 20px 0 12px; color: var(--text-primary);}
+        .md-h3 { font-size: 1.1em; font-weight: 600; margin: 16px 0 8px; color: var(--text-primary);}
+        .md-hr { border: 0; border-top: 1px solid var(--border-subtle); margin: 24px 0; }
+        .md-list { margin: 12px 0 16px; padding-left: 24px; color: var(--text-secondary); }
+        .md-list li { margin-bottom: 8px; line-height: 1.6; word-wrap: break-word; word-break: break-word;}
+        .bubble blockquote { border-left: 4px solid var(--text-tertiary); margin: 16px 0; color: var(--text-secondary); font-style: italic; background: rgba(0,0,0,0.02); padding: 12px 16px; border-radius: 0 8px 8px 0;}
+        .md-table-wrap { overflow-x: auto; margin: 16px 0; border-radius: 12px; border: 1px solid var(--border-subtle); -webkit-overflow-scrolling: touch;}
+        .md-table { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--bg-surface); white-space: nowrap;}
+        .md-table th, .md-table td { border-bottom: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); padding: 12px 16px; text-align: left; }
+        .md-table th:last-child, .md-table td:last-child { border-right: none; }
+        .md-table tr:last-child td { border-bottom: none; }
+        .md-table th { background: rgba(0,0,0,0.02); font-weight: 600; color: var(--text-primary); }
+
         .inline-code { background: var(--border-subtle); padding: 3px 6px; border-radius: 6px; font-family: 'SF Mono', ui-monospace, monospace; font-size: 0.85em; color: var(--text-primary); }
         
         .reasoning-box { margin-bottom: 20px; background: transparent; border-left: 2px solid var(--border-subtle); padding: 4px 0 4px 16px; font-size: 14.5px; color: var(--text-secondary); transition: 0.3s; }
@@ -189,12 +186,10 @@
 
         .token-usage { font-size: 11px; color: var(--text-tertiary); margin-top: 16px; text-align: right; font-family: 'SF Mono', ui-monospace, monospace; font-weight: 600; display: flex; justify-content: flex-end; align-items: center; gap: 4px;}
 
-        /* Canvas 级内嵌代码与自动预览框 核心修复：锁死宽度 */
+        /* Canvas 级内嵌代码与自动预览框 */
         .code-box { margin: 20px 0; background: var(--bg-surface); border-radius: 16px; border: 1px solid var(--border-subtle); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.02); max-width: 100%; width: 100%; min-width: 0; box-sizing: border-box; }
         .code-nav { padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); background: rgba(0,0,0,0.01); }
         .code-lang { font-size: 11px; font-weight: 600; color: var(--text-tertiary); font-family: 'SF Mono', ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.05em;}
-        
-        /* 增加平滑触摸滚动机制 */
         .pre-area { padding: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; box-sizing: border-box; font-family: 'SF Mono', ui-monospace, monospace; font-size: 13px; color: var(--text-secondary); line-height: 1.6; white-space: pre; margin: 0; background: transparent; }
         
         .inline-preview { width: 100%; height: 380px; background: #FFFFFF; position: relative; border-radius: 0 0 16px 16px; border-top: 1px solid var(--border-subtle); }
@@ -397,7 +392,6 @@
     <main id="chat-container"></main>
     
     <div class="footer-island">
-        <!-- 胶囊控制台 -->
         <div class="chat-toggles">
             <div class="mini-toggle" id="toggle-think" onclick="window.toggleSetting('think')">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>
@@ -420,7 +414,6 @@
             <div class="input-box">
                 <input type="text" id="user-in" placeholder="发送指令..." autocomplete="off" onkeypress="if(event.key==='Enter') window.handleSendAction()">
             </div>
-            <!-- 内嵌微型模型选择器 -->
             <div class="inline-model-select">
                 <select id="mod-in-footer" onchange="window.syncModelSelects('mod-in-footer')">
                     <option value="mimo-v2-flash">Flash</option>
@@ -549,7 +542,7 @@
     // --- SVG 图标库 ---
     const icons = {
         menu: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="18" x2="14" y2="18"></line></svg>`,
-        gear: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
+        gear: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
         send: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>`,
         stop: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>`,
         plus: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
@@ -571,7 +564,6 @@
         upload: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`
     };
 
-    // 初始化图标
     window.initIcons = function() {
         const el = (id) => document.getElementById(id);
         if(el('icon-menu')) el('icon-menu').innerHTML = icons.menu;
@@ -588,7 +580,6 @@
     };
     window.initIcons();
 
-    // 全局基础配置
     const PROXY = "https://delicate-bread-d122.z2098732021.workers.dev";
     const API = "https://api.xiaomimimo.com/v1/chat/completions";
 
@@ -611,14 +602,13 @@
     window.checkAuthAndInit = function() {
         const savedCred = JSON.parse(localStorage.getItem('mimo_auto_login') || 'null');
         if (!window.currentUser && savedCred) {
-            // 静默自动登录
             document.getElementById('login-user').value = savedCred.user;
             document.getElementById('login-pass').value = savedCred.pass;
             document.getElementById('remember-me').checked = true;
             
             document.getElementById('login-overlay').style.display = 'flex';
             document.getElementById('login-overlay').style.opacity = '1';
-            document.querySelector('.login-card').style.display = 'none'; // 隐藏登录表单，实现无感体验
+            document.querySelector('.login-card').style.display = 'none'; 
             
             window.handleLoginBtn(true);
             return;
@@ -698,7 +688,7 @@
             window.unlockApp();
         } catch (e) {
             console.warn("Cloud sync failed, falling back to local", e);
-            document.querySelector('.login-card').style.display = 'block'; // 恢复显示登录卡片
+            document.querySelector('.login-card').style.display = 'block'; 
             
             let userMsg = e.message;
             if (userMsg.includes('Failed to fetch') || userMsg.includes('NetworkError')) {
@@ -798,7 +788,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'sync-key': window.config.syncKey },
                 body: JSON.stringify({ config: window.config, sessions: window.sessions })
-            }).catch(e => {}); // Fire and forget
+            }).catch(e => {}); 
         } catch(e) {}
     };
 
@@ -1112,7 +1102,7 @@
         `;
     };
 
-    // 核心修复：使用字符串拼接代替正则表达式里的反引号，彻底避免 Markdown 解析器把文件拦腰截断！
+    // 核心重写：双轨制 AST 解析引擎，支持全套 Markdown 且绝不吞噬代码，防截断处理
     window.parse = function(text, isFinished = false) {
         if(!text) return "";
         
@@ -1120,68 +1110,157 @@
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         };
 
+        // 安全替换结束符，规避解析器异常截断
         const marker = '`' + '`' + '`';
-        // 清理模型输出的异规结尾符，通过拼接规避环境截断
         text = text.replace(new RegExp(marker + '[ \\t]*eof', 'gi'), marker);
         
-        let parts = text.split(marker);
-        let res = "";
-        
-        for(let i = 0; i < parts.length; i++) {
-            if (i % 2 === 0) {
-                let sub = encodeHTML(parts[i]);
-                sub = sub.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-                sub = sub.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-                sub = sub.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-                sub = sub.replace(/`([^`\n]+)`/g, '<code class="inline-code">$1</code>');
-                sub = sub.replace(/\n/g, '<br>');
-                res += sub;
+        // 隔离轨：安全剥离所有的代码块
+        let codeBlocks = [];
+        const codeRegex = new RegExp(marker + '([a-z0-9_+\\-#:\\.]+)?\\s*\\n([\\s\\S]*?)(?:' + marker + '|$)', 'gi');
+        text = text.replace(codeRegex, (match, lang, code) => {
+            codeBlocks.push({ lang: lang || 'code', code: code });
+            return `__MIMO_CDBLK_${codeBlocks.length - 1}__`;
+        });
+
+        // 解析轨：逐行扫描剩余的 Markdown 文本
+        let lines = text.split('\n');
+        let html = "";
+        let inList = false;
+        let listType = "";
+        let inTable = false;
+
+        const formatInline = (str) => {
+            let s = encodeHTML(str);
+            s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            s = s.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            s = s.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+            return s;
+        };
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+            let trimmed = line.trim();
+
+            if (trimmed.startsWith('__MIMO_CDBLK_')) {
+                if (inList) { html += `</${listType}>`; inList = false; }
+                if (inTable) { html += '</tbody></table></div>'; inTable = false; }
+                html += trimmed; 
+                continue;
+            }
+
+            if (/^---+$/.test(trimmed) || /^\*\*\*+$/.test(trimmed)) {
+                if (inList) { html += `</${listType}>`; inList = false; }
+                if (inTable) { html += '</tbody></table></div>'; inTable = false; }
+                html += '<hr class="md-hr">';
+                continue;
+            }
+
+            let hMatch = line.match(/^(#{1,3}) (.*)/);
+            if (hMatch) {
+                if (inList) { html += `</${listType}>`; inList = false; }
+                if (inTable) { html += '</tbody></table></div>'; inTable = false; }
+                let level = hMatch[1].length;
+                html += `<h${level} class="md-h${level}">${formatInline(hMatch[2])}</h${level}>`;
+                continue;
+            }
+
+            if (/^> (.*)/.test(line)) {
+                if (inList) { html += `</${listType}>`; inList = false; }
+                if (inTable) { html += '</tbody></table></div>'; inTable = false; }
+                html += `<blockquote>${formatInline(line.substring(2))}</blockquote>`;
+                continue;
+            }
+
+            if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+                if (inList) { html += `</${listType}>`; inList = false; }
+                
+                if (!inTable) {
+                    inTable = true;
+                    html += '<div class="md-table-wrap"><table class="md-table"><tbody>';
+                }
+                
+                if (/^[|\-\s:]+$/.test(trimmed)) continue; 
+                
+                let cells = trimmed.split('|').filter((c, idx, arr) => idx > 0 && idx < arr.length - 1);
+                let isHeader = html.endsWith('<tbody>');
+                html += '<tr>' + cells.map(c => isHeader ? `<th>${formatInline(c.trim())}</th>` : `<td>${formatInline(c.trim())}</td>`).join('') + '</tr>';
+                continue;
+            } else if (inTable) {
+                inTable = false;
+                html += '</tbody></table></div>';
+            }
+
+            let ulMatch = line.match(/^(\s*)([-*])\s+(.*)/);
+            let olMatch = line.match(/^(\s*)(\d+)\.\s+(.*)/);
+            if (ulMatch || olMatch) {
+                let type = ulMatch ? 'ul' : 'ol';
+                if (!inList) {
+                    inList = true;
+                    listType = type;
+                    html += `<${listType} class="md-list">`;
+                }
+                let content = ulMatch ? ulMatch[3] : olMatch[3];
+                html += `<li>${formatInline(content)}</li>`;
+                continue;
+            } else if (inList) {
+                if (trimmed === '') {
+                    inList = false;
+                    html += `</${listType}>`;
+                } else {
+                    inList = false;
+                    html += `</${listType}>`;
+                }
+            }
+
+            if (trimmed === '') {
+                html += '<div style="height:8px"></div>';
             } else {
-                let block = parts[i];
-                let lang = 'code';
-                let rawCode = block;
-                
-                let langMatch = block.match(/^([a-z0-9_+\-#:\.]+)[ \t]*(\n)?/i);
-                if (langMatch) {
-                    lang = langMatch[1].split(':')[0].toLowerCase() || 'code';
-                    rawCode = block.substring(langMatch[0].length);
-                } else if (block.startsWith('\n')) {
-                    rawCode = block.substring(1);
-                }
-                
-                if(rawCode.endsWith('\n')) rawCode = rawCode.slice(0, -1);
-
-                let isPreviewable = ['html', 'xml', 'svg'].includes(lang);
-                let isPreviewActive = isPreviewable && isFinished;
-                
-                let contentHtml = `<pre class="pre-area" style="display:${isPreviewActive ? 'none' : 'block'}"><code>${encodeHTML(rawCode)}</code></pre>`;
-                let previewHtml = '';
-                let btnHtml = `<button class="code-action-btn" onclick="window.cpBubble(this, true)">${icons.copy} 复制</button>`;
-
-                if (isPreviewable) {
-                    let injectCode = rawCode;
-                    if (lang === 'html' && !injectCode.toLowerCase().includes('charset=')) {
-                        injectCode = '<meta charset="UTF-8">\n' + injectCode;
-                    }
-                    const safeSrcDoc = encodeHTML(injectCode);
-                    previewHtml = `<div class="inline-preview" style="display:${isPreviewActive ? 'block' : 'none'}"><iframe srcdoc="${safeSrcDoc}" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe></div>`;
-                    btnHtml = `<button class="code-action-btn ${isPreviewActive ? 'active' : ''}" onclick="window.toggleCodeView(this)">${icons.play} 源码/沙盒</button>` + btnHtml;
-                    btnHtml += `<button class="code-action-btn" onclick="window.pv(this)">${icons.expand}</button>`;
-                }
-
-                res += `
-                <div class="code-box">
-                    <div class="code-nav">
-                        <div class="code-lang">${encodeHTML(lang)}</div>
-                        <div style="display:flex;">${btnHtml}</div>
-                    </div>
-                    ${contentHtml}
-                    ${previewHtml}
-                </div>`;
+                html += `<p>${formatInline(line)}</p>`;
             }
         }
-        
-        return res;
+
+        if (inList) html += `</${listType}>`;
+        if (inTable) html += '</tbody></table></div>';
+
+        // 重组轨：将保护好的代码框安全镶嵌回 HTML 骨架中
+        codeBlocks.forEach((cb, idx) => {
+            let rawCode = cb.code;
+            if(rawCode.endsWith('\n')) rawCode = rawCode.slice(0, -1);
+            
+            let lang = cb.lang.split(':')[0].trim().toLowerCase() || 'code';
+            
+            let isPreviewable = ['html', 'xml', 'svg'].includes(lang);
+            let isPreviewActive = isPreviewable && isFinished;
+            
+            let contentHtml = `<pre class="pre-area" style="display:${isPreviewActive ? 'none' : 'block'}"><code>${encodeHTML(rawCode)}</code></pre>`;
+            let previewHtml = '';
+            let btnHtml = `<button class="code-action-btn" onclick="window.cpBubble(this, true)">${icons.copy} 复制</button>`;
+
+            if (isPreviewable) {
+                let injectCode = rawCode;
+                if (lang === 'html' && !injectCode.toLowerCase().includes('charset=')) {
+                    injectCode = '<meta charset="UTF-8">\n' + injectCode;
+                }
+                const safeSrcDoc = encodeHTML(injectCode);
+                previewHtml = `<div class="inline-preview" style="display:${isPreviewActive ? 'block' : 'none'}"><iframe srcdoc="${safeSrcDoc}" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe></div>`;
+                btnHtml = `<button class="code-action-btn ${isPreviewActive ? 'active' : ''}" onclick="window.toggleCodeView(this)">${icons.play} 源码/沙盒</button>` + btnHtml;
+                btnHtml += `<button class="code-action-btn" onclick="window.pv(this)">${icons.expand}</button>`;
+            }
+
+            let boxHtml = `
+            <div class="code-box">
+                <div class="code-nav">
+                    <div class="code-lang">${encodeHTML(cb.lang)}</div>
+                    <div style="display:flex;">${btnHtml}</div>
+                </div>
+                ${contentHtml}
+                ${previewHtml}
+            </div>`;
+            
+            html = html.replace(`__MIMO_CDBLK_${idx}__`, boxHtml);
+        });
+
+        return html;
     };
 
     window.toggleCodeView = function(btn) {
