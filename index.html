@@ -301,7 +301,7 @@
         #overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: 0.5s; z-index: 2000; backdrop-filter: blur(12px) saturate(150%); -webkit-backdrop-filter: blur(12px) saturate(150%);
         }
-        body.modal-open #overlay, body.history-open #overlay, body.preview-open #overlay, body.media-open #overlay { opacity: 1; pointer-events: auto; }
+        body.modal-open #overlay, body.history-open #overlay, body.media-open #overlay { opacity: 1; pointer-events: auto; }
         
         #sheet, #media-modal { 
             position: fixed; bottom: 0; left: 50%; width: 100%; max-width: 800px;
@@ -524,6 +524,12 @@
         @media (max-width: 768px) {
             .ide-header { padding-top: calc(env(safe-area-inset-top) + 4px); height: auto; min-height: 48px; padding-bottom: 4px; }
             .ide-header-title { display: none; }
+        }
+
+        @media (max-width: 430px) {
+            /* 手机同时打开联网搜索和深度思考会挤出发送键，低于该宽度仅显示图标不展开文字 */
+            .mini-toggle.active { padding: 0 8px !important; }
+            .mini-toggle.active span { max-width: 0 !important; opacity: 0 !important; margin-left: 0 !important; display: none !important; }
         }
 
         /* 优雅的 Toast 提示框 */
@@ -1715,10 +1721,15 @@
             } else if (mod === 'mimo-v2-flash') {
                 cost = (prompt / 1000000) * 0.70 + (comp / 1000000) * 2.10;
             }
-            if (msgObj.searchUsed) cost += 0.025; 
+            
+            let searchCostStr = "";
+            if (msgObj.searchUsed) {
+                cost += 0.025; // 联网搜索 25元/1000次
+                searchCostStr = " + ¥0.025(检索)";
+            }
 
             const usageM = (total / 1000000).toFixed(6);
-            let costStr = cost === 0 ? '限时免费' : `预计 ¥${cost.toFixed(4)}`;
+            let costStr = cost === 0 ? '限时免费' : `预计 ¥${cost.toFixed(4)}${searchCostStr}`;
             
             html += `<div class="token-usage">
                         ${icons.bolt} 消耗: ${usageM} M Tokens
