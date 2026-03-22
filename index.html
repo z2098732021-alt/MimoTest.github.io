@@ -27,10 +27,11 @@
             --border-subtle: rgba(0, 0, 0, 0.08);
             --accent-glow: radial-gradient(circle at center, rgba(0,122,255,0.1) 0%, transparent 70%);
             --user-bubble: #E9E9EB;
-            --spring: cubic-bezier(0.2, 0.8, 0.2, 1);
+            --spring: cubic-bezier(0.25, 0.8, 0.25, 1);
             --blur-heavy: blur(40px) saturate(200%);
             --shadow-float: 0 20px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
             --sidebar-w: 300px;
+            --ide-font-size: 14px;
         }
         
         @media (prefers-color-scheme: dark) {
@@ -147,11 +148,14 @@
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
         
         .msg-role-label { font-size: 12px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;}
-        .bubble { font-size: 16px; line-height: 1.6; word-wrap: break-word; overflow-wrap: break-word; color: var(--text-primary); min-width: 0; max-width: 100%; }
-        .wrapper-user { align-items: flex-end; }
+        .bubble { font-size: 16px; line-height: 1.6; word-wrap: break-word; overflow-wrap: break-word; color: var(--text-primary); min-width: 0; max-width: 100%; box-sizing: border-box; }
+        .wrapper-user { align-items: flex-end; min-width: 0; }
         .wrapper-user .msg-role-label { text-align: right; }
-        .bubble-user { background: var(--user-bubble); padding: 14px 20px; border-radius: 20px 20px 4px 20px; max-width: 85%; white-space: pre-wrap; }
+        .bubble-user { background: var(--user-bubble); padding: 14px 20px; border-radius: 20px 20px 4px 20px; max-width: 85%; white-space: pre-wrap; overflow-wrap: break-word; word-wrap: break-word; }
         
+        /* 防止图片超出版心 */
+        .bubble img, .chat-media { max-width: 100%; height: auto; border-radius: 12px; margin-bottom: 8px; display: block; box-sizing: border-box; object-fit: contain; }
+
         .wrapper-bot { align-items: flex-start; max-width: 100%; }
         .bubble-bot { max-width: 100%; width: 100%; min-width: 0; overflow-x: hidden; }
 
@@ -210,13 +214,6 @@
         }
 
         .chat-toggles { display: flex; gap: 8px; margin-bottom: 12px; padding: 0 4px; align-items: center; flex-wrap: wrap;}
-        .mini-toggle { 
-            background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 6px 12px; border-radius: 100px; 
-            font-size: 12px; font-weight: 600; color: var(--text-tertiary); cursor: pointer; transition: 0.3s var(--spring);
-            display: inline-flex; align-items: center; gap: 6px; user-select: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .mini-toggle:active { transform: scale(0.95); }
-        .mini-toggle.active { background: var(--text-primary); color: var(--bg-surface); border-color: var(--text-primary); }
         
         .attachment-preview { padding: 0 12px; margin-bottom: 8px; display: none; align-items: center;}
         .attach-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-surface); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; color: var(--text-primary); max-width: 100%; border: 1px solid var(--border-subtle); box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
@@ -232,18 +229,19 @@
         .btn-attach:hover { color: var(--text-primary); }
         .btn-attach svg { width: 22px; height: 22px; }
         
+        /* 修改版丝滑收缩动画 */
         .mini-toggle { 
             background: transparent !important; border: none; 
-            color: var(--text-secondary); cursor: pointer; transition: all 0.4s var(--spring);
+            color: var(--text-secondary); cursor: pointer; transition: all 0.3s var(--spring);
             display: inline-flex; align-items: center; justify-content: center; user-select: none;
             overflow: hidden; white-space: nowrap; height: 32px; box-sizing: border-box; padding: 0 6px;
-            -webkit-appearance: none;
+            -webkit-appearance: none; border-radius: 100px;
         }
         .mini-toggle:hover { color: var(--text-primary); }
         .mini-toggle svg { flex-shrink: 0; width: 20px; height: 20px; }
-        .mini-toggle span { max-width: 0; opacity: 0; display: inline-block; transition: all 0.4s var(--spring); pointer-events: none; font-size: 13px; font-weight: 600; }
+        .mini-toggle span { max-width: 0; opacity: 0; display: inline-block; transition: max-width 0.3s ease, opacity 0.2s ease, margin 0.3s ease; pointer-events: none; font-size: 13px; font-weight: 600; vertical-align: middle;}
         .mini-toggle:active { transform: scale(0.95); }
-        .mini-toggle.active { background: var(--text-primary) !important; color: var(--bg-surface) !important; border-radius: 100px; padding: 0 12px; height: 32px;}
+        .mini-toggle.active { background: var(--text-primary) !important; color: var(--bg-surface) !important; padding: 0 12px;}
         .mini-toggle.active:hover { color: var(--bg-surface); }
         .mini-toggle.active span { max-width: 100px; opacity: 1; margin-left: 6px; }
 
@@ -362,30 +360,6 @@
         .t-dot:nth-child(1) { animation-delay: -0.32s; } .t-dot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes t-bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
 
-        /* 沉浸式语音通话舱 */
-        #voice-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10,10,12,0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            z-index: 2200; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.5s var(--spring); color: white;
-        }
-        body.voice-open #voice-modal { opacity: 1; pointer-events: auto; }
-        
-        .voice-close-btn { position: absolute; top: calc(env(safe-area-inset-top) + 24px); right: 24px; background: rgba(255,255,255,0.1); border: none; width: 44px; height: 44px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(10px); transition: 0.2s;}
-        .voice-close-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
-
-        .voice-orb { width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ff4b9c, #007AFF, #00C6FF); box-shadow: 0 0 60px rgba(0, 122, 255, 0.4); transition: all 0.2s ease-out; filter: blur(12px); cursor: pointer; }
-        .voice-orb.listening { animation: orbBreathe 3s ease-in-out infinite; }
-        .voice-orb.thinking { animation: orbSpin 1.5s linear infinite; border-radius: 40% 60% 60% 40% / 40% 50% 50% 60%; background: radial-gradient(circle at 50% 50%, #007AFF, #ff4b9c); }
-        .voice-orb.speaking { animation: orbPulse 0.4s ease-in-out infinite alternate; background: radial-gradient(circle at 70% 70%, #34C759, #00C6FF); }
-
-        @keyframes orbBreathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(0, 122, 255, 0.4); } 50% { transform: scale(1.15); box-shadow: 0 0 90px rgba(0, 122, 255, 0.7); } }
-        @keyframes orbSpin { 100% { transform: rotate(360deg); } }
-        @keyframes orbPulse { 0% { transform: scale(1); box-shadow: 0 0 50px rgba(52, 199, 89, 0.4); } 100% { transform: scale(1.3); box-shadow: 0 0 100px rgba(52, 199, 89, 0.8); } }
-
-        .voice-subtitle { margin-top: 60px; font-size: 22px; font-weight: 500; text-align: center; max-width: 80%; min-height: 80px; letter-spacing: 0.02em; line-height: 1.4; opacity: 0.9; color: #FFF; word-break: break-word;}
-        .voice-status { position: absolute; bottom: 60px; font-size: 13px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;}
-
         /* IDE 窗口 UI */
         #preview-page {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1500;
@@ -438,7 +412,7 @@
         #preview-page[data-tab="code"] .ide-preview-wrap { transform: translateX(100%); }
         #preview-page[data-tab="preview"] .ide-editor-wrap { transform: translateX(-100%); }
         
-        .CodeMirror { flex: 1; height: 100% !important; font-family: 'SF Mono', ui-monospace, monospace; font-size: 14px; background: #1e1e1e !important;}
+        .CodeMirror { flex: 1; height: 100% !important; font-family: 'SF Mono', ui-monospace, monospace; font-size: var(--ide-font-size, 14px); background: #1e1e1e !important;}
         .CodeMirror-vscrollbar, .CodeMirror-hscrollbar, .CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler { display: none !important; }
         .CodeMirror-scroll { -ms-overflow-style: none; scrollbar-width: none; }
         .CodeMirror-scroll::-webkit-scrollbar { display: none !important; }
@@ -461,7 +435,7 @@
         .ide-actions-menu { 
             position: absolute; right: 0; top: 100%; margin-top: 8px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); 
             border-radius: 16px; padding: 6px; display: flex; flex-direction: column; gap: 2px; box-shadow: var(--shadow-float); z-index: 200; 
-            min-width: 150px; backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy);
+            min-width: 160px; backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy);
             opacity: 0; visibility: hidden; transform: translateY(10px) scale(0.95); transform-origin: top right;
             transition: all 0.4s var(--spring); pointer-events: none;
         }
@@ -480,17 +454,6 @@
         .console-log-item::before { content: '>'; color: var(--text-tertiary); font-weight: bold; }
         .console-log-item.error { color: #FF3B30; background: rgba(255, 59, 48, 0.05); }
         .console-log-item.error::before { content: 'x'; color: #FF3B30; }
-
-        .patch-box { margin: 12px 0; border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; font-family: 'SF Mono', ui-monospace, monospace; font-size: 12px; background: var(--bg-surface); }
-        .patch-header { padding: 6px 12px; background: rgba(0,0,0,0.02); color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px; font-weight: 600;}
-        .patch-body { padding: 8px 12px; max-height: 200px; overflow-y: auto; }
-        .patch-del { color: var(--text-secondary); opacity: 0.6; text-decoration: line-through; white-space: pre-wrap; margin-bottom: 4px; }
-        .patch-add { color: #34C759; font-weight: 500; white-space: pre-wrap; }
-        
-        .patch-status { padding: 2px 6px; border-radius: 4px; transition: 0.3s; }
-        .patch-status.pending { background: var(--border-subtle); color: var(--text-secondary); }
-        .patch-status.success { background: rgba(52, 199, 89, 0.15); color: #34C759; }
-        .patch-status.failed { background: rgba(255, 59, 48, 0.15); color: #FF3B30; }
 
         #fab-open-ide {
             position: absolute; right: 0; bottom: 100%; margin-bottom: 12px;
@@ -527,9 +490,8 @@
         }
 
         @media (max-width: 430px) {
-            /* 手机同时打开联网搜索和深度思考会挤出发送键，低于该宽度仅显示图标不展开文字 */
             .mini-toggle.active { padding: 0 8px !important; }
-            .mini-toggle.active span { max-width: 0 !important; opacity: 0 !important; margin-left: 0 !important; display: none !important; }
+            .mini-toggle.active span { max-width: 0 !important; opacity: 0 !important; margin-left: 0 !important; }
         }
 
         /* 优雅的 Toast 提示框 */
@@ -541,7 +503,7 @@
             background: var(--bg-elevated); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
             border: 1px solid var(--border-subtle); box-shadow: 0 8px 32px rgba(0,0,0,0.12);
             padding: 12px 24px; border-radius: 100px; font-size: 14px; font-weight: 600; color: var(--text-primary);
-            display: flex; align-items: center; gap: 8px;
+            display: flex; align-items: center; gap: 8px; white-space: nowrap;
             animation: toastSlideIn 0.4s var(--spring) forwards;
         }
         .mimo-toast.hiding { animation: toastSlideOut 0.3s forwards; }
@@ -601,11 +563,11 @@
                     <button class="btn-attach" onclick="window.toggleMedia(true)" id="icon-attach"></button>
                     <button class="mini-toggle" id="toggle-think" onclick="window.toggleSetting('think')">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>
-                        <span>深度思考</span>
+                        <span><div>深度思考</div></span>
                     </button>
                     <button class="mini-toggle" id="toggle-search" onclick="window.toggleSetting('search')">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                        <span>联网检索</span>
+                        <span><div>联网检索</div></span>
                     </button>
                 </div>
 
@@ -744,6 +706,12 @@
                     选项 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
                 <div class="ide-actions-menu" id="ide-actions-menu">
+                    <div style="padding: 8px 14px; display: flex; align-items: center; gap: 8px; color: var(--text-primary);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                        <input type="range" id="ide-zoom-slider" min="0.5" max="3" step="0.1" value="1" oninput="window.setIDEZoom(this.value)" style="flex:1">
+                        <span id="ide-zoom-val" style="font-size:11px; width:36px; text-align:right">100%</span>
+                    </div>
+                    <div style="height: 1px; background: var(--border-subtle); margin: 4px 0;"></div>
                     <button class="ide-actions-menu-btn" onclick="window.runIDE(); window.toggleIDEMenu(false)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> 运行代码
                     </button>
@@ -829,6 +797,7 @@
     window.currentSessionId = null;
     window.currentAbortController = null;
     window.currentAttachment = null;
+    window.ideZoom = 1;
 
     const chat = document.getElementById('chat-container');
     const sessionListEl = document.getElementById('session-list');
@@ -837,6 +806,49 @@
 
     window.onload = () => { 
         window.checkAuthAndInit();
+        window.initIDEGestures();
+    };
+
+    window.initIDEGestures = function() {
+        let idePinchDist = 0;
+        let idePinchStartZoom = 1;
+        const ideBodyEl = document.querySelector('.ide-body');
+        
+        ideBodyEl.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                idePinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                idePinchStartZoom = window.ideZoom || 1;
+            }
+        }, {passive: false});
+        
+        ideBodyEl.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                let newZ = idePinchStartZoom * (dist / idePinchDist);
+                newZ = Math.max(0.5, Math.min(newZ, 3));
+                const slider = document.getElementById('ide-zoom-slider');
+                if (slider) slider.value = newZ;
+                window.setIDEZoom(newZ);
+            }
+        }, {passive: false});
+    };
+
+    window.setIDEZoom = function(val) {
+        window.ideZoom = parseFloat(val);
+        document.getElementById('ide-zoom-val').innerText = Math.round(window.ideZoom * 100) + '%';
+        
+        document.documentElement.style.setProperty('--ide-font-size', (14 * window.ideZoom) + 'px');
+        if (window.ideEditor) window.ideEditor.refresh();
+        if (window.diffEditorInline) window.diffEditorInline.refresh();
+        
+        const iframe = document.getElementById('p-frame');
+        if (iframe) {
+            iframe.style.transform = `scale(${window.ideZoom})`;
+            iframe.style.transformOrigin = 'top left';
+            iframe.style.width = `${100 / window.ideZoom}%`;
+            iframe.style.height = `${100 / window.ideZoom}%`;
+        }
     };
 
     window.checkAuthAndInit = function() {
@@ -1116,10 +1128,18 @@
         if(!window.currentUser) return;
         window.config[type] = !window.config[type];
         const el = document.getElementById(`toggle-${type}`);
-        if(window.config[type]) el.classList.add('active');
+        const isActive = window.config[type];
+        
+        if(isActive) el.classList.add('active');
         else el.classList.remove('active');
+        
         localStorage.setItem(`mimo_cfg_v5_${window.currentUser}`, JSON.stringify(window.config));
         window.syncToCloud();
+        
+        if (window.innerWidth <= 430) {
+            const name = type === 'think' ? '深度思考' : '联网检索';
+            window.showToast(`${name}已${isActive ? '开启' : '关闭'}`, isActive ? icons.bolt : icons.close);
+        }
     };
 
     window.checkTTSMode = function() {
@@ -1153,9 +1173,9 @@
                 if(data.sessions) window.sessions = data.sessions;
                 window.saveSessions();
                 window.saveConfig();
-                alert("数据恢复成功！");
+                window.showToast("数据恢复成功");
                 window.refreshUIState();
-            } catch(err) { alert("备份文件格式错误"); }
+            } catch(err) { window.showToast("备份文件格式错误", `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`); }
         };
         reader.readAsText(file);
     };
@@ -1255,7 +1275,7 @@
                 b.className = 'bubble bubble-user';
                 let userHtml = "";
                 if (msg.attachment) {
-                    if (msg.attachment.type === 'image') userHtml += `<img src="${msg.attachment.url}" style="max-width:100%; border-radius:12px; margin-bottom:8px; display:block;">`;
+                    if (msg.attachment.type === 'image') userHtml += `<img src="${msg.attachment.url}" class="chat-media">`;
                     if (msg.attachment.type === 'video') userHtml += `<div style="background:rgba(0,0,0,0.1); padding:8px 12px; border-radius:12px; margin-bottom:8px; display:inline-flex; align-items:center; gap:8px;">${icons.video} 视频分析请求</div>`;
                     if (msg.attachment.type === 'audio') userHtml += `<div style="background:rgba(0,0,0,0.1); padding:8px 12px; border-radius:12px; margin-bottom:8px; display:inline-flex; align-items:center; gap:8px;">${icons.mic} 音频分析请求</div>`;
                 }
@@ -1437,30 +1457,6 @@
         const marker = '\x60\x60\x60';
         text = text.replace(new RegExp(marker + '[ \\t]*eof', 'gi'), marker);
 
-        text = text.replace(new RegExp(marker + '(html|js|css)?\\r?\\n<{4,7}\\s*SEARCH', 'gi'), '<<<< SEARCH');
-        text = text.replace(/={4,7}(?:\\s*REPLACE)?\\r?\\n([\\s\\S]*?)\\r?\\n>{4,7}(?:\\s*REPLACE)?\\r?\\n\x60{3}/gi, '==== REPLACE\n$1\n>>>>');
-
-        let patches = [];
-        const flexPatchRegex = /<{4,7}\s*SEARCH\r?\n([\s\S]*?)\r?\n={4,7}(?:\s*REPLACE)?\r?\n([\s\S]*?)\r?\n>{4,7}(?:\s*REPLACE)?/gi;
-        
-        const hashStr = (str) => {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) hash = ((hash << 5) - hash) + str.charCodeAt(i);
-            return 'p' + Math.abs(hash).toString(36);
-        };
-
-        text = text.replace(flexPatchRegex, (match, search, replace) => {
-            const patchId = 'patch_' + hashStr(search + replace);
-            window.pendingPatches = window.pendingPatches || {};
-            if (!window.pendingPatches[patchId]) {
-                window.pendingPatches[patchId] = { search, replace, applied: false, failed: false };
-            }
-            if (!patches.includes(patchId)) patches.push(patchId);
-            return ``;
-        });
-        
-        text = text.replace(/<{4,7}\s*SEARCH[\s\S]*$/gi, '');
-
         let codeBlocks = [];
         const codeRegex = new RegExp(marker + '([a-z0-9_+\\-#:\\.]+)?(?:[ \\t]*\\n)?([\\s\\S]*?)(?:' + marker + '|$)', 'gi');
         text = text.replace(codeRegex, (match, lang, code) => {
@@ -1588,14 +1584,20 @@
 
             let boxHtml = '';
             if (rawCode.trim().length > 100 && (rawCode.includes('<html') || rawCode.includes('<!DOCTYPE') || rawCode.includes('<body') || rawCode.includes('<style') || rawCode.includes('<div'))) {
+                let statusBtnText = isFinished ? '查看效果' : '更改中...';
+                let statusColor = isFinished ? '#007AFF' : '#FF9500';
+                let statusBg = isFinished ? 'rgba(0, 122, 255, 0.05)' : 'rgba(255, 149, 0, 0.05)';
+                let statusBorder = isFinished ? 'rgba(0, 122, 255, 0.3)' : 'rgba(255, 149, 0, 0.3)';
+                let statusPointer = isFinished ? '' : 'pointer-events:none;';
+
                 boxHtml = `
-                <div class="code-box patch-box" style="border-color: rgba(0, 122, 255, 0.3); margin: 20px 0; overflow: hidden; background: transparent;">
-                    <div class="patch-header" style="background: rgba(0, 122, 255, 0.05); color: #007AFF; padding: 12px; font-size: 13px; border-bottom: none; display: flex; justify-content: space-between; align-items: center;">
+                <div class="code-box patch-box" style="border-color: ${statusBorder}; margin: 20px 0; overflow: hidden; background: transparent; transition: all 0.3s;">
+                    <div class="patch-header" style="background: ${statusBg}; color: ${statusColor}; padding: 12px; font-size: 13px; border-bottom: none; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s;">
                         <span style="display:flex; align-items:center; gap:6px; font-weight: 600;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                             工作区代码已同步更新
                         </span>
-                        <button class="code-action-btn" style="margin:0; background:transparent; color:#007AFF; font-weight: 600;" onclick="window.pv(this)">查看效果</button>
+                        <button class="code-action-btn" style="margin:0; background:transparent; font-weight: 600; color:${statusColor}; ${statusPointer}" onclick="window.pv(this)">${statusBtnText}</button>
                     </div>
                     <div class="code-lang" style="display:none;">${encodeHTML(cb.lang)}</div>
                     <pre class="pre-area" style="display:none;"><code>${encodeHTML(rawCode)}</code></pre>
@@ -1614,22 +1616,6 @@
             }
             
             html = html.replace(`__MIMO_CDBLK_${idx}__`, boxHtml);
-        });
-
-        patches.forEach(pid => {
-            const p = window.pendingPatches[pid];
-            if (p) {
-                const statusClass = p.failed ? 'failed' : (p.applied ? 'success' : 'pending');
-                const statusText = p.failed ? '合并失败' : (p.applied ? '已自动合并' : '代码更新补丁');
-                const patchHtml = `
-                <div class="patch-box">
-                    <div class="patch-header">
-                        <span>代码更新补丁</span>
-                        <span class="patch-status ${statusClass}">${statusText}</span>
-                    </div>
-                </div>`;
-                html += patchHtml;
-            }
         });
 
         return html;
@@ -1724,7 +1710,7 @@
             
             let searchCostStr = "";
             if (msgObj.searchUsed) {
-                cost += 0.025; // 联网搜索 25元/1000次
+                cost += 0.025; 
                 searchCostStr = " + ¥0.025(检索)";
             }
 
@@ -1740,16 +1726,7 @@
         bubble.innerHTML = html || `<div class="typing-indicator"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
 
         if (isFinished) {
-            let anyPatchApplied = false;
-            for (let pid in window.pendingPatches) {
-                if (!window.pendingPatches[pid].applied && !window.pendingPatches[pid].failed) {
-                    if (window.applyPatch(pid, true)) {
-                        anyPatchApplied = true;
-                    }
-                }
-            }
-
-            if ((anyPatchApplied || msgObj.hasAppliedPatches || msgObj.hasFullCodeRewrite) && window.ideEditor && !msgObj.versionPushed) {
+            if (msgObj.hasFullCodeRewrite && window.ideEditor && !msgObj.versionPushed) {
                 const finalCode = window.ideEditor.getValue();
                 if (window.ideVersions[window.ideCurrentV] !== finalCode) {
                     window.ideVersions = window.ideVersions.slice(0, window.ideCurrentV + 1);
@@ -1787,7 +1764,7 @@
             });
 
             if (document.body.classList.contains('preview-open')) {
-                if (codeBoxes.length > 0 && !anyPatchApplied) {
+                if (codeBoxes.length > 0 && !msgObj.hasFullCodeRewrite) {
                     const lastBox = codeBoxes[codeBoxes.length - 1];
                     const btnExpand = lastBox.querySelector('button[onclick^="window.pv"]');
                     if (btnExpand) {
@@ -1795,7 +1772,7 @@
                         window.pv(btnExpand);
                         if (currentTab) window.switchIDETab(currentTab);
                     }
-                } else if (anyPatchApplied) {
+                } else if (msgObj.hasFullCodeRewrite) {
                     if (window.isDiffMode) window.renderDiff();
                     else if (window.ideEditor) window.ideEditor.setValue(window.ideVersions[window.ideCurrentV]);
                     window.runIDE();
@@ -2045,7 +2022,7 @@
                 const reader = res.body.getReader();
                 const dec = new TextDecoder();
                 let streamBuffer = '';
-                let lastRenderTime = 0; // 新增：节流渲染计时器，防止高频更新卡死页面
+                let lastRenderTime = 0; 
                 
                 while(true) {
                     const {done, value} = await reader.read();
@@ -2088,11 +2065,10 @@
                                 }
 
                                 const now = Date.now();
-                                // 实施 80ms 的渲染节流，极大降低重绘开销，解决卡顿死机
                                 if (now - lastRenderTime > 80) {
                                     window.renderOutput(bubble, msgObj, false); 
                                     
-                                    if (window.ideEditor && !window.isDiffMode && !msgObj.hasAppliedPatches) {
+                                    if (window.ideEditor && !window.isDiffMode) {
                                         const marker = '\x60\x60\x60';
                                         const codeRegex = new RegExp(marker + '(?:html|js|css|xml)?\\s*\\n([\\s\\S]*?)(?:' + marker + '|$)', 'gi');
                                         let match;
@@ -2104,23 +2080,9 @@
                                             msgObj.hasFullCodeRewrite = true;
                                             if (window.ideEditor.getValue() !== lastCode) {
                                                 window.ideEditor.setValue(lastCode);
-                                                // 自动滚动到最底部，实现打字机视口跟随效果
                                                 window.ideEditor.setCursor(window.ideEditor.lineCount(), 0);
                                             }
                                         }
-                                    }
-
-                                    let anyPatchLiveApplied = false;
-                                    for (let pid in window.pendingPatches) {
-                                        if (!window.pendingPatches[pid].applied && !window.pendingPatches[pid].failed) {
-                                            if (window.applyPatch(pid, true)) { 
-                                                anyPatchLiveApplied = true;
-                                                msgObj.hasAppliedPatches = true; 
-                                            }
-                                        }
-                                    }
-                                    if (anyPatchLiveApplied && window.ideEditor && !window.isDiffMode) {
-                                        window.runIDE();
                                     }
 
                                     if (chat.scrollHeight - chat.scrollTop < 1000) chat.scrollTop = chat.scrollHeight;
@@ -2131,8 +2093,7 @@
                     }
                 }
                 
-                // 循环结束后，强制进行最后一次全量同步，防止节流漏掉最后片段
-                if (window.ideEditor && !window.isDiffMode && !msgObj.hasAppliedPatches) {
+                if (window.ideEditor && !window.isDiffMode) {
                     const marker = '\x60\x60\x60';
                     const codeRegex = new RegExp(marker + '(?:html|js|css|xml)?\\s*\\n([\\s\\S]*?)(?:' + marker + '|$)', 'gi');
                     let match;
@@ -2430,62 +2391,6 @@
     window.isDiffMode = false;
     window.diffEditor = null;
     window.diffMinimap = null;
-
-    window.applyPatch = function(patchId, skipVersionHistory = false) {
-        window.pendingPatches = window.pendingPatches || {};
-        const patch = window.pendingPatches[patchId];
-        if (!patch || patch.applied || patch.failed) return false;
-
-        if (!window.ideEditor) {
-            const codeBoxes = document.querySelectorAll('.code-box');
-            if (codeBoxes.length > 0) {
-                const lastBox = codeBoxes[codeBoxes.length - 1];
-                const btnExpand = lastBox.querySelector('button[onclick^="window.pv"]');
-                if (btnExpand) window.pv(btnExpand);
-            }
-        }
-        
-        if (!window.ideEditor) {
-            patch.failed = true;
-            return false;
-        }
-
-        let code = window.ideEditor.getValue();
-        
-        function flexReplace(source, search, replace) {
-            if (source.includes(search)) return source.replace(search, replace);
-            if (search.trim() !== '' && source.includes(search.trim())) return source.replace(search.trim(), replace.trim());
-            let s1 = source.replace(/\r\n/g, '\n');
-            let s2 = search.replace(/\r\n/g, '\n');
-            if (s1.includes(s2)) return s1.replace(s2, replace);
-            try {
-                let regexStr = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
-                let regex = new RegExp(regexStr);
-                if (regex.test(source)) return source.replace(regex, replace);
-            } catch(e) {}
-            return null;
-        }
-
-        let newCode = flexReplace(code, patch.search, patch.replace);
-
-        if (newCode !== null) {
-            window.ideEditor.setValue(newCode);
-            
-            if (!skipVersionHistory) {
-                window.ideVersions = window.ideVersions.slice(0, window.ideCurrentV + 1);
-                window.ideVersions.push(newCode);
-                window.ideCurrentV++;
-                window.updateIDEVersionUI();
-                if (window.isDiffMode) window.renderDiff();
-            }
-
-            patch.applied = true;
-            return true;
-        } else {
-            patch.failed = true;
-            return false;
-        }
-    };
 
     window.toggleDiff = function() {
         window.isDiffMode = !window.isDiffMode;
