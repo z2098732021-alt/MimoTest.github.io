@@ -1055,9 +1055,26 @@
         document.getElementById('cfg-voice').value = window.config.voice || 'mimo_default';
         if(!window.config.key) window.toggleM(true); 
         window.initToggles();
-        if(window.sessions.length === 0) window.createNewSession(false);
-        else {
+        
+        if(window.sessions.length === 0) {
+            window.createNewSession(false);
+        } else {
             window.currentSessionId = window.sessions[0].id;
+            
+            // 修复关键点 1：恢复会话前，必须先将内存中的版本历史重载到全局变量
+            const currentSession = window.sessions[0];
+            window.ideVersions = currentSession.ideVersions ? [...currentSession.ideVersions] : [];
+            window.ideCurrentV = currentSession.ideCurrentV !== undefined ? currentSession.ideCurrentV : -1;
+            
+            // 如果存在历史，初始化编辑器让其准备好
+            if (window.ideVersions.length > 0 && window.ideCurrentV >= 0) {
+                window.initIDEIfNeeded(window.ideVersions[window.ideCurrentV]);
+                if (window.ideEditor && window.ideEditor.getValue() !== window.ideVersions[window.ideCurrentV]) {
+                    window.ideEditor.setValue(window.ideVersions[window.ideCurrentV]);
+                }
+            }
+            window.updateIDEVersionUI();
+
             window.renderSessionList();
             window.loadSessionToUI();
         }
@@ -1157,7 +1174,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `MIMO_Backup_${window.currentUser}_${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `Mimo_Backup_${window.currentUser}_${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -1200,6 +1217,7 @@
             if (oldSession) {
                 oldSession.ideVersions = window.ideVersions ? [...window.ideVersions] : [];
                 oldSession.ideCurrentV = window.ideCurrentV;
+                window.saveSessions(); // 修复点：确保切出旧会话前强制保存
             }
         }
 
@@ -2179,6 +2197,7 @@
                             const session = window.sessions.find(s => s.id === window.currentSessionId);
                             if (session) {
                                 session.ideVersions = [...window.ideVersions];
+                                window.saveSessions(); // 修复点：确保修改代码后触发持久化保存
                             }
                         }
                     }, 1000);
@@ -2645,6 +2664,7 @@
         if (session) {
             session.ideVersions = window.ideVersions ? [...window.ideVersions] : [];
             session.ideCurrentV = window.ideCurrentV;
+            window.saveSessions(); // 修复点：确保UI或版本变更时立即持久化
         }
     };
 
