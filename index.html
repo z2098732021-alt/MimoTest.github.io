@@ -598,9 +598,9 @@
                         </div>
                         <div class="model-menu" id="model-menu">
                             <div class="model-option" onclick="window.selectModel('mimo-v2-flash', 'Flash', event)">Flash</div>
-                            <div class="model-option" onclick="window.selectModel('mimo-v2-pro', 'Pro', event)">Pro</div>
-                            <div class="model-option" onclick="window.selectModel('mimo-v2-omni', 'Omni', event)">Omni</div>
-                            <div class="model-option" onclick="window.selectModel('mimo-v2-tts', 'TTS', event)">TTS</div>
+                            <div class="model-option" onclick="window.selectModel('mimo-v2.5-pro', 'Pro', event)">Pro</div>
+                            <div class="model-option" onclick="window.selectModel('mimo-v2.5', 'v2.5', event)">2.5</div>
+                            <div class="model-option" onclick="window.selectModel('mimo-v2.5-tts', 'TTS', event)">TTS</div>
                         </div>
                     </div>
                     
@@ -643,9 +643,9 @@
             <label class="form-label">核心引擎</label>
             <select id="mod-in-sheet" class="form-input" style="width: auto; text-align: right;" onchange="window.syncModelSelects('mod-in-sheet')">
                 <option value="mimo-v2-flash">MIMO Flash</option>
-                <option value="mimo-v2-pro">MIMO Pro</option>
-                <option value="mimo-v2-omni">MIMO Omni</option>
-                <option value="mimo-v2-tts">MIMO TTS</option>
+                <option value="mimo-v2.5-pro">MIMO Pro</option>
+                <option value="mimo-v2.5">MIMO V2.5</option>
+                <option value="mimo-v2.5-tts">MIMO TTS</option>
             </select>
         </div>
         <div class="form-item form-item-row">
@@ -1066,7 +1066,7 @@
     window.refreshUIState = function() {
         document.getElementById('key-in').value = window.config.key || '';
         
-        const displayMap = { 'mimo-v2-flash': 'Flash', 'mimo-v2-pro': 'Pro', 'mimo-v2-omni': 'Omni', 'mimo-v2-tts': 'TTS' };
+        const displayMap = { 'mimo-v2-flash': 'Flash', 'mimo-v2.5-pro': 'Pro', 'mimo-v2.5': 'V2.5', 'mimo-v2.5-tts': 'TTS' };
         const el = document.getElementById('mod-display');
         if(el) el.innerText = displayMap[window.config.mod] || 'Flash';
         
@@ -1118,7 +1118,7 @@
         const val = document.getElementById(sourceId).value;
         window.config.mod = val;
         
-        const displayMap = { 'mimo-v2-flash': 'Flash', 'mimo-v2-pro': 'Pro', 'mimo-v2-omni': 'Omni', 'mimo-v2-tts': 'TTS' };
+        const displayMap = { 'mimo-v2-flash': 'Flash', 'mimo-v2.5-pro': 'Pro', 'mimo-v2.5': 'V2.5', 'mimo-v2.5-tts': 'TTS' };
         const el = document.getElementById('mod-display');
         if(el) el.innerText = displayMap[val] || 'Flash';
         
@@ -1189,7 +1189,7 @@
         const mod = window.config.mod;
         const container = document.getElementById('tts-style-container');
         if (container) {
-            if (mod === 'mimo-v2-tts') container.style.display = 'block';
+            if (mod === 'mimo-2.5-tts') container.style.display = 'block';
             else container.style.display = 'none';
         }
     };
@@ -1477,13 +1477,13 @@
     window.setAttachment = function(type, url, isLocal, name) {
         window.currentAttachment = { type, url, isLocal, name };
         window.renderAttachmentPreview();
-        if (window.config.mod !== 'mimo-v2-omni') {
-            window.config.mod = 'mimo-v2-omni';
+        if (window.config.mod !== 'mimo-v2.5') {
+            window.config.mod = 'mimo-v2.5';
             
             const el = document.getElementById('mod-display');
-            if(el) el.innerText = 'Omni';
+            if(el) el.innerText = 'V2.5';
             
-            document.getElementById('mod-in-sheet').value = 'mimo-v2-omni';
+            document.getElementById('mod-in-sheet').value = 'mimo-v2.5';
             if(window.currentUser) {
                 localStorage.setItem(`mimo_cfg_v5_${window.currentUser}`, JSON.stringify(window.config));
             }
@@ -1783,7 +1783,7 @@
             
             if (mod === 'mimo-v2-pro') {
                 cost = (prompt / 1000000) * 7.00 + (comp / 1000000) * 21.00;
-            } else if (mod === 'mimo-v2-omni') {
+            } else if (mod === 'mimo-v2.5') {
                 cost = (prompt / 1000000) * 2.80 + (comp / 1000000) * 14.00;
             } else if (mod === 'mimo-v2-flash') {
                 cost = (prompt / 1000000) * 0.70 + (comp / 1000000) * 2.10;
@@ -1924,7 +1924,7 @@
         try {
             const cleanText = msg.content.replace(/[#*\x60_~>]/g, '');
             const reqBody = {
-                model: 'mimo-v2-tts',
+                model: 'mimo-v2.5-tts',
                 messages: [
                     { role: "user", content: "请根据语境朗读：" },
                     { role: "assistant", content: cleanText.substring(0, 1000) }
@@ -2071,7 +2071,7 @@
         chat.appendChild(bw);
         chat.scrollTop = chat.scrollHeight;
 
-        const isTTS = window.config.mod === 'mimo-v2-tts';
+        const isTTS = window.config.mod === 'mimo-v2.5-tts';
         const msgObj = { id: (Date.now() + 1).toString(), role: 'assistant', reasoning: "", content: "", annotations: [], audioData: null, usage: null, modelUsed: window.config.mod, searchUsed: (window.config.search && !isTTS), isModification: false };
         
         let reqBody = { model: window.config.mod };
