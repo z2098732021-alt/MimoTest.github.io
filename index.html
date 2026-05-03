@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>MIMO Cloud</title>
+    <title>MIMO CODE</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
@@ -50,7 +50,19 @@
             }
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0,0,0,0.12) transparent;
+        }
+        *::-webkit-scrollbar { width: 5px; height: 5px; }
+        *::-webkit-scrollbar-track { background: transparent; }
+        *::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 10px; }
+        *::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.22); }
+        @media (prefers-color-scheme: dark) {
+            * { scrollbar-color: rgba(255,255,255,0.1) transparent; }
+            *::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+            *::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+        }
         
         body, html { 
             height: 100%; width: 100%; overflow: hidden; 
@@ -149,6 +161,7 @@
         
         .wrapper { display: flex; width: 100%; max-width: 100%; box-sizing: border-box; padding: 16px 24px; animation: fadeIn 0.5s var(--spring) forwards; opacity: 0; transform: translateY(10px); flex-direction: column;}
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        @keyframes pop { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
         
         .msg-role-label { font-size: 12px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;}
         .bubble { font-size: 16px; line-height: 1.6; word-wrap: break-word; overflow-wrap: break-word; color: var(--text-primary); min-width: 0; max-width: 100%; box-sizing: border-box; }
@@ -266,18 +279,6 @@
         .model-trigger:hover { color: var(--text-primary); }
         .model-trigger svg { width: 12px; height: 12px; transition: transform 0.3s var(--spring); }
         .inline-model-select.open .model-trigger svg { transform: rotate(180deg); }
-        
-        .model-menu {
-            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(12px) scale(0.9);
-            background: var(--bg-elevated); backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy);
-            border: 1px solid var(--border-subtle); border-radius: 16px; padding: 6px;
-            display: flex; flex-direction: column; gap: 2px; box-shadow: var(--shadow-float);
-            opacity: 0; pointer-events: none; transition: all 0.4s var(--spring); transform-origin: bottom center;
-            z-index: 100;
-        }
-        .inline-model-select.open .model-menu { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(-10px) scale(1); }
-        .model-option { padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: center; transition: 0.2s; white-space: nowrap; }
-        .model-option:hover { background: var(--border-subtle); }
 
         .btn-up { 
             width: 36px !important; height: 36px !important; 
@@ -383,6 +384,14 @@
             position: relative; z-index: 100;
         }
         .ide-header-title { font-weight: 700; font-size: 15px; letter-spacing: -0.02em; color: var(--text-primary); }
+        .ide-lang-badge {
+            display: inline-flex; align-items: center; padding: 2px 8px;
+            border-radius: 6px; font-size: 11px; font-weight: 600;
+            background: var(--border-subtle); color: var(--text-secondary);
+            font-family: 'SF Mono', ui-monospace, monospace;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            margin-left: 8px;
+        }
         
         .ide-versions { display: flex; align-items: center; gap: 6px; font-family: 'SF Mono', ui-monospace, monospace; font-size: 13px; font-weight: 600; color: var(--text-secondary); background: var(--bg-surface); padding: 4px; border-radius: 12px; border: 1px solid var(--border-subtle); box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-right: 12px;}
         .ide-v-btn { background: transparent; border: none; border-radius: 8px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-primary); transition: 0.2s;}
@@ -528,6 +537,123 @@
         .mimo-toast.hiding { animation: toastSlideOut 0.3s forwards; }
         @keyframes toastSlideIn { from { opacity: 0; transform: translateY(-20px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes toastSlideOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-20px) scale(0.9); } }
+
+        /* ================= API Key 弹窗 ================= */
+        #apikey-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 3000;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s;
+            backdrop-filter: blur(12px) saturate(150%); -webkit-backdrop-filter: blur(12px) saturate(150%);
+        }
+        #apikey-modal.visible { opacity: 1; pointer-events: auto; }
+        .apikey-card {
+            background: var(--bg-elevated); padding: 40px 36px; border-radius: 28px;
+            box-shadow: var(--shadow-float); width: 90%; max-width: 360px;
+            border: 1px solid var(--border-subtle); text-align: center;
+            backdrop-filter: blur(50px) saturate(200%); -webkit-backdrop-filter: blur(50px) saturate(200%);
+            transform: scale(0.88) translateY(20px); opacity: 0;
+            transition: transform 0.5s var(--spring), opacity 0.4s;
+        }
+        #apikey-modal.visible .apikey-card { transform: scale(1) translateY(0); opacity: 1; }
+        .apikey-provider-icon { width: 48px; height: 48px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; color: var(--text-primary); }
+        .apikey-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.02em; }
+        .apikey-card p { color: var(--text-secondary); font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+        .apikey-input-wrap { position: relative; margin-bottom: 8px; }
+        .apikey-input {
+            width: 100%; background: var(--bg-surface); border: 1px solid var(--border-subtle);
+            padding: 14px 44px 14px 16px; border-radius: 14px; font-size: 15px; color: var(--text-primary);
+            outline: none; transition: 0.3s; box-sizing: border-box;
+        }
+        .apikey-input:focus { border-color: var(--text-primary); }
+        .apikey-toggle-vis {
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            background: transparent; border: none; color: var(--text-tertiary); cursor: pointer;
+            padding: 6px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: 0.2s;
+        }
+        .apikey-toggle-vis:hover { color: var(--text-primary); }
+        .apikey-error {
+            display: none; font-size: 12px; color: #FF3B30; text-align: left; padding: 8px 0;
+        }
+        .apikey-actions { display: flex; gap: 10px; margin-top: 16px; }
+        .apikey-btn {
+            flex: 1; padding: 14px; border-radius: 14px; font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: 0.3s var(--spring); border: none;
+        }
+        .apikey-btn:active { transform: scale(0.96); }
+        .apikey-btn-cancel { background: var(--bg-surface); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
+        .apikey-btn-cancel:hover { background: var(--border-subtle); color: var(--text-primary); }
+        .apikey-btn-confirm { background: var(--text-primary); color: var(--bg-base); }
+        .apikey-btn-confirm:hover { transform: scale(1.02); }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+        /* ================= 模型分组菜单 ================= */
+        .model-menu {
+            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(12px) scale(0.9);
+            background: var(--bg-elevated); backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy);
+            border: 1px solid var(--border-subtle); border-radius: 16px; padding: 6px;
+            display: flex; flex-direction: column; gap: 0; box-shadow: var(--shadow-float);
+            opacity: 0; pointer-events: none; transition: all 0.4s var(--spring); transform-origin: bottom center;
+            z-index: 100; min-width: 220px; max-height: 400px; overflow-y: auto; overflow-x: hidden;
+        }
+        .model-menu::-webkit-scrollbar { display: none; }
+        .inline-model-select.open .model-menu { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(-10px) scale(1); }
+        .model-section-label {
+            font-size: 11px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase;
+            letter-spacing: 0.06em; padding: 8px 12px 4px; display: flex; align-items: center; gap: 6px;
+        }
+        .model-group-header {
+            font-size: 11px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase;
+            letter-spacing: 0.05em; padding: 10px 12px 4px; display: flex; align-items: center; gap: 6px;
+            opacity: 0; animation: fadeSlideIn 0.3s var(--spring) forwards;
+        }
+        .model-group-divider { height: 1px; background: var(--border-subtle); margin: 4px 10px; }
+        .model-option {
+            padding: 9px 14px; border-radius: 10px; font-size: 13px; font-weight: 600;
+            color: var(--text-primary); transition: 0.2s; white-space: nowrap; cursor: pointer;
+            opacity: 0; transform: translateX(-6px); animation: fadeSlideIn 0.3s var(--spring) forwards;
+        }
+        .model-option:hover { background: var(--border-subtle); }
+        .freq-model-tag {
+            display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 10px;
+            font-size: 12px; font-weight: 600; color: var(--text-primary); cursor: pointer;
+            background: var(--bg-surface); border: 1px solid var(--border-subtle); transition: 0.2s;
+            opacity: 0; transform: translateX(-6px); animation: fadeSlideIn 0.3s var(--spring) forwards;
+        }
+        .freq-model-tag:hover { background: var(--border-subtle); }
+        .freq-model-tag svg { pointer-events: none; }
+        @keyframes fadeSlideIn { to { opacity: 1; transform: translateX(0); } }
+        .model-expand-btn {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            width: 100%; padding: 8px; border: none; background: transparent;
+            color: var(--text-tertiary); font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: 0.2s; border-radius: 8px;
+        }
+        .model-expand-btn:hover { color: var(--text-secondary); background: var(--border-subtle); }
+        .model-expand-btn .expand-arrow { width: 12px; height: 12px; transition: transform 0.3s var(--spring); pointer-events: none; }
+        .model-section:not(.collapsed) .expand-arrow { transform: rotate(180deg); }
+        .model-group-list {
+            max-height: 0; opacity: 0; overflow: hidden;
+            transition: max-height 0.4s var(--spring), opacity 0.3s ease;
+        }
+        .model-section:not(.collapsed) .model-group-list { max-height: 600px; opacity: 1; }
+
+        /* ================= API 管理面板 ================= */
+        .btn-clear-keys {
+            width: 100%; background: transparent; border: 1px solid rgba(255,59,48,0.3);
+            padding: 14px; border-radius: 14px; font-size: 14px; font-weight: 600;
+            color: #FF3B30; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-clear-keys:hover { background: rgba(255,59,48,0.08); }
+        .btn-clear-keys:active { transform: scale(0.97); }
+        .api-key-row { display: flex; flex-direction: column; gap: 8px; }
+        .api-key-row .key-input-wrap { display: flex; gap: 8px; align-items: center; }
+        .api-key-row .key-input-wrap input { flex: 1; }
+        .api-key-row .key-input-wrap .btn-icon { flex-shrink: 0; }
+        .api-key-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .api-key-status.set { background: #34C759; }
+        .api-key-status.unset { background: var(--border-subtle); }
     </style>
 </head>
 <body class="app-locked">
@@ -555,7 +681,7 @@
 <div id="app-container">
     <header>
         <div class="btn-icon" onclick="window.toggleHistory(true)" id="icon-menu" role="button"></div>
-        <h1>MIMO</h1>
+        <h1>MIMO CODE</h1>
         <div class="btn-icon" onclick="window.toggleM(true)" id="icon-gear" role="button"></div>
     </header>
     
@@ -597,10 +723,18 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </div>
                         <div class="model-menu" id="model-menu">
-                            <div class="model-option" onclick="window.selectModel('mimo-v2-flash', 'Flash', event)">Flash</div>
-                            <div class="model-option" onclick="window.selectModel('mimo-v2.5-pro', 'Pro', event)">Pro</div>
-                            <div class="model-option" onclick="window.selectModel('mimo-v2.5', 'v2.5', event)">2.5</div>
-                            <div class="model-option" onclick="window.selectModel('mimo-v2.5-tts', 'TTS', event)">TTS</div>
+                            <div class="model-section" id="frequent-section">
+                                <div class="model-section-label" id="freq-label"></div>
+                                <div id="freq-tags" style="display:flex; flex-wrap:wrap; gap:4px; padding:0 8px 6px;"></div>
+                            </div>
+                            <div class="model-group-divider"></div>
+                            <div class="model-section" id="all-models-section">
+                                <button class="model-expand-btn" id="expand-all-btn" onclick="window.toggleAllModels(event)">
+                                    <span>全部模型</span>
+                                    <svg class="expand-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                                </button>
+                                <div class="model-group-list" id="model-group-list"></div>
+                            </div>
                         </div>
                     </div>
                     
@@ -633,7 +767,7 @@
     
     <div class="form-group">
         <div class="form-item">
-            <label class="form-label">MIMO API KEY</label>
+            <label class="form-label" id="key-in-label">API KEY</label>
             <input type="password" id="key-in" class="form-input" placeholder="sk-...">
         </div>
     </div>
@@ -658,6 +792,25 @@
         </div>
     </div>
 
+    <div class="form-group" id="api-mgmt-entry">
+        <div class="form-item form-item-row" style="cursor:pointer;" onclick="window.openApiManager()">
+            <label class="form-label" style="color:var(--text-primary); display:flex; align-items:center; gap:8px;" id="icon-apikey"></label>
+            <span style="display:flex; align-items:center; color:var(--text-tertiary);" id="icon-apikey-arrow"></span>
+        </div>
+    </div>
+
+    <div id="api-manage-view" style="display:none;">
+        <div style="padding: 0 24px 16px; display:flex; justify-content:space-between; align-items:center;">
+            <button class="btn-close-sheet" onclick="window.closeApiManager()" style="display:flex; align-items:center; gap:6px;" id="icon-apiback"></button>
+            <h2 style="font-size:18px; font-weight:700;">API 密钥</h2>
+            <div style="width:80px;"></div>
+        </div>
+        <div id="api-manage-list" class="form-group" style="margin: 0 24px 16px;"></div>
+        <div style="padding: 0 24px 32px;">
+            <button class="btn-clear-keys" id="btn-clear-keys" onclick="window.clearAllKeys()"></button>
+        </div>
+    </div>
+
     <div class="form-group">
         <div class="form-item form-item-row" style="cursor:pointer;" onclick="window.exportData()">
             <label class="form-label" style="color:var(--text-primary); display:flex; align-items:center; gap:8px;" id="icon-download">导出本地数据</label>
@@ -676,13 +829,13 @@
         <button class="btn-close-sheet" onclick="window.closeAll()">取消</button>
     </div>
     <div style="padding: 0 24px 32px;">
-        <div class="media-guide">
+        <div class="media-guide" id="media-guide">
             <b>关于大文件解析：</b><br>
             受限于浏览器内存限制，过大的文件会导致分析失败。<br>
             若需处理超长视频，请提供<b>公共直链 URL</b>。
         </div>
         <input type="file" id="local-file-input" style="display:none" accept="image/*,video/*,audio/*" onchange="window.handleLocalFile(event)">
-        <button class="btn-local-file" onclick="document.getElementById('local-file-input').click()">
+        <button class="btn-local-file" id="btn-media-upload" onclick="document.getElementById('local-file-input').click()">
             <span id="icon-media-upload" style="display:flex; align-items:center; margin-right:6px;"></span> 从相册图库上传 (智能压缩)
         </button>
         <div style="height: 24px;"></div>
@@ -700,7 +853,7 @@
                 <input type="text" id="media-url" class="form-input" placeholder="https://...">
             </div>
         </div>
-        <button class="btn-local-file" style="margin-top: 16px; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-subtle); box-shadow:none;" onclick="window.confirmMediaUrl()">
+        <button class="btn-local-file" id="btn-media-url" style="margin-top: 16px; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-subtle); box-shadow:none;" onclick="window.confirmMediaUrl()">
             解析网络直链
         </button>
     </div>
@@ -709,6 +862,9 @@
 <div id="preview-page" data-tab="preview">
     <div class="ide-header">
         <div class="ide-header-title">MIMO IDE</div>
+        <div class="ide-lang-badge" id="ide-lang-badge" style="display:none;">
+            <span id="ide-lang-text">HTML</span>
+        </div>
         <div class="ide-tabs">
             <button class="ide-tab" onclick="window.switchIDETab('code')" id="tab-code">代码</button>
             <button class="ide-tab active" onclick="window.switchIDETab('preview')" id="tab-preview">预览</button>
@@ -790,7 +946,31 @@
         bolt: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
         warning: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
         upload: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`,
-        edit: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`
+        edit: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
+        bolt16: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
+        providerOpenAI: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8.5 5v10L12 22l-8.5-5V7L12 2z"/><circle cx="12" cy="12" r="3"/></svg>`,
+        providerAnthropic: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>`,
+        providerGoogle: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 22L6 9l6-6 6 6-6 13z"/></svg>`,
+        providerDeepSeek: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/><path d="M2 7c2-2.5 4-2.5 6 0s4 2.5 6 0 4-2.5 6 0"/><path d="M2 17c2-2.5 4-2.5 6 0s4 2.5 6 0 4-2.5 6 0"/></svg>`,
+        providerQwen: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/><line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/><circle cx="12" cy="12" r="3"/></svg>`,
+        providerZhipu: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l6 3.5v7L12 16l-6-3.5v-7L12 2z"/><path d="M12 16v6"/><path d="M6 9.5L12 13l6-3.5"/></svg>`,
+        providerErnie: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2V3z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7V3z"/></svg>`,
+        providerSpark: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4-2 7-6 7-10a7 7 0 0 0-14 0c0 4 3 8 7 10z"/><path d="M12 22c-2-1.5-3-3.5-3-6a3 3 0 0 1 6 0c0 2.5-1 4.5-3 6z"/></svg>`,
+        providerKimi: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+        providerDoubao: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>`,
+        providerMiniMax: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
+        providerBaichuan: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20l5-10 3 5 4-9 5 14"/></svg>`,
+        providerYi: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V8"/><path d="M5 12c0-5 7-10 7-10s7 5 7 10"/><path d="M8 16c0-2.5 4-5 4-5s4 2.5 4 5"/></svg>`,
+        providerStep: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 18 4 14 8 14 8 10 12 10 12 6 16 6 16 2 22 2"/><polyline points="19 2 22 2 22 5"/></svg>`,
+        star: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        key: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>`,
+        eye: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+        eyeOff: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`,
+        arrowLeft: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`,
+        chevronDown: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`,
+        alertTriangle: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+        checkCircle: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+        download: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
     };
 
     window.initIcons = function() {
@@ -807,11 +987,189 @@
     };
     window.initIcons();
 
+    const AI_PROVIDERS = {
+        mimo:      { name: 'MIMO',      icon: icons.bolt16,          format: 'openai',     apiBase: 'https://api.xiaomimimo.com/v1/chat/completions', media: { image: true, video: true, audio: true, accept: 'image/*,video/*,audio/*', imageGen: false }, models: [
+            { id: 'mimo-v2.5-pro', name: 'Pro',   caps: {think:true, search:true, tts:false} },
+            { id: 'mimo-v2.5',     name: 'V2.5',  caps: {think:true, search:true, tts:false} },
+            { id: 'mimo-v2-flash', name: 'Flash', caps: {think:false,search:true, tts:false} },
+            { id: 'mimo-v2.5-tts', name: 'TTS',   caps: {think:false,search:false,tts:true}  },
+            { id: 'mimo-v2.5-asr', name: 'ASR',   caps: {think:false,search:false,tts:false} }
+        ]},
+        openai:    { name: 'OpenAI',    icon: icons.providerOpenAI,  format: 'openai',     apiBase: 'https://api.openai.com/v1/chat/completions', ttsApi: 'https://api.openai.com/v1/audio/speech', media: { image: true, video: false, audio: false, accept: 'image/*', imageGen: true, imageGenApi: 'https://api.openai.com/v1/images/generations', imageGenModel: 'dall-e-3' }, models: [
+            { id: 'gpt-5.5',             name: 'GPT-5.5 Omni',      caps: {think:true, search:false, tts:true}  },
+            { id: 'gpt-5.5-mini',        name: 'GPT-5.5 Mini',      caps: {think:false,search:false, tts:false} },
+            { id: 'gpt-5.3-codex-spark', name: 'Codex Spark',       caps: {think:false,search:false, tts:false} }
+        ]},
+        anthropic: { name: 'Anthropic', icon: icons.providerAnthropic,format: 'anthropic',  apiBase: 'https://api.anthropic.com/v1/messages', media: { image: true, video: false, audio: false, accept: 'image/*', imageGen: false }, models: [
+            { id: 'claude-sonnet-4-20250514',  name: 'Claude Sonnet 4',  caps: {think:true, search:false,tts:false} },
+            { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', caps: {think:false,search:false,tts:false} },
+            { id: 'claude-3-opus-20240229',    name: 'Claude 3 Opus',    caps: {think:true, search:false,tts:false} }
+        ]},
+        google:    { name: 'Google',    icon: icons.providerGoogle,  format: 'gemini',     apiBase: 'https://generativelanguage.googleapis.com/v1beta/models', media: { image: true, video: true, audio: true, accept: 'image/*,video/*,audio/*', imageGen: true, imageGenApi: 'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', imageGenModel: 'imagen-3.0-generate-002' }, models: [
+            { id: 'gemini-3.1-pro',   name: 'Gemini 3.1 Pro',   caps: {think:true, search:true, tts:true}  },
+            { id: 'gemini-3.1-flash', name: 'Gemini 3.1 Flash', caps: {think:true, search:true, tts:false} },
+            { id: 'gemini-3.0-ultra', name: 'Gemini 3.0 Ultra', caps: {think:true, search:true, tts:true}  }
+        ]},
+        deepseek:  { name: 'DeepSeek',  icon: icons.providerDeepSeek,format: 'openai',     apiBase: 'https://api.deepseek.com/v1/chat/completions', media: { image: true, video: false, audio: false, accept: 'image/*', imageGen: false }, models: [
+            { id: 'deepseek-chat',     name: 'DeepSeek V3', caps: {think:false,search:false,tts:false} },
+            { id: 'deepseek-reasoner', name: 'DeepSeek R1', caps: {think:true, search:false,tts:false} }
+        ]},
+        qwen:      { name: '通义千问',  icon: icons.providerQwen,    format: 'openai',     apiBase: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', ttsApi: 'https://dashscope.aliyuncs.com/compatible-mode/v1/audio/speech', media: { image: true, video: true, audio: true, accept: 'image/*,video/*,audio/*', imageGen: true, imageGenApi: 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis', imageGenModel: 'wanx-v1' }, models: [
+            { id: 'qwen-3.6-max',   name: 'Qwen 3.6 Max',   caps: {think:true, search:true,  tts:true}  },
+            { id: 'qwen-3.6-plus',  name: 'Qwen 3.6 Plus',  caps: {think:true, search:true,  tts:false} },
+            { id: 'qwen-3.6-turbo', name: 'Qwen 3.6 Turbo', caps: {think:false,search:true,  tts:false} },
+            { id: 'qwen-vl-max',    name: 'Qwen-VL-Max',    caps: {think:false,search:false, tts:false} },
+            { id: 'qwen-vl-plus',   name: 'Qwen-VL-Plus',   caps: {think:false,search:false, tts:false} }
+        ]},
+        zhipu:     { name: '智谱AI',    icon: icons.providerZhipu,   format: 'openai',     apiBase: 'https://open.bigmodel.cn/api/paas/v4/chat/completions', media: { image: true, video: false, audio: false, accept: 'image/*', imageGen: true, imageGenApi: 'https://open.bigmodel.cn/api/paas/v4/images/generations', imageGenModel: 'cogview-4' }, models: [
+            { id: 'glm-5',   name: 'GLM-5',   caps: {think:true, search:true,  tts:false} },
+            { id: 'glm-5v',  name: 'GLM-5V',  caps: {think:false,search:false, tts:false} },
+            { id: 'glm-5.1', name: 'GLM-5.1', caps: {think:true, search:true,  tts:false} }
+        ]},
+        ernie:     { name: '百度文心',  icon: icons.providerErnie,   format: 'ernie',      apiBase: 'https://aip.baidubce.com', media: { image: true, video: false, audio: false, accept: 'image/*', imageGen: false }, models: [
+            { id: 'ernie-5.0',       name: 'ERNIE 5.0',       caps: {think:true, search:true,  tts:false} },
+            { id: 'ernie-4.0-turbo', name: 'ERNIE 4.0 Turbo', caps: {think:true, search:true,  tts:false} }
+        ]},
+        spark:     { name: '讯飞星火',  icon: icons.providerSpark,   format: 'spark',      apiBase: 'https://spark-api-open.xf-yun.com/v1/chat/completions', media: { image: true, video: false, audio: false, accept: 'image/*', imageGen: false }, models: [
+            { id: 'spark-x2',        name: 'Spark X2',        caps: {think:true, search:true,  tts:true} },
+            { id: 'spark-auto-emm',  name: 'SparkAuto-EMM',   caps: {think:false,search:false, tts:true} }
+        ]},
+        kimi:      { name: '月之暗面',  icon: icons.providerKimi,    format: 'openai',     apiBase: 'https://api.moonshot.cn/v1/chat/completions', media: { image: true, video: false, audio: false, accept: 'image/*', imageGen: false }, models: [
+            { id: 'kimi-k2.6', name: 'Kimi K2.6', caps: {think:true,search:true,tts:false} }
+        ]},
+        doubao:    { name: '字节豆包',  icon: icons.providerDoubao,  format: 'openai',     apiBase: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions', media: { image: true, video: false, audio: false, accept: 'image/*', imageGen: false }, models: [
+            { id: 'doubao-pro-256k', name: 'Doubao Pro 256K', caps: {think:true, search:false,tts:false} },
+            { id: 'doubao-pro-32k',  name: 'Doubao Pro 32K',  caps: {think:true, search:false,tts:false} },
+            { id: 'doubao-lite-32k', name: 'Doubao Lite',     caps: {think:false,search:false,tts:false} }
+        ]},
+        minimax:   { name: 'MiniMax',   icon: icons.providerMiniMax, format: 'openai',     apiBase: 'https://api.minimax.chat/v1/text/chatcompletion_v2', media: { image: false, video: false, audio: false, accept: '', imageGen: true, imageGenApi: 'https://api.minimax.chat/v1/image/generation', imageGenModel: 'image-01' }, models: [
+            { id: 'minimax-m2.5', name: 'MiniMax M2.5', caps: {think:false,search:false,tts:false} }
+        ]}
+    };
+
+    const ERROR_MAP = {
+        _http: {
+            401: { msg: '密钥无效或已过期',   icon: icons.key },
+            403: { msg: '访问被拒绝',         icon: icons.alertTriangle },
+            404: { msg: '接口不存在',         icon: icons.link },
+            429: { msg: '请求频率超限',       icon: icons.warning },
+            500: { msg: '服务内部异常',       icon: icons.alertTriangle },
+            502: { msg: '网关异常',           icon: icons.alertTriangle },
+            503: { msg: '服务暂时不可用',     icon: icons.gear }
+        },
+        openai: {
+            'insufficient_quota':      { msg: '余额不足，请充值',     icon: icons.bolt16 },
+            'invalid_api_key':         { msg: '密钥无效',             icon: icons.key },
+            'model_not_found':         { msg: '模型不存在或无权访问', icon: icons.link },
+            'rate_limit_exceeded':     { msg: '速率限制，请稍后',     icon: icons.warning },
+            'context_length_exceeded': { msg: '上下文长度超限',       icon: icons.alertTriangle },
+            'server_error':            { msg: 'OpenAI 服务异常',      icon: icons.alertTriangle }
+        },
+        anthropic: {
+            'authentication_error': { msg: 'Anthropic 密钥无效',   icon: icons.key },
+            'permission_error':     { msg: '无权访问该模型',       icon: icons.alertTriangle },
+            'rate_limit_error':     { msg: 'Anthropic 速率限制',   icon: icons.warning },
+            'overloaded_error':     { msg: '服务过载，请稍后',     icon: icons.alertTriangle },
+            'invalid_request_error':{ msg: '请求参数错误',         icon: icons.alertTriangle },
+            'api_error':            { msg: 'Anthropic 服务异常',   icon: icons.alertTriangle }
+        },
+        google: {
+            'INVALID_ARGUMENT':       { msg: '请求参数无效',         icon: icons.alertTriangle },
+            'PERMISSION_DENIED':      { msg: 'API 密钥无权',         icon: icons.key },
+            'RESOURCE_EXHAUSTED':     { msg: '配额耗尽',             icon: icons.bolt16 },
+            'SAFETY':                 { msg: '内容安全策略拦截',     icon: icons.alertTriangle },
+            'BLOCKED_REASON_SAFETY':  { msg: '内容安全策略拦截',     icon: icons.alertTriangle },
+            'INTERNAL':               { msg: 'Google 服务内部错误',  icon: icons.alertTriangle },
+            'UNAVAILABLE':            { msg: '服务暂不可用',         icon: icons.gear }
+        },
+        deepseek: {
+            'authentication_error': { msg: 'DeepSeek 密钥无效',   icon: icons.key },
+            'rate_limit':           { msg: '请求频繁，请稍后',     icon: icons.warning },
+            'server_busy':          { msg: '服务繁忙，排队中',     icon: icons.alertTriangle },
+            'insufficient_balance': { msg: '余额不足',             icon: icons.bolt16 }
+        },
+        qwen: {
+            'InvalidApiKey': { msg: '通义千问密钥无效', icon: icons.key },
+            'Throttling':    { msg: '请求限流',         icon: icons.warning },
+            'InternalError': { msg: '服务异常',         icon: icons.alertTriangle },
+            'ModelNotFound': { msg: '模型不存在或未开通', icon: icons.link }
+        },
+        zhipu: {
+            '1000': { msg: '智谱密钥无效',     icon: icons.key },
+            '1001': { msg: '智谱权限不足',     icon: icons.alertTriangle },
+            '1002': { msg: '智谱请求限流',     icon: icons.warning },
+            '1013': { msg: '内容触发安全策略', icon: icons.alertTriangle }
+        },
+        ernie: {
+            '1':  { msg: '文心密钥无效',   icon: icons.key },
+            '2':  { msg: '文心服务超时',   icon: icons.warning },
+            '6':  { msg: '文心请求频繁',   icon: icons.warning },
+            '13': { msg: '内容安全拦截',   icon: icons.alertTriangle },
+            '17': { msg: '文心配额不足',   icon: icons.bolt16 }
+        },
+        spark: {
+            '10001': { msg: '星火密钥无效',     icon: icons.key },
+            '10002': { msg: '星火请求限流',     icon: icons.warning },
+            '10003': { msg: '内容安全拦截',     icon: icons.alertTriangle },
+            '11200': { msg: '星火授权不足',     icon: icons.bolt16 }
+        },
+        kimi: {
+            'invalid_api_key':         { msg: 'Kimi 密钥无效',   icon: icons.key },
+            'rate_limit':              { msg: '请求频繁',         icon: icons.warning },
+            'context_length_exceeded': { msg: '上下文超限',       icon: icons.alertTriangle }
+        },
+        doubao: {
+            'InvalidApiKey': { msg: '豆包密钥无效',   icon: icons.key },
+            'Throttling':    { msg: '请求限流',       icon: icons.warning },
+            'ModelNotFound': { msg: '模型不存在',     icon: icons.link }
+        },
+        minimax:  { 'invalid_api_key': { msg: 'MiniMax 密钥无效', icon: icons.key }, 'rate_limit': { msg: '请求限流', icon: icons.warning } }
+    };
+
+    window.findProviderForModel = function(modelId) {
+        for (const [pid, prov] of Object.entries(AI_PROVIDERS)) {
+            const model = prov.models.find(m => m.id === modelId);
+            if (model) return { providerId: pid, provider: prov, model };
+        }
+        return null;
+    };
+
+    window.getModelCaps = function(modelId) {
+        const r = window.findProviderForModel(modelId);
+        return r ? r.model.caps : { think: false, search: false, tts: false };
+    };
+
+    window.parseProviderError = function(providerId, httpStatus, responseBody) {
+        const provName = AI_PROVIDERS[providerId]?.name || '';
+        if (httpStatus && ERROR_MAP._http[httpStatus]) {
+            const b = ERROR_MAP._http[httpStatus];
+            return `${b.icon} ${provName}：${b.msg}`;
+        }
+        const pErrors = ERROR_MAP[providerId];
+        if (pErrors && responseBody) {
+            const errType = responseBody.error?.type || responseBody.error?.code || responseBody.code || '';
+            if (pErrors[errType]) { const s = pErrors[errType]; return `${s.icon} ${provName}：${s.msg}`; }
+            const err_msg = (responseBody.error?.message || responseBody.message || '').toLowerCase();
+            for (const [key, val] of Object.entries(pErrors)) {
+                if (err_msg.includes(key.toLowerCase())) return `${val.icon} ${provName}：${val.msg}`;
+            }
+        }
+        return `${icons.warning} ${provName}：请求失败 (${httpStatus || '未知'})`;
+    };
+
+    window.recordModelUsage = function(modelId) {
+        if (!window.currentUser) return;
+        const key = `mimo_freq_${window.currentUser}`;
+        const freq = JSON.parse(localStorage.getItem(key) || '{}');
+        freq[modelId] = (freq[modelId] || 0) + 1;
+        localStorage.setItem(key, JSON.stringify(freq));
+    };
+
     const PROXY = "https://delicate-bread-d122.z2098732021.workers.dev";
     const API = "https://api.xiaomimimo.com/v1/chat/completions";
 
     window.currentUser = sessionStorage.getItem('mimo_current_user');
-    window.config = { key: '', mod: 'mimo-v2-flash', think: false, search: false, voice: 'mimo_default' };
+    window.config = { key: '', mod: 'mimo-v2-flash', think: false, search: false, voice: 'mimo_default', providerKeys: {}, currentProvider: 'mimo' };
     window.sessions = [];
     window.currentSessionId = null;
     window.currentAbortController = null;
@@ -1029,7 +1387,8 @@
     };
 
     window.loadLocalData = function() {
-        window.config = JSON.parse(localStorage.getItem(`mimo_cfg_v5_${window.currentUser}`)) || { key: '', mod: 'mimo-v2-flash', think: false, search: false, voice: 'mimo_default' };
+        window.config = JSON.parse(localStorage.getItem(`mimo_cfg_v5_${window.currentUser}`)) || { key: '', mod: 'mimo-v2-flash', think: false, search: false, voice: 'mimo_default', providerKeys: {} };
+        if (!window.config.providerKeys) window.config.providerKeys = {};
         window.sessions = JSON.parse(localStorage.getItem(`mimo_sessions_v5_${window.currentUser}`)) || [];
         window.refreshUIState();
     };
@@ -1064,16 +1423,23 @@
     };
 
     window.refreshUIState = function() {
-        document.getElementById('key-in').value = window.config.key || '';
+        const providerId = window.config.currentProvider || 'mimo';
+        const prov = AI_PROVIDERS[providerId];
+        const label = document.getElementById('key-in-label');
+        if (label) label.textContent = (prov?.name || 'MIMO') + ' API KEY';
+        document.getElementById('key-in').value = window.getApiKey(providerId);
         
-        const displayMap = { 'mimo-v2-flash': 'Flash', 'mimo-v2.5-pro': 'Pro', 'mimo-v2.5': 'V2.5', 'mimo-v2.5-tts': 'TTS' };
+        const info = window.findProviderForModel(window.config.mod);
         const el = document.getElementById('mod-display');
-        if(el) el.innerText = displayMap[window.config.mod] || 'Flash';
+        if(el) el.innerText = info ? info.model.name : 'Flash';
         
+        window.populateModelSelect();
         document.getElementById('mod-in-sheet').value = window.config.mod || 'mimo-v2-flash';
         document.getElementById('cfg-voice').value = window.config.voice || 'mimo_default';
-        if(!window.config.key) window.toggleM(true); 
+        if(!window.config.key && !window.config.providerKeys?.mimo) window.toggleM(true); 
         window.initToggles();
+        window.updateFeatureToggles();
+        window.renderModelMenu();
         
         if(window.sessions.length === 0) {
             window.createNewSession(false);
@@ -1104,7 +1470,6 @@
             window.renderSessionList();
             window.loadSessionToUI();
         }
-        window.checkTTSMode();
     };
 
     window.saveSessions = function() { 
@@ -1116,27 +1481,103 @@
 
     window.syncModelSelects = function(sourceId) {
         const val = document.getElementById(sourceId).value;
-        window.config.mod = val;
-        
-        const displayMap = { 'mimo-v2-flash': 'Flash', 'mimo-v2.5-pro': 'Pro', 'mimo-v2.5': 'V2.5', 'mimo-v2.5-tts': 'TTS' };
+        const info = window.findProviderForModel(val);
         const el = document.getElementById('mod-display');
-        if(el) el.innerText = displayMap[val] || 'Flash';
-        
+        if(el) el.innerText = info ? info.model.name : 'Flash';
+        window.config.mod = val;
         window.saveConfig();
     };
     
     window.toggleModelMenu = function(e) {
         e.stopPropagation();
-        document.getElementById('custom-model-select').classList.toggle('open');
+        const sel = document.getElementById('custom-model-select');
+        const isOpen = sel.classList.contains('open');
+        if (!isOpen) window.renderModelMenu();
+        sel.classList.toggle('open');
     };
     
-    window.selectModel = function(val, text, e) {
-        e.stopPropagation();
-        document.getElementById('mod-display').innerText = text;
+    window.selectModel = function(modelId, displayName, providerId, e) {
+        if (e) e.stopPropagation();
+        const prov = AI_PROVIDERS[providerId];
+        const key = (providerId === 'mimo') ? (config.providerKeys?.mimo || config.key) : (config.providerKeys?.[providerId] || '');
+        if (!key) {
+            window._pendingModelSelect = function() { window.applyModel(modelId, displayName, providerId); };
+            window.showApiKeyModal(providerId, displayName);
+            return;
+        }
+        window.applyModel(modelId, displayName, providerId);
+    };
+
+    window.applyModel = function(modelId, displayName, providerId) {
+        window.config.mod = modelId;
+        window.config.currentProvider = providerId;
+        document.getElementById('mod-display').innerText = displayName;
         document.getElementById('custom-model-select').classList.remove('open');
-        window.config.mod = val;
-        document.getElementById('mod-in-sheet').value = val;
+        document.getElementById('mod-in-sheet').value = modelId;
+        const prov = AI_PROVIDERS[providerId];
+        const label = document.getElementById('key-in-label');
+        if (label) label.textContent = (prov?.name || 'MIMO') + ' API KEY';
+        const keyIn = document.getElementById('key-in');
+        if (keyIn) keyIn.value = window.getApiKey(providerId);
+        window.recordModelUsage(modelId);
+        window.updateFeatureToggles();
+        
+        if (window.currentAttachment) {
+            const media = AI_PROVIDERS[providerId]?.media || {};
+            const attType = window.currentAttachment.type;
+            if ((attType === 'image' && !media.image) || (attType === 'video' && !media.video) || (attType === 'audio' && !media.audio)) {
+                const typeName = attType === 'image' ? '图像' : attType === 'video' ? '视频' : '音频';
+                window.currentAttachment = null;
+                window.renderAttachmentPreview();
+                window.showToast(AI_PROVIDERS[providerId].name + ' 不支持' + typeName + '分析', icons.alertTriangle);
+            }
+        }
+        
         window.saveConfig();
+    };
+
+    window.showApiKeyModal = function(providerId, modelName) {
+        const prov = AI_PROVIDERS[providerId];
+        const displayName = modelName || prov.models[0]?.name || prov.name;
+        document.getElementById('apikey-icon').innerHTML = prov.icon;
+        document.getElementById('apikey-title').innerText = '连接 ' + displayName;
+        document.getElementById('apikey-desc').innerText = '需要 ' + prov.name + ' 的 API Key 来使用 ' + displayName;
+        document.getElementById('apikey-input').value = '';
+        document.getElementById('apikey-error').style.display = 'none';
+        document.getElementById('apikey-modal').dataset.provider = providerId;
+        document.getElementById('apikey-vis-btn').innerHTML = icons.eye;
+        document.getElementById('apikey-input').type = 'password';
+        document.getElementById('apikey-modal').classList.add('visible');
+        setTimeout(function() { document.getElementById('apikey-input').focus(); }, 300);
+    };
+    window.confirmApiKey = function() {
+        var providerId = document.getElementById('apikey-modal').dataset.provider;
+        var key = document.getElementById('apikey-input').value.trim();
+        if (!key) {
+            var errEl = document.getElementById('apikey-error');
+            errEl.innerText = '请输入有效的 API Key';
+            errEl.style.display = 'block';
+            errEl.style.animation = 'none'; errEl.offsetHeight;
+            errEl.style.animation = 'shake 0.4s ease';
+            return;
+        }
+        if (!window.config.providerKeys) window.config.providerKeys = {};
+        window.config.providerKeys[providerId] = key;
+        if (providerId === 'mimo') window.config.key = key;
+        window.saveConfig();
+        document.getElementById('apikey-modal').classList.remove('visible');
+        window.showToast(AI_PROVIDERS[providerId].name + ' 已连接', icons.checkCircle);
+        if (window._pendingModelSelect) { window._pendingModelSelect(); window._pendingModelSelect = null; }
+    };
+    window.cancelApiKey = function() {
+        document.getElementById('apikey-modal').classList.remove('visible');
+        window._pendingModelSelect = null;
+    };
+    window.toggleApiKeyVis = function() {
+        var inp = document.getElementById('apikey-input');
+        var btn = document.getElementById('apikey-vis-btn');
+        if (inp.type === 'password') { inp.type = 'text'; btn.innerHTML = icons.eyeOff; }
+        else { inp.type = 'password'; btn.innerHTML = icons.eye; }
     };
 
     document.addEventListener('click', (e) => {
@@ -1148,11 +1589,15 @@
 
     window.saveConfig = function() {
         if(!window.currentUser) return;
-        window.config.key = document.getElementById('key-in').value.trim();
+        const providerId = window.config.currentProvider || 'mimo';
+        const keyVal = document.getElementById('key-in').value.trim();
+        if (!window.config.providerKeys) window.config.providerKeys = {};
+        window.config.providerKeys[providerId] = keyVal;
+        if (providerId === 'mimo') window.config.key = keyVal;
         window.config.voice = document.getElementById('cfg-voice').value;
         localStorage.setItem(`mimo_cfg_v5_${window.currentUser}`, JSON.stringify(window.config));
         window.syncToCloud();
-        window.checkTTSMode();
+        window.updateFeatureToggles();
     };
 
     window.saveSettings = function() { 
@@ -1185,14 +1630,239 @@
         }
     };
 
-    window.checkTTSMode = function() {
-        const mod = window.config.mod;
-        const container = document.getElementById('tts-style-container');
-        if (container) {
-            if (mod === 'mimo-2.5-tts') container.style.display = 'block';
-            else container.style.display = 'none';
+    window.checkTTSMode = window.updateFeatureToggles = function() {
+        const caps = window.getModelCaps(window.config.mod);
+        const ttsContainer = document.getElementById('tts-style-container');
+        if (ttsContainer) {
+            const shouldShow = caps.tts;
+            if (shouldShow && ttsContainer.style.display === 'none') {
+                ttsContainer.style.display = 'block';
+                ttsContainer.style.opacity = '0';
+                ttsContainer.style.transform = 'translateY(8px)';
+                requestAnimationFrame(function() {
+                    ttsContainer.style.transition = 'opacity 0.3s var(--spring), transform 0.3s var(--spring)';
+                    ttsContainer.style.opacity = '1';
+                    ttsContainer.style.transform = 'translateY(0)';
+                });
+            } else if (!shouldShow && ttsContainer.style.display !== 'none') {
+                ttsContainer.style.transition = 'opacity 0.2s, transform 0.2s';
+                ttsContainer.style.opacity = '0';
+                ttsContainer.style.transform = 'translateY(-8px)';
+                setTimeout(function() { ttsContainer.style.display = 'none'; }, 200);
+            }
+        }
+        var thinkEl = document.getElementById('toggle-think');
+        if (thinkEl) {
+            if (!caps.think && thinkEl.style.display !== 'none') {
+                thinkEl.style.transition = 'max-height 0.3s ease, opacity 0.2s ease, margin 0.3s ease';
+                thinkEl.style.maxHeight = '32px';
+                requestAnimationFrame(function() {
+                    thinkEl.style.maxHeight = '0'; thinkEl.style.opacity = '0';
+                    thinkEl.style.marginRight = '0'; thinkEl.style.overflow = 'hidden';
+                });
+                setTimeout(function() { thinkEl.style.display = 'none'; }, 300);
+            } else if (caps.think && thinkEl.style.display === 'none') {
+                thinkEl.style.display = ''; thinkEl.style.maxHeight = '0';
+                thinkEl.style.opacity = '0'; thinkEl.style.overflow = 'hidden';
+                requestAnimationFrame(function() {
+                    thinkEl.style.transition = 'max-height 0.3s var(--spring), opacity 0.3s var(--spring)';
+                    thinkEl.style.maxHeight = '32px'; thinkEl.style.opacity = '1';
+                });
+                setTimeout(function() { thinkEl.style.overflow = ''; thinkEl.style.maxHeight = ''; }, 300);
+            }
+        }
+        var searchEl = document.getElementById('toggle-search');
+        if (searchEl) {
+            if (!caps.search && searchEl.style.display !== 'none') {
+                searchEl.style.transition = 'max-height 0.3s ease, opacity 0.2s ease, margin 0.3s ease';
+                searchEl.style.maxHeight = '32px';
+                requestAnimationFrame(function() {
+                    searchEl.style.maxHeight = '0'; searchEl.style.opacity = '0';
+                    searchEl.style.marginRight = '0'; searchEl.style.overflow = 'hidden';
+                });
+                setTimeout(function() { searchEl.style.display = 'none'; }, 300);
+            } else if (caps.search && searchEl.style.display === 'none') {
+                searchEl.style.display = ''; searchEl.style.maxHeight = '0';
+                searchEl.style.opacity = '0'; searchEl.style.overflow = 'hidden';
+                requestAnimationFrame(function() {
+                    searchEl.style.transition = 'max-height 0.3s var(--spring), opacity 0.3s var(--spring)';
+                    searchEl.style.maxHeight = '32px'; searchEl.style.opacity = '1';
+                });
+                setTimeout(function() { searchEl.style.overflow = ''; searchEl.style.maxHeight = ''; }, 300);
+            }
         }
     };
+
+    window.populateModelSelect = function() {
+        var sel = document.getElementById('mod-in-sheet');
+        sel.innerHTML = '';
+        for (let pid in AI_PROVIDERS) {
+            var prov = AI_PROVIDERS[pid];
+            var group = document.createElement('optgroup');
+            group.label = prov.name;
+            prov.models.forEach(function(m) {
+                var opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = m.name;
+                group.appendChild(opt);
+            });
+            sel.appendChild(group);
+        }
+    };
+
+    window.renderModelMenu = function() {
+        var freqData = {};
+        try { freqData = JSON.parse(localStorage.getItem('mimo_freq_' + window.currentUser) || '{}'); } catch(e) {}
+        var sorted = Object.entries(freqData).sort(function(a,b) { return b[1]-a[1]; }).slice(0, 5);
+        var freqContainer = document.getElementById('freq-tags');
+        var freqSection = document.getElementById('frequent-section');
+        var freqLabel = document.getElementById('freq-label');
+        freqContainer.innerHTML = '';
+        if (sorted.length === 0) {
+            freqSection.style.display = 'none';
+        } else {
+            freqSection.style.display = '';
+            freqLabel.innerHTML = icons.star + ' 常用';
+            sorted.forEach(function(entry, idx) {
+                var modelId = entry[0];
+                var info = window.findProviderForModel(modelId);
+                if (!info) return;
+                var tag = document.createElement('div');
+                tag.className = 'freq-model-tag';
+                tag.style.animationDelay = (idx * 0.03) + 's';
+                tag.innerHTML = info.provider.icon + ' ' + info.model.name;
+                tag.onclick = function(e) { window.selectModel(modelId, info.model.name, info.providerId, e); };
+                freqContainer.appendChild(tag);
+            });
+        }
+        var groupList = document.getElementById('model-group-list');
+        groupList.innerHTML = '';
+        for (let pid in AI_PROVIDERS) {
+            var prov = AI_PROVIDERS[pid];
+            var header = document.createElement('div');
+            header.className = 'model-group-header';
+            header.innerHTML = prov.icon + ' ' + prov.name;
+            groupList.appendChild(header);
+            prov.models.forEach(function(m, idx) {
+                var opt = document.createElement('div');
+                opt.className = 'model-option';
+                opt.style.animationDelay = (idx * 0.02) + 's';
+                opt.textContent = m.name;
+                opt.onclick = function(e) { window.selectModel(m.id, m.name, pid, e); };
+                groupList.appendChild(opt);
+            });
+        }
+        if (sorted.length < 3) {
+            document.getElementById('all-models-section').classList.remove('collapsed');
+        }
+    };
+
+    window.toggleAllModels = function(e) {
+        if (e) e.stopPropagation();
+        document.getElementById('all-models-section').classList.toggle('collapsed');
+    };
+
+    window.openApiManager = function() {
+        document.querySelectorAll('#sheet > .form-group, #sheet > #api-mgmt-entry').forEach(function(el) {
+            el.style.transition = 'opacity 0.2s, transform 0.2s';
+            el.style.opacity = '0'; el.style.transform = 'translateY(-8px)';
+        });
+        setTimeout(function() {
+            document.querySelectorAll('#sheet > .form-group, #sheet > #api-mgmt-entry').forEach(function(el) { el.style.display = 'none'; });
+            var apiView = document.getElementById('api-manage-view');
+            apiView.style.display = 'block'; apiView.style.opacity = '0'; apiView.style.transform = 'translateY(8px)';
+            window.renderApiManager();
+            requestAnimationFrame(function() {
+                apiView.style.transition = 'opacity 0.3s var(--spring), transform 0.3s var(--spring)';
+                apiView.style.opacity = '1'; apiView.style.transform = 'translateY(0)';
+            });
+        }, 200);
+    };
+    window.closeApiManager = function() {
+        var apiView = document.getElementById('api-manage-view');
+        apiView.style.transition = 'opacity 0.2s, transform 0.2s';
+        apiView.style.opacity = '0'; apiView.style.transform = 'translateY(-8px)';
+        setTimeout(function() {
+            apiView.style.display = 'none';
+            document.querySelectorAll('#sheet > .form-group, #sheet > #api-mgmt-entry').forEach(function(el) {
+                el.style.display = ''; el.style.opacity = '0'; el.style.transform = 'translateY(8px)';
+                requestAnimationFrame(function() {
+                    el.style.transition = 'opacity 0.3s var(--spring), transform 0.3s var(--spring)';
+                    el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+                });
+            });
+        }, 200);
+    };
+    window.renderApiManager = function() {
+        var list = document.getElementById('api-manage-list');
+        list.innerHTML = '';
+        for (let pid in AI_PROVIDERS) {
+            var prov = AI_PROVIDERS[pid];
+            var currentKey = (pid === 'mimo') ? (config.providerKeys?.mimo || config.key) : (config.providerKeys?.[pid] || '');
+            var isSet = !!currentKey;
+            var row = document.createElement('div');
+            row.className = 'form-item api-key-row';
+            row.innerHTML = '<div style="display:flex; align-items:center; gap:8px;">' +
+                '<div class="api-key-status ' + (isSet ? 'set' : 'unset') + '"></div>' +
+                prov.icon + ' <label class="form-label" style="margin:0;">' + prov.name + '</label></div>' +
+                '<div class="key-input-wrap"><input type="password" class="form-input" placeholder="未设置" value="' + (isSet ? '••••••••' : '') + '" data-pid="' + pid + '" readonly>' +
+                '<button class="btn-icon" onclick="window.startEditKey(this)" title="编辑">' + icons.edit + '</button></div>';
+            list.appendChild(row);
+        }
+        var clearBtn = document.getElementById('btn-clear-keys');
+        clearBtn.innerHTML = icons.trash + ' 清空所有密钥';
+    };
+    window.startEditKey = function(btn) {
+        var input = btn.previousElementSibling;
+        input.removeAttribute('readonly');
+        input.value = '';
+        input.type = 'text';
+        input.focus();
+        input.dataset.editing = 'true';
+        input.onblur = function() {
+            var val = input.value.trim();
+            var pid = input.dataset.pid;
+            if (val) {
+                if (!config.providerKeys) config.providerKeys = {};
+                config.providerKeys[pid] = val;
+                if (pid === 'mimo') config.key = val;
+                saveConfig();
+            }
+            input.setAttribute('readonly', '');
+            input.type = 'password';
+            input.dataset.editing = 'false';
+            window.renderApiManager();
+        };
+    };
+    window.saveProviderKey = function(pid, val) {
+        if (!window.config.providerKeys) window.config.providerKeys = {};
+        window.config.providerKeys[pid] = val.trim();
+        if (pid === 'mimo') window.config.key = val.trim();
+        window.saveConfig();
+        window.renderApiManager();
+    };
+    window.clearAllKeys = function() {
+        if (!window._confirmClearKeys) {
+            window._confirmClearKeys = true;
+            window.showToast('再次点击确认清空', icons.alertTriangle);
+            setTimeout(function() { window._confirmClearKeys = false; }, 3000);
+            return;
+        }
+        window._confirmClearKeys = false;
+        window.config.providerKeys = {};
+        window.config.key = '';
+        document.getElementById('key-in').value = '';
+        window.saveConfig();
+        window.renderApiManager();
+        window.showToast('所有密钥已清空');
+    };
+
+    var iconApiKey = document.getElementById('icon-apikey');
+    if (iconApiKey) iconApiKey.innerHTML = icons.key + '<span style="margin-left:8px;">API 密钥管理</span>';
+    var iconApiArrow = document.getElementById('icon-apikey-arrow');
+    if (iconApiArrow) iconApiArrow.innerHTML = icons.chevronDown;
+    var iconApiBack = document.getElementById('icon-apiback');
+    if (iconApiBack) iconApiBack.innerHTML = icons.arrowLeft + ' 返回系统偏好';
 
     window.exportData = function() {
         const data = { config: window.config, sessions: window.sessions };
@@ -1404,11 +2074,188 @@
         }
     };
     window.toggleHistory = function(s) { document.body.classList.toggle('history-open', s); };
-    window.toggleMedia = function(s) { document.body.classList.toggle('media-open', s); };
+    window.toggleMedia = function(s) { 
+        document.body.classList.toggle('media-open', s); 
+        if (s) window.updateMediaPanel();
+    };
+
+    window.imageGenSizes = {
+        '1024x1024': '1024x1024',
+        '1024x1792': '1024x1792 (竖版)',
+        '1792x1024': '1792x1024 (横版)',
+        '512x512': '512x512',
+        '256x256': '256x256'
+    };
+
+    window.generateImage = async function(providerId, prompt, size) {
+        var prov = AI_PROVIDERS[providerId];
+        var apiKey = window.getApiKey(providerId);
+        if (!apiKey) throw new Error('未设置 API Key');
+        if (!prov.media.imageGen) throw new Error(prov.name + ' 暂不支持图片生成');
+
+        size = size || '1024x1024';
+
+        if (providerId === 'openai') {
+            var res = await fetch('https://api.openai.com/v1/images/generations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+                body: JSON.stringify({ model: 'dall-e-3', prompt: prompt, n: 1, size: size, quality: 'standard' })
+            });
+            if (!res.ok) {
+                var errBody = null;
+                try { errBody = await res.json(); } catch(e) {}
+                throw new Error(errBody?.error?.message || 'OpenAI 图片生成失败');
+            }
+            var data = await res.json();
+            return { url: data.data[0].url, revisedPrompt: data.data[0].revised_prompt };
+        }
+
+        if (providerId === 'google') {
+            var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=' + apiKey, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ instances: [{ prompt: prompt }], parameters: { sampleCount: 1, aspectRatio: size === '1792x1024' ? '16:9' : size === '1024x1792' ? '9:16' : '1:1' } })
+            });
+            if (!res.ok) {
+                var errBody = null;
+                try { errBody = await res.json(); } catch(e) {}
+                throw new Error(errBody?.error?.message || 'Google 图片生成失败');
+            }
+            var data = await res.json();
+            if (data.predictions && data.predictions[0]) {
+                return { url: 'data:image/png;base64,' + data.predictions[0].bytesBase64Encoded };
+            }
+            throw new Error('Google 未返回图片');
+        }
+
+        if (providerId === 'zhipu') {
+            var res = await fetch('https://open.bigmodel.cn/api/paas/v4/images/generations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+                body: JSON.stringify({ model: 'cogview-4', prompt: prompt, size: size })
+            });
+            if (!res.ok) {
+                var errBody = null;
+                try { errBody = await res.json(); } catch(e) {}
+                throw new Error(errBody?.error?.message || '智谱图片生成失败');
+            }
+            var data = await res.json();
+            return { url: data.data[0].url };
+        }
+
+        if (providerId === 'qwen') {
+            var res = await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey, 'X-DashScope-Async': 'enable' },
+                body: JSON.stringify({ model: 'wanx-v1', input: { prompt: prompt }, parameters: { size: size, n: 1 } })
+            });
+            if (!res.ok) {
+                var errBody = null;
+                try { errBody = await res.json(); } catch(e) {}
+                throw new Error(errBody?.message || '通义万相图片生成失败');
+            }
+            var data = await res.json();
+            if (data.output && data.output.task_id) {
+                var taskId = data.output.task_id;
+                for (var i = 0; i < 30; i++) {
+                    await new Promise(function(r) { setTimeout(r, 2000); });
+                    var pollRes = await fetch('https://dashscope.aliyuncs.com/api/v1/tasks/' + taskId, {
+                        headers: { 'Authorization': 'Bearer ' + apiKey }
+                    });
+                    var pollData = await pollRes.json();
+                    if (pollData.output && pollData.output.task_status === 'SUCCEEDED') {
+                        return { url: pollData.output.results[0].url };
+                    }
+                    if (pollData.output && pollData.output.task_status === 'FAILED') {
+                        throw new Error('通义万相图片生成失败');
+                    }
+                }
+                throw new Error('通义万相图片生成超时');
+            }
+            throw new Error('通义万相未返回任务 ID');
+        }
+
+        if (providerId === 'minimax') {
+            var res = await fetch('https://api.minimax.chat/v1/image/generation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+                body: JSON.stringify({ model: 'image-01', prompt: prompt, aspect_ratio: size === '1792x1024' ? '16:9' : size === '1024x1792' ? '9:16' : '1:1' })
+            });
+            if (!res.ok) {
+                var errBody = null;
+                try { errBody = await res.json(); } catch(e) {}
+                throw new Error(errBody?.base_resp?.status_msg || 'MiniMax 图片生成失败');
+            }
+            var data = await res.json();
+            if (data.data && data.data.image) {
+                return { url: 'data:image/png;base64,' + data.data.image };
+            }
+            throw new Error('MiniMax 未返回图片');
+        }
+
+        throw new Error(prov.name + ' 图片生成功能暂未实现');
+    };
+
+    window.isImageGenRequest = function(text) {
+        var keywords = ['画', '生成图片', '图片生成', '绘制', '绘图', '画一幅', '画一张', '生成一张', 'create image', 'generate image', 'draw', 'paint', 'illustrate'];
+        var lowerText = text.toLowerCase();
+        return keywords.some(function(kw) { return lowerText.includes(kw.toLowerCase()); });
+    };
+
+    window.updateMediaPanel = function() {
+        const providerId = window.config.currentProvider || window.findProviderForModel(window.config.mod)?.providerId || 'mimo';
+        const prov = AI_PROVIDERS[providerId];
+        const media = prov?.media || { image: true, video: false, audio: false, accept: 'image/*' };
+        
+        const fileInput = document.getElementById('local-file-input');
+        if (fileInput) fileInput.accept = media.accept || 'image/*';
+        
+        const uploadBtn = document.getElementById('btn-media-upload');
+        if (uploadBtn) {
+            if (!media.image && !media.video && !media.audio) {
+                uploadBtn.style.opacity = '0.4';
+                uploadBtn.style.pointerEvents = 'none';
+            } else {
+                uploadBtn.style.opacity = '1';
+                uploadBtn.style.pointerEvents = 'auto';
+            }
+        }
+        
+        const guide = document.getElementById('media-guide');
+        if (guide) {
+            let supported = [];
+            if (media.image) supported.push('图像');
+            if (media.video) supported.push('视频');
+            if (media.audio) supported.push('音频');
+            const supportedText = supported.length > 0 ? supported.join(' / ') : '纯文本';
+            let html = '<b>' + prov.name + ' 支持：</b> ' + supportedText + '<br>';
+            if (media.image) html += '图像：JPG / PNG / WebP / GIF，建议小于 10MB<br>';
+            if (media.video) html += '视频：MP4 / WebM，建议提供直链 URL<br>';
+            if (media.audio) html += '音频：MP3 / WAV，建议提供直链 URL<br>';
+            if (!media.image && !media.video && !media.audio) html += '该模型仅支持纯文本对话';
+            guide.innerHTML = html;
+        }
+        
+        const mediaType = document.getElementById('media-type');
+        if (mediaType) {
+            Array.from(mediaType.options).forEach(function(opt) {
+                if (opt.value === 'image') opt.disabled = !media.image;
+                else if (opt.value === 'video') opt.disabled = !media.video;
+                else if (opt.value === 'audio') opt.disabled = !media.audio;
+            });
+            if (mediaType.selectedOptions[0] && mediaType.selectedOptions[0].disabled) {
+                if (media.image) mediaType.value = 'image';
+                else if (media.video) mediaType.value = 'video';
+                else if (media.audio) mediaType.value = 'audio';
+            }
+        }
+    };
     window.closeAll = function() { 
         document.body.classList.remove('modal-open', 'history-open', 'preview-open', 'media-open'); 
         const iframe = document.getElementById('p-frame');
         if (iframe) { iframe.src = 'about:blank'; iframe.srcdoc = ''; }
+        var akModal = document.getElementById('apikey-modal');
+        if (akModal) akModal.classList.remove('visible');
     };
 
     window.setButtonState = function(isGenerating) {
@@ -1436,6 +2283,15 @@
         let type = 'image';
         if (file.type.startsWith('video/')) type = 'video';
         else if (file.type.startsWith('audio/')) type = 'audio';
+
+        const providerId = window.config.currentProvider || window.findProviderForModel(window.config.mod)?.providerId || 'mimo';
+        const media = AI_PROVIDERS[providerId]?.media || { image: true };
+        if ((type === 'image' && !media.image) || (type === 'video' && !media.video) || (type === 'audio' && !media.audio)) {
+            const typeName = type === 'image' ? '图像' : type === 'video' ? '视频' : '音频';
+            window.showToast(AI_PROVIDERS[providerId].name + ' 不支持' + typeName + '上传', icons.alertTriangle);
+            event.target.value = '';
+            return;
+        }
 
         if (type !== 'image') {
             if (file.size > 5 * 1024 * 1024) {
@@ -1477,19 +2333,25 @@
     window.setAttachment = function(type, url, isLocal, name) {
         window.currentAttachment = { type, url, isLocal, name };
         window.renderAttachmentPreview();
-        if (window.config.mod !== 'mimo-v2.5') {
-            window.config.mod = 'mimo-v2.5';
-            
-            const el = document.getElementById('mod-display');
-            if(el) el.innerText = 'V2.5';
-            
-            document.getElementById('mod-in-sheet').value = 'mimo-v2.5';
-            if(window.currentUser) {
-                localStorage.setItem(`mimo_cfg_v5_${window.currentUser}`, JSON.stringify(window.config));
+        
+        const providerId = window.config.currentProvider || window.findProviderForModel(window.config.mod)?.providerId || 'mimo';
+        const media = AI_PROVIDERS[providerId]?.media || {};
+        const supported = (type === 'image' && media.image) || (type === 'video' && media.video) || (type === 'audio' && media.audio);
+        
+        if (!supported) {
+            for (const pid in AI_PROVIDERS) {
+                const pMedia = AI_PROVIDERS[pid].media || {};
+                if ((type === 'image' && pMedia.image) || (type === 'video' && pMedia.video) || (type === 'audio' && pMedia.audio)) {
+                    const firstModel = AI_PROVIDERS[pid].models[0];
+                    if (firstModel) {
+                        window.applyModel(firstModel.id, firstModel.name, pid);
+                        window.showToast('已自动切换到 ' + AI_PROVIDERS[pid].name + ' ' + firstModel.name);
+                        break;
+                    }
+                }
             }
-            window.syncToCloud();
-            window.checkTTSMode();
         }
+        
         window.closeAll();
     };
 
@@ -1553,6 +2415,7 @@
             s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             s = s.replace(/\*(.*?)\*/g, '<em>$1</em>');
             s = s.replace(new RegExp('\\`([^\\`]+)\\`', 'g'), '<code class="inline-code">$1</code>');
+            s = s.replace(/(https?:\/\/[^\s<>"']+\.(?:png|jpg|jpeg|gif|webp|svg)(?:\?[^\s<>"']*)?)/gi, '<img src="$1" class="chat-media" style="max-width:100%;border-radius:12px;margin:8px 0;" onerror="this.style.display=\'none\'">');
             return s;
         };
 
@@ -1817,7 +2680,8 @@
                 }
                 
                 if (finalCode !== null) {
-                    if (window.ideVersions[window.ideCurrentV] !== finalCode) {
+                    var alreadyHasVersion = window.ideVersions.some(function(v) { return v === finalCode; });
+                    if (!alreadyHasVersion && window.ideVersions[window.ideCurrentV] !== finalCode) {
                         window.ideVersions = window.ideVersions.slice(0, window.ideCurrentV + 1);
                         window.ideVersions.push(finalCode);
                         window.ideCurrentV++;
@@ -1912,81 +2776,76 @@
         const bubble = btn.closest('.bubble');
         const audioEl = document.createElement('audio');
         audioEl.controls = true;
-        audioEl.style.width = '100%';
-        audioEl.style.outline = 'none';
-        audioEl.style.marginBottom = '16px';
-        audioEl.style.borderRadius = '12px';
-        audioEl.style.background = 'var(--bg-surface)';
-        audioEl.style.border = '1px solid var(--border-subtle)';
-        audioEl.style.display = 'none'; 
+        audioEl.style.cssText = 'width:100%;outline:none;margin-bottom:16px;border-radius:12px;background:var(--bg-surface);border:1px solid var(--border-subtle);display:none;';
         bubble.insertBefore(audioEl, bubble.firstChild);
 
         try {
-            const cleanText = msg.content.replace(/[#*\x60_~>]/g, '');
-            const reqBody = {
-                model: 'mimo-v2.5-tts',
-                messages: [
-                    { role: "user", content: "请根据语境朗读：" },
-                    { role: "assistant", content: cleanText.substring(0, 1000) }
-                ],
-                stream: false,
-                audio: { format: "wav", voice: window.config.voice || "mimo_default" }
-            };
-
-            const res = await fetch(PROXY, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.config.key}`, 'api-key': window.config.key, 'x-target-url': API },
-                body: JSON.stringify(reqBody)
-            });
-
-            if (!res.ok) {
-                let errDetail = `HTTP ${res.status}`;
-                try {
-                    const errData = await res.json();
-                    errDetail = errData.error?.message || JSON.stringify(errData);
-                } catch(e) {}
-                throw new Error(errDetail);
-            }
-            
-            const data = await res.json();
-            if (data.error) throw new Error(data.error.message);
-
-            const audioData = data.choices?.[0]?.message?.audio?.data;
-            if (audioData) {
-                msg.audioData = audioData; 
-                window.saveSessions();
-                audioEl.src = `data:audio/wav;base64,${audioData}`;
-                audioEl.style.display = 'block';
-                audioEl.play().catch(e => console.log('Autoplay issue', e));
-                btn.remove(); 
-            } else { throw new Error("Null Audio Data"); }
+            const cleanText = msg.content.replace(/[#*\x60_~>]/g, '').substring(0, 1000);
+            const providerId = window.config.currentProvider || window.findProviderForModel(msg.modelUsed || window.config.mod)?.providerId || 'mimo';
+            const audioUrl = await window.ttsWithProvider(providerId, cleanText, window.config.voice);
+            msg.audioData = audioUrl;
+            window.saveSessions();
+            audioEl.src = audioUrl;
+            audioEl.style.display = 'block';
+            audioEl.play().catch(function() {});
+            btn.remove();
         } catch (e) {
             audioEl.remove();
-            btn.innerHTML = `<span style="color:#FF3B30">失败: ${e.message}</span>`;
-            setTimeout(() => { btn.innerHTML = originalHtml; btn.disabled = false; }, 3000);
+            btn.innerHTML = `<span style="color:#FF3B30">${e.message}</span>`;
+            setTimeout(function() { btn.innerHTML = originalHtml; btn.disabled = false; }, 3000);
         }
     };
 
-    window.getMediaPayloadObj = function(attachment) {
-        let format = "wav";
+    window.getMediaPayloadObj = function(attachment, apiFormat) {
+        let format_ext = "wav";
         let dataStr = attachment.url;
         
         if (dataStr.startsWith("data:")) {
             const mime = dataStr.split(';')[0].split(':')[1];
             if (mime) {
-                format = mime.split('/')[1] || "wav";
-                if (format === "mpeg") format = "mp3";
-            }
-            if (attachment.type === 'audio') {
-                 return { type: "input_audio", input_audio: { data: dataStr.split(',')[1], format: format } };
-            } else if (attachment.type === 'image') {
-                 return { type: "image_url", image_url: { url: dataStr } };
+                format_ext = mime.split('/')[1] || "wav";
+                if (format_ext === "mpeg") format_ext = "mp3";
             }
         }
 
-        if (attachment.type === 'image') return { type: "image_url", image_url: { url: attachment.url } };
-        else if (attachment.type === 'video') return { type: "video_url", video_url: { url: attachment.url, fps: 2, media_resolution: "default" } };
-        else if (attachment.type === 'audio') return { type: "input_audio", input_audio: { data: attachment.url } };
+        if (apiFormat === 'anthropic') {
+            if (attachment.type === 'image') {
+                if (dataStr.startsWith("data:")) {
+                    return { type: "image", source: { type: "base64", media_type: dataStr.split(';')[0].split(':')[1], data: dataStr.split(',')[1] } };
+                }
+                return { type: "image", source: { type: "url", url: attachment.url } };
+            }
+            return null;
+        }
+
+        if (apiFormat === 'gemini') {
+            if (attachment.type === 'image') {
+                if (dataStr.startsWith("data:")) {
+                    return { inlineData: { mimeType: dataStr.split(';')[0].split(':')[1], data: dataStr.split(',')[1] } };
+                }
+                return { fileData: { mimeType: "image/jpeg", fileUri: attachment.url } };
+            }
+            if (attachment.type === 'video') {
+                return { fileData: { mimeType: "video/mp4", fileUri: attachment.url } };
+            }
+            if (attachment.type === 'audio') {
+                if (dataStr.startsWith("data:")) {
+                    return { inlineData: { mimeType: dataStr.split(';')[0].split(':')[1], data: dataStr.split(',')[1] } };
+                }
+                return { fileData: { mimeType: "audio/mp3", fileUri: attachment.url } };
+            }
+            return null;
+        }
+
+        if (attachment.type === 'image') {
+            if (dataStr.startsWith("data:")) return { type: "image_url", image_url: { url: dataStr } };
+            return { type: "image_url", image_url: { url: attachment.url } };
+        }
+        if (attachment.type === 'video') return { type: "video_url", video_url: { url: attachment.url, fps: 2, media_resolution: "default" } };
+        if (attachment.type === 'audio') {
+            if (dataStr.startsWith("data:")) return { type: "input_audio", input_audio: { data: dataStr.split(',')[1], format: format_ext } };
+            return { type: "input_audio", input_audio: { data: attachment.url } };
+        }
         return null;
     };
 
@@ -2005,6 +2864,218 @@
         }
     };
 
+    window.getApiKey = function(providerId) {
+        if (providerId === 'mimo') return config.providerKeys?.mimo || config.key;
+        return config.providerKeys?.[providerId] || '';
+    };
+
+    window.sendToProvider = async function(providerId, modelId, messages, options, abortSignal) {
+        var prov = AI_PROVIDERS[providerId];
+        var apiKey = window.getApiKey(providerId);
+        if (!apiKey) throw new Error('未设置 API Key');
+
+        if (prov.format === 'openai') {
+            var res = await fetch(PROXY, {
+                method: 'POST', signal: abortSignal,
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey, 'api-key': apiKey, 'x-target-url': prov.apiBase },
+                body: JSON.stringify(Object.assign({ model: modelId, messages: messages, stream: true }, options || {}))
+            });
+            if (!res.ok) {
+                var errBody = null;
+                try { errBody = await res.json(); } catch(e) {}
+                var err = new Error(window.parseProviderError(providerId, res.status, errBody));
+                err._httpStatus = res.status; err._response = errBody; err._parsedMsg = err.message;
+                throw err;
+            }
+            return { response: res, format: 'openai' };
+        }
+
+        if (prov.format === 'anthropic') {
+            var sysMsg = messages.find(function(m) { return m.role === 'system'; });
+            var chatMsgs = messages.filter(function(m) { return m.role !== 'system'; });
+            var anthropicBody = { model: modelId, max_tokens: 8192, messages: chatMsgs, stream: true };
+            if (sysMsg) anthropicBody.system = sysMsg.content;
+            var res = await fetch(prov.apiBase, {
+                method: 'POST', signal: abortSignal,
+                headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+                body: JSON.stringify(anthropicBody)
+            });
+            if (!res.ok) {
+                var errBody = null;
+                try { errBody = await res.json(); } catch(e) {}
+                var err = new Error(window.parseProviderError(providerId, res.status, errBody));
+                err._httpStatus = res.status; err._response = errBody; err._parsedMsg = err.message;
+                throw err;
+            }
+            return { response: res, format: 'anthropic' };
+        }
+
+        if (prov.format === 'gemini') {
+            var contents = messages.filter(function(m) { return m.role !== 'system'; }).map(function(m) {
+                return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content || '' }] };
+            });
+            var sysMsg = messages.find(function(m) { return m.role === 'system'; });
+            var geminiBody = { contents: contents, generationConfig: { maxOutputTokens: 8192 } };
+            if (sysMsg) geminiBody.systemInstruction = { parts: [{ text: sysMsg.content }] };
+            var url = prov.apiBase + '/' + modelId + ':streamGenerateContent?alt=sse&key=' + apiKey;
+            var res = await fetch(url, {
+                method: 'POST', signal: abortSignal,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(geminiBody)
+            });
+            if (!res.ok) {
+                var errBody = null;
+                try { errBody = await res.json(); } catch(e) {}
+                var err = new Error(window.parseProviderError(providerId, res.status, errBody));
+                err._httpStatus = res.status; err._response = errBody; err._parsedMsg = err.message;
+                throw err;
+            }
+            return { response: res, format: 'gemini' };
+        }
+
+        if (prov.format === 'ernie') {
+            var parts = apiKey.split(':');
+            var tokenRes = await fetch('https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=' + parts[0] + '&client_secret=' + parts[1], { method: 'POST' });
+            var tokenData = await tokenRes.json();
+            var ernieUrl = prov.apiBase + '/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/' + modelId + '?access_token=' + tokenData.access_token;
+            var ernieBody = { messages: messages, stream: true };
+            if (options && options.thinking) ernieBody.enable_thinking = true;
+            var res = await fetch(ernieUrl, {
+                method: 'POST', signal: abortSignal,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(ernieBody)
+            });
+            if (!res.ok) {
+                var errBody = null;
+                try { errBody = await res.json(); } catch(e) {}
+                var err = new Error(window.parseProviderError(providerId, res.status, errBody));
+                err._httpStatus = res.status; err._response = errBody; err._parsedMsg = err.message;
+                throw err;
+            }
+            return { response: res, format: 'ernie' };
+        }
+
+        if (prov.format === 'spark') {
+            var res = await fetch(prov.apiBase, {
+                method: 'POST', signal: abortSignal,
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+                body: JSON.stringify({ model: modelId, messages: messages, stream: true })
+            });
+            if (!res.ok) {
+                var errBody = null;
+                try { errBody = await res.json(); } catch(e) {}
+                var err = new Error(window.parseProviderError(providerId, res.status, errBody));
+                err._httpStatus = res.status; err._response = errBody; err._parsedMsg = err.message;
+                throw err;
+            }
+            return { response: res, format: 'spark' };
+        }
+
+        throw new Error('未知的 API 格式: ' + prov.format);
+    };
+
+    window.parseStreamDelta = function(format, line) {
+        if (format === 'openai' || format === 'spark') {
+            if (!line.startsWith('data: ')) return null;
+            var dataStr = line.replace('data: ', '').trim();
+            if (dataStr === '[DONE]') return { done: true };
+            try {
+                var json = JSON.parse(dataStr);
+                var delta = json.choices?.[0]?.delta;
+                var result = {};
+                if (delta) {
+                    if (delta.reasoning_content) result.reasoning = delta.reasoning_content;
+                    if (delta.content) result.content = delta.content;
+                }
+                if (json.usage && json.usage.total_tokens) result.usage = { total: json.usage.total_tokens, prompt: json.usage.prompt_tokens, completion: json.usage.completion_tokens };
+                return result;
+            } catch(e) { return null; }
+        }
+        if (format === 'anthropic') {
+            if (!line.startsWith('data: ')) return null;
+            try {
+                var json = JSON.parse(line.replace('data: ', ''));
+                if (json.type === 'content_block_delta') return { content: json.delta?.text || '' };
+                if (json.type === 'message_delta' && json.usage) return { usage: { total: (json.usage.input_tokens||0)+(json.usage.output_tokens||0), prompt: json.usage.input_tokens, completion: json.usage.output_tokens } };
+                return null;
+            } catch(e) { return null; }
+        }
+        if (format === 'gemini') {
+            if (!line.startsWith('data: ')) return null;
+            try {
+                var json = JSON.parse(line.replace('data: ', ''));
+                var text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+                return text ? { content: text } : null;
+            } catch(e) { return null; }
+        }
+        if (format === 'ernie') {
+            if (!line.startsWith('data: ')) return null;
+            try {
+                var json = JSON.parse(line.replace('data: ', ''));
+                var result = {};
+                if (json.result) result.content = json.result;
+                if (json.usage) result.usage = { total: json.usage.total_tokens, prompt: json.usage.prompt_tokens, completion: json.usage.completion_tokens };
+                return Object.keys(result).length ? result : null;
+            } catch(e) { return null; }
+        }
+        return null;
+    };
+
+    window.ttsWithProvider = async function(providerId, text, voice) {
+        var prov = AI_PROVIDERS[providerId];
+        var apiKey = window.getApiKey(providerId);
+        if (!apiKey) throw new Error('未设置 API Key');
+
+        if (providerId === 'mimo') {
+            var res = await fetch(PROXY, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey, 'api-key': apiKey, 'x-target-url': 'https://api.xiaomimimo.com/v1/chat/completions' },
+                body: JSON.stringify({ model: 'mimo-v2.5-tts', messages: [{ role: 'user', content: '请根据语境朗读：' }, { role: 'assistant', content: text.substring(0, 1000) }], stream: false, audio: { format: 'wav', voice: voice || 'mimo_default' } })
+            });
+            if (!res.ok) throw new Error('TTS 请求失败');
+            var data = await res.json();
+            var audioData = data.choices?.[0]?.message?.audio?.data;
+            if (!audioData) throw new Error('TTS 返回为空');
+            return 'data:audio/wav;base64,' + audioData;
+        }
+
+        if (prov.ttsApi) {
+            var res = await fetch(prov.ttsApi, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+                body: JSON.stringify({ model: 'tts-1', input: text.substring(0, 4000), voice: voice || 'alloy', response_format: 'mp3' })
+            });
+            if (!res.ok) throw new Error('TTS 请求失败');
+            var blob = await res.blob();
+            return URL.createObjectURL(blob);
+        }
+
+        if (providerId === 'google') {
+            var res = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize?key=' + apiKey, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ input: { text: text.substring(0, 5000) }, voice: { languageCode: 'zh-CN', name: 'cmn-CN-Wavenet-A' }, audioConfig: { audioEncoding: 'MP3' } })
+            });
+            if (!res.ok) throw new Error('Google TTS 请求失败');
+            var data = await res.json();
+            return 'data:audio/mp3;base64,' + data.audioContent;
+        }
+
+        if (providerId === 'spark') {
+            var res = await fetch('https://tts-api.xf-yun.com/v1/tts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+                body: JSON.stringify({ model: 'spark-tts', text: text.substring(0, 2000), voice: voice || 'x4_yezi' })
+            });
+            if (!res.ok) throw new Error('讯飞 TTS 请求失败');
+            var data = await res.json();
+            if (data.audio) return 'data:audio/mp3;base64,' + data.audio;
+            throw new Error('讯飞 TTS 返回为空');
+        }
+
+        throw new Error(prov.name + ' 暂不支持 TTS');
+    };
+
     window.handleSendAction = async function() {
         if (window.currentAbortController) {
             window.currentAbortController.abort();
@@ -2016,7 +3087,57 @@
         const inp = document.getElementById('user-in');
         const txt = inp.value.trim();
         if(!txt && !window.currentAttachment) return;
-        if(!window.config.key) { window.toggleM(true); return; }
+        const providerId = window.config.currentProvider || window.findProviderForModel(window.config.mod)?.providerId || 'mimo';
+        if(!window.getApiKey(providerId)) {
+            const modelInfo = window.findProviderForModel(window.config.mod);
+            window.showApiKeyModal(providerId, modelInfo?.model?.name);
+            return;
+        }
+
+        const prov = AI_PROVIDERS[providerId];
+        if (txt && prov.media.imageGen && window.isImageGenRequest(txt)) {
+            const session = window.sessions.find(s => s.id === window.currentSessionId);
+            if (session.messages.length === 0) {
+                session.title = txt.substring(0, 16);
+                window.renderSessionList();
+            }
+            const msgUserObj = { id: Date.now().toString(), role: 'user', content: txt, attachment: null };
+            session.messages.push(msgUserObj);
+            window.saveSessions();
+            const uw = document.createElement('div');
+            uw.className = 'wrapper wrapper-user';
+            uw.innerHTML = `<div class="msg-role-label">You</div><div class="bubble bubble-user"><div>${txt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div></div>`;
+            chat.appendChild(uw);
+            inp.value = '';
+            window.autoResize(inp);
+            const bw = document.createElement('div');
+            bw.className = 'wrapper wrapper-bot';
+            bw.innerHTML = `<div class="msg-role-label">MIMO</div>`;
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble bubble-bot';
+            bubble.innerHTML = `<div class="typing-indicator"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
+            bw.appendChild(bubble);
+            chat.appendChild(bw);
+            chat.scrollTop = chat.scrollHeight;
+            window.setButtonState(true);
+            window.currentAbortController = new AbortController();
+            try {
+                const result = await window.generateImage(providerId, txt);
+                const imgHtml = `<img src="${result.url}" class="chat-media" style="max-width:100%;border-radius:12px;margin:8px 0;">` +
+                    (result.revisedPrompt ? `<p style="font-size:12px;color:var(--text-tertiary);margin-top:8px;">${result.revisedPrompt}</p>` : '');
+                bubble.innerHTML = imgHtml;
+                const msgObj = { id: (Date.now() + 1).toString(), role: 'assistant', content: `![生成的图片](${result.url})`, reasoning: '', annotations: [], audioData: null, usage: null, modelUsed: window.config.mod };
+                session.messages.push(msgObj);
+                window.saveSessions();
+            } catch(e) {
+                const errMsg = e._parsedMsg || window.parseProviderError(providerId, e._httpStatus, e._response) || e.message;
+                bubble.innerHTML = `<div class="error-message">${errMsg}</div>`;
+                window.showToast(errMsg, icons.warning);
+            }
+            window.currentAbortController = null;
+            window.setButtonState(false);
+            return;
+        }
 
         const session = window.sessions.find(s => s.id === window.currentSessionId);
         if (session.messages.length === 0) {
@@ -2071,167 +3192,151 @@
         chat.appendChild(bw);
         chat.scrollTop = chat.scrollHeight;
 
-        const isTTS = window.config.mod === 'mimo-v2.5-tts';
-        const msgObj = { id: (Date.now() + 1).toString(), role: 'assistant', reasoning: "", content: "", annotations: [], audioData: null, usage: null, modelUsed: window.config.mod, searchUsed: (window.config.search && !isTTS), isModification: false };
+        const caps = window.getModelCaps(window.config.mod);
+        const isTTS = caps.tts;
+        const msgObj = { id: (Date.now() + 1).toString(), role: 'assistant', reasoning: "", content: "", annotations: [], audioData: null, usage: null, modelUsed: window.config.mod, searchUsed: (window.config.search && caps.search), isModification: false };
         
-        let reqBody = { model: window.config.mod };
+        let reqOptions = {};
         let isModification = false;
 
         if (isTTS) {
-            const stylePrompt = document.getElementById('tts-style').value.trim();
-            const sysPrompt = stylePrompt ? `请用【${stylePrompt}】的风格朗读以下文本：` : "请根据语义情感朗读：";
-            reqBody.messages = [
-                { role: "user", content: sysPrompt },
-                { role: "assistant", content: txt }
-            ];
-            reqBody.stream = false;
-            reqBody.audio = { format: "wav", voice: window.config.voice || "mimo_default" };
-        } else {
-            reqBody.messages = session.messages.slice(-10).map(m => {
-                if (m.role === 'user' && m.attachment) {
-                    const mediaObj = window.getMediaPayloadObj(m.attachment);
-                    return { role: m.role, content: [mediaObj, { type: "text", text: m.content || "请描述附件内容" }] };
+            try {
+                const stylePrompt = document.getElementById('tts-style').value.trim();
+                const ttsText = stylePrompt ? `请用【${stylePrompt}】的风格朗读：${txt}` : txt;
+                const audioUrl = await window.ttsWithProvider(providerId, ttsText, window.config.voice);
+                msgObj.audioData = audioUrl.startsWith('data:') ? audioUrl.split(',')[1] : null;
+                msgObj.content = txt;
+                if (!msgObj.audioData) {
+                    const audioEl = document.createElement('audio');
+                    audioEl.controls = true; audioEl.src = audioUrl;
+                    audioEl.style.cssText = 'width:100%;outline:none;margin-bottom:16px;border-radius:12px;background:var(--bg-surface);border:1px solid var(--border-subtle);display:block;';
+                    bubble.innerHTML = ''; bubble.appendChild(audioEl);
+                    msgObj.content = txt;
+                } else {
+                    window.renderOutput(bubble, msgObj, true);
                 }
-                return { role: m.role, content: m.content || "继续" };
-            });
-            
-            let currentIDECode = "";
-            if (window.ideVersions && window.ideCurrentV >= 0 && window.ideVersions[window.ideCurrentV]) {
-                currentIDECode = window.ideVersions[window.ideCurrentV];
-            } else if (window.ideEditor) {
-                currentIDECode = window.ideEditor.getValue();
+                session.messages.push(msgObj);
+                window.saveSessions();
+            } catch(e) {
+                const errMsg = e._parsedMsg || e.message;
+                bubble.innerHTML = `<div class="error-message">${errMsg}</div>`;
+                window.showToast(errMsg, icons.warning);
             }
-
-            isModification = currentIDECode.trim().length > 0;
-            msgObj.isModification = isModification;
-
-            reqBody.messages.unshift({
-                role: "system",
-                content: "你是一个搭载了顶级 Web IDE (Artifacts) 的高级研发引擎。\n【核心运行机制】\n不论用户要求新建项目还是修改现有代码，你都必须**直接输出包含所有修改的 HTML/CSS/JS 代码全文**！\n系统会像 Canvas 一样自动抓取你输出的代码并实时覆写到右侧工作台中。\n**绝不要使用任何 SEARCH/REPLACE 补丁格式，直接以 \x60\x60\x60html 包裹输出最新的完整代码即可。**\n\n" + (currentIDECode ? "【当前 IDE 源码状态】\n请基于以下代码进行修改，并输出完整的最新代码全文：\n\x60\x60\x60html\n" + currentIDECode + "\n\x60\x60\x60" : "")
-            });
-
-            reqBody.stream = true;
-            if (window.config.think) reqBody.thinking = { type: "enabled" };
-            if (window.config.search) reqBody.tools = [{ type: "web_search", max_keyword: 3, force_search: true, limit: 3 }];
+            window.currentAbortController = null;
+            window.setButtonState(false);
+            return;
         }
+
+        var messages = session.messages.slice(-10).map(m => {
+            if (m.role === 'user' && m.attachment) {
+                const mediaObj = window.getMediaPayloadObj(m.attachment, AI_PROVIDERS[providerId]?.format || 'openai');
+                return { role: m.role, content: [mediaObj, { type: "text", text: m.content || "请描述附件内容" }] };
+            }
+            return { role: m.role, content: m.content || "继续" };
+        });
+        
+        let currentIDECode = "";
+        if (window.ideVersions && window.ideCurrentV >= 0 && window.ideVersions[window.ideCurrentV]) {
+            currentIDECode = window.ideVersions[window.ideCurrentV];
+        } else if (window.ideEditor) {
+            currentIDECode = window.ideEditor.getValue();
+        }
+
+        isModification = currentIDECode.trim().length > 0;
+        msgObj.isModification = isModification;
+
+        var systemPrompt = '你是一个搭载了顶级 Web IDE (Artifacts) 的高级研发引擎。\n【核心运行机制】\n不论用户要求新建项目还是修改现有代码，你都必须**直接输出包含所有修改的 HTML/CSS/JS 代码全文**！\n系统会像 Canvas 一样自动抓取你输出的代码并实时覆写到右侧工作台中。\n**绝不要使用任何 SEARCH/REPLACE 补丁格式，直接以 \x60\x60\x60html 包裹输出最新的完整代码即可。**\n\n' + (currentIDECode ? '【当前 IDE 源码状态】\n请基于以下代码进行修改，并输出完整的最新代码全文：\n\x60\x60\x60html\n' + currentIDECode + '\n\x60\x60\x60' : '');
+
+        messages.unshift({ role: "system", content: systemPrompt });
+
+        if (caps.think && window.config.think) reqOptions.thinking = { type: "enabled" };
+        if (caps.search && window.config.search) reqOptions.tools = [{ type: "web_search", max_keyword: 3, force_search: true, limit: 3 }];
 
         window.currentAbortController = new AbortController();
         window.setButtonState(true);
 
         try {
-            const res = await fetch(PROXY, {
-                method: 'POST',
-                signal: window.currentAbortController.signal,
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.config.key}`, 'api-key': window.config.key, 'x-target-url': API },
-                body: JSON.stringify(reqBody)
-            });
+            const providerResult = await window.sendToProvider(providerId, window.config.mod, messages, reqOptions, window.currentAbortController.signal);
+            const res = providerResult.response;
+            const fmt = providerResult.format;
 
-            if (!res.ok) {
-                let errDetail = `HTTP ${res.status}`;
-                try { const errData = await res.json(); errDetail = errData.error?.message || JSON.stringify(errData); } catch(e) {}
-                throw new Error(`请求失败: ${errDetail}`);
+            const reader = res.body.getReader();
+            const dec = new TextDecoder();
+            let streamBuffer = '';
+            let lastRenderTime = 0; 
+            
+            while(true) {
+                const {done, value} = await reader.read();
+                if(done) break;
+                
+                streamBuffer += dec.decode(value, { stream: true });
+                const lines = streamBuffer.split('\n');
+                streamBuffer = lines.pop(); 
+                
+                for(let line of lines) {
+                    const delta = window.parseStreamDelta(fmt, line);
+                    if (!delta) continue;
+                    if (delta.done) continue;
+                    
+                    if (delta.usage) msgObj.usage = delta.usage;
+                    if (delta.reasoning) msgObj.reasoning += delta.reasoning;
+                    if (delta.content) {
+                        msgObj.content += delta.content;
+                        if (delta.content.includes('```')) {
+                            if (isModification) {
+                                if (document.body.classList.contains('preview-open')) {
+                                    document.body.classList.remove('preview-open');
+                                    window.showToast("正在后台安全修补代码...", `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`);
+                                }
+                                const fab = document.getElementById('fab-open-ide');
+                                if(fab) fab.style.display = 'none';
+                            } else {
+                                window.initIDEIfNeeded('');
+                            }
+                        }
+                    }
+                    if (delta.annotations) msgObj.annotations = msgObj.annotations.concat(delta.annotations);
+
+                    const now = Date.now();
+                    if (now - lastRenderTime > 80) {
+                        window.renderOutput(bubble, msgObj, false); 
+                        if (!window.isDiffMode) {
+                            const marker = '```';
+                            const codeRegex = new RegExp(marker + '(?:html|js|css|xml)?\\s*\\n([\\s\\S]*?)(?:' + marker + '|$)', 'gi');
+                            let match, lastCode = null;
+                            while ((match = codeRegex.exec(msgObj.content)) !== null) lastCode = match[1];
+                            if (lastCode !== null && lastCode.trim().length > 0) {
+                                msgObj.hasFullCodeRewrite = true;
+                            }
+                        }
+                        if (chat.scrollHeight - chat.scrollTop < 1000) chat.scrollTop = chat.scrollHeight;
+                        lastRenderTime = now;
+                    }
+                }
             }
-
-            if (isTTS) {
-                const data = await res.json();
-                if (data.error) throw new Error(data.error.message);
-                msgObj.audioData = data.choices?.[0]?.message?.audio?.data;
-                msgObj.content = txt; 
-                if (data.usage) msgObj.usage = { total: data.usage.total_tokens || 0, prompt: data.usage.prompt_tokens || 0, completion: data.usage.completion_tokens || 0 };
-                window.renderOutput(bubble, msgObj, true);
-            } else {
-                const reader = res.body.getReader();
-                const dec = new TextDecoder();
-                let streamBuffer = '';
-                let lastRenderTime = 0; 
-                
-                while(true) {
-                    const {done, value} = await reader.read();
-                    if(done) break;
-                    
-                    streamBuffer += dec.decode(value, { stream: true });
-                    const lines = streamBuffer.split('\n');
-                    streamBuffer = lines.pop(); 
-                    
-                    for(let line of lines) {
-                        if(line.startsWith('data: ')) {
-                            const dataStr = line.replace('data: ', '').trim();
-                            if(dataStr === '[DONE]') continue;
-                            try {
-                                const json = JSON.parse(dataStr);
-                                const delta = json.choices?.[0]?.delta;
-                                
-                                if (json.usage && json.usage.total_tokens) {
-                                    msgObj.usage = { total: json.usage.total_tokens || 0, prompt: json.usage.prompt_tokens || 0, completion: json.usage.completion_tokens || 0 };
-                                }
-
-                                if (delta) {
-                                    if (delta.reasoning_content) msgObj.reasoning += delta.reasoning_content;
-                                    if (delta.content) {
-                                        msgObj.content += delta.content;
-                                        
-                                        if (delta.content.includes('```')) {
-                                            if (isModification) {
-                                                if (document.body.classList.contains('preview-open')) {
-                                                    document.body.classList.remove('preview-open');
-                                                    window.showToast("正在后台安全修补代码...", `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`);
-                                                }
-                                                const fab = document.getElementById('fab-open-ide');
-                                                if(fab) fab.style.display = 'none';
-                                            } else {
-                                                window.initIDEIfNeeded('');
-                                            }
-                                        }
-                                    }
-                                    if (delta.annotations && delta.annotations.length > 0) msgObj.annotations = msgObj.annotations.concat(delta.annotations);
-                                }
-
-                                const now = Date.now();
-                                if (now - lastRenderTime > 80) {
-                                    window.renderOutput(bubble, msgObj, false); 
-                                    
-                                    if (!window.isDiffMode) {
-                                        const marker = '```';
-                                        const codeRegex = new RegExp(marker + '(?:html|js|css|xml)?\\s*\\n([\\s\\S]*?)(?:' + marker + '|$)', 'gi');
-                                        let match;
-                                        let lastCode = null;
-                                        while ((match = codeRegex.exec(msgObj.content)) !== null) {
-                                            lastCode = match[1];
-                                        }
-                                        if (lastCode !== null && lastCode.trim().length > 0) {
-                                            msgObj.hasFullCodeRewrite = true;
-                                            if (!isModification && window.ideEditor && window.ideEditor.getValue() !== lastCode) {
-                                                window.ideEditor.setValue(lastCode);
-                                                window.ideEditor.setCursor(window.ideEditor.lineCount(), 0);
-                                            }
-                                        }
-                                    }
-
-                                    if (chat.scrollHeight - chat.scrollTop < 1000) chat.scrollTop = chat.scrollHeight;
-                                    lastRenderTime = now;
-                                }
-                            } catch(e){}
-                        }
+            
+            if (!window.isDiffMode) {
+                const marker = '```';
+                const codeRegex = new RegExp(marker + '(?:html|js|css|xml)?\\s*\\n([\\s\\S]*?)(?:' + marker + '|$)', 'gi');
+                let match, lastCode = null;
+                while ((match = codeRegex.exec(msgObj.content)) !== null) lastCode = match[1];
+                if (lastCode !== null && lastCode.trim().length > 0) {
+                    msgObj.hasFullCodeRewrite = true;
+                    if (!isModification && window.ideEditor && window.ideEditor.getValue() !== lastCode) {
+                        window.ideEditor.setValue(lastCode);
+                        window.ideEditor.setCursor(window.ideEditor.lineCount(), 0);
                     }
                 }
-                
-                if (!window.isDiffMode) {
-                    const marker = '```';
-                    const codeRegex = new RegExp(marker + '(?:html|js|css|xml)?\\s*\\n([\\s\\S]*?)(?:' + marker + '|$)', 'gi');
-                    let match;
-                    let lastCode = null;
-                    while ((match = codeRegex.exec(msgObj.content)) !== null) {
-                        lastCode = match[1];
-                    }
-                    if (lastCode !== null && lastCode.trim().length > 0) {
-                        msgObj.hasFullCodeRewrite = true;
-                        if (!isModification && window.ideEditor && window.ideEditor.getValue() !== lastCode) {
-                            window.ideEditor.setValue(lastCode);
-                            window.ideEditor.setCursor(window.ideEditor.lineCount(), 0);
-                        }
-                    }
+            }
+            window.renderOutput(bubble, msgObj, true); 
+
+            const codeBoxes = bubble.querySelectorAll('.code-box');
+            if (codeBoxes.length > 0) {
+                const lastLang = codeBoxes[codeBoxes.length - 1].querySelector('.code-lang')?.textContent?.toLowerCase() || '';
+                if (lastLang) {
+                    window.currentIdeLang = lastLang;
+                    window.updateIdeLangBadge(lastLang);
                 }
-                window.renderOutput(bubble, msgObj, true); 
             }
 
             session.messages.push(msgObj);
@@ -2245,7 +3350,9 @@
                 window.saveSessions();
                 window.loadSessionToUI(); 
             } else {
-                bubble.innerHTML = `<div class="error-message">${icons.warning} API 回应: ${e.message}</div>`; 
+                const errMsg = e._parsedMsg || window.parseProviderError(providerId, e._httpStatus, e._response) || e.message;
+                bubble.innerHTML = `<div class="error-message">${errMsg}</div>`;
+                window.showToast(errMsg, icons.warning);
             }
         } finally {
             window.currentAbortController = null;
@@ -2371,11 +3478,25 @@
         window.runIDE();
     };
 
-    window.runIDE = function() {
+    window.runIDE = async function() {
         if (!window.ideEditor) return;
         const code = window.ideEditor.getValue();
-        window.clearConsole();
+        const lang = window.currentIdeLang || 'html';
         
+        window.clearConsole();
+        window.toggleConsole(true);
+        window.updateIdeLangBadge(lang);
+        
+        if (['html', 'js', 'javascript', 'css', 'xml', 'svg', 'jsx', 'tsx', 'ts'].includes(lang)) {
+            window.runHTML(code);
+        } else if (lang === 'python' || lang === 'py') {
+            await window.runPython(code);
+        } else {
+            window.logToConsole('error', '暂不支持该语言的执行: ' + lang);
+        }
+    };
+
+    window.runHTML = function(code) {
         const hijacker = `
             <script>
                 const _l = console.log, _e = console.error, _w = console.warn;
@@ -2402,6 +3523,39 @@
         const iframe = document.getElementById('p-frame');
         iframe.srcdoc = finalCode;
         iframe.removeAttribute('src'); 
+    };
+
+    window.pyodideInstance = null;
+    window.initPyodide = async function() {
+        if (window.pyodideInstance) return window.pyodideInstance;
+        window.logToConsole('info', '正在初始化 Python 运行时 (Pyodide)，首次加载可能需要几秒钟...');
+        
+        if (!document.getElementById('pyodide-script')) {
+            const script = document.createElement('script');
+            script.id = 'pyodide-script';
+            script.src = 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js';
+            document.body.appendChild(script);
+            await new Promise(function(resolve) { script.onload = resolve; });
+        }
+        
+        window.pyodideInstance = await loadPyodide({
+            stdout: function(text) { window.logToConsole('info', text); },
+            stderr: function(text) { window.logToConsole('error', text); }
+        });
+        window.logToConsole('info', 'Python 环境就绪。');
+        return window.pyodideInstance;
+    };
+
+    window.runPython = async function(code) {
+        window.logToConsole('info', '正在初始化 Python 运行环境，首次加载可能需要几秒钟...');
+        try {
+            const pyodide = await window.initPyodide();
+            window.logToConsole('info', '--- 执行开始 ---');
+            await pyodide.runPythonAsync(code);
+            window.logToConsole('info', '--- 执行完毕 ---');
+        } catch (err) {
+            window.logToConsole('error', err.toString());
+        }
     };
 
     window.cpUserBubble = function(btn) {
@@ -2802,6 +3956,26 @@
         document.getElementById('console-logs').innerHTML = '';
     };
 
+    window.logToConsole = function(lvl, msg) {
+        const logsBox = document.getElementById('console-logs');
+        const div = document.createElement('div');
+        div.className = 'console-log-item ' + (lvl === 'error' ? 'error' : '');
+        div.innerText = msg;
+        logsBox.appendChild(div);
+        logsBox.scrollTop = logsBox.scrollHeight;
+        if (lvl === 'error') window.toggleConsole(true);
+    };
+
+    window.currentIdeLang = 'html';
+    window.updateIdeLangBadge = function(lang) {
+        const badge = document.getElementById('ide-lang-badge');
+        const text = document.getElementById('ide-lang-text');
+        if (badge && text) {
+            text.textContent = lang || 'HTML';
+            badge.style.display = lang ? '' : 'none';
+        }
+    };
+
     window.addEventListener('message', function(e) {
         if (e.data && e.data.type === 'mimo_console') {
             const logsBox = document.getElementById('console-logs');
@@ -2817,5 +3991,22 @@
         }
     });
 </script>
+
+<div id="apikey-modal">
+    <div class="apikey-card">
+        <div class="apikey-provider-icon" id="apikey-icon"></div>
+        <h3 id="apikey-title">连接模型</h3>
+        <p id="apikey-desc">请输入您的 API Key 以启用该厂商模型</p>
+        <div class="apikey-input-wrap">
+            <input type="password" id="apikey-input" class="apikey-input" placeholder="sk-..." onkeypress="if(event.key==='Enter') window.confirmApiKey()">
+            <button class="apikey-toggle-vis" id="apikey-vis-btn" onclick="window.toggleApiKeyVis()"></button>
+        </div>
+        <div id="apikey-error" class="apikey-error"></div>
+        <div class="apikey-actions">
+            <button class="apikey-btn apikey-btn-cancel" onclick="window.cancelApiKey()">稍后再说</button>
+            <button class="apikey-btn apikey-btn-confirm" onclick="window.confirmApiKey()">确认连接</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
